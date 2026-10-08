@@ -1,0 +1,118 @@
+reference_book: pinnacle
+kelly_profile: Player_Props
+min_edge: 0.0
+account_floor: 100000
+project_cap: 2000000
+books:
+  draftkings: DraftKings
+  fanduel: FanDuel
+  betmgm: BetMGM
+  hardrockbet: Hard Rock Bet
+  bovada: Bovada
+  espnbet: ESPN BET
+  betrivers: BetRivers
+  betonlineag: BetOnline.ag
+  ballybet: Bally Bet
+  williamhill_us: Caesars
+  fanatics: Fanatics
+sports:
+  nfl:
+    label: NFL
+    key: americanfootball_nfl
+    markets:
+    - player_pass_tds
+    - player_pass_yds
+    - player_pass_completions
+    - player_pass_attempts
+    - player_pass_interceptions
+    - player_pass_longest_completion
+    - player_rush_yds
+    - player_rush_attempts
+    - player_rush_longest
+    - player_receptions
+    - player_reception_yds
+    - player_reception_longest
+    - player_kicking_points
+    - player_field_goals
+    - player_tackles_assists
+    alternate_markets: []
+  nba:
+    label: NBA
+    key: basketball_nba
+    markets:
+    - player_points
+    - player_points_q1
+    - player_rebounds
+    - player_rebounds_q1
+    - player_assists
+    - player_assists_q1
+    - player_threes
+    - player_blocks
+    - player_steals
+    - player_blocks_steals
+    - player_turnovers
+    - player_points_rebounds_assists
+    - player_points_rebounds
+    - player_points_assists
+    - player_rebounds_assists
+    - player_field_goals
+    - player_frees_made
+    - player_frees_attempts
+    alternate_markets: []
+  nhl:
+    label: NHL
+    key: icehockey_nhl
+    markets:
+    - player_points
+    - player_assists
+    - player_power_play_points
+    - player_blocked_shots
+    - player_shots_on_goal
+    - player_goals
+    - player_total_saves
+    alternate_markets: []
+  mlb:
+    label: MLB
+    key: baseball_mlb
+    markets:
+    - batter_home_runs
+    - batter_hits
+    - batter_total_bases
+    - batter_rbis
+    - batter_runs_scored
+    - batter_hits_runs_rbis
+    - batter_singles
+    - batter_doubles
+    - batter_triples
+    - batter_walks
+    - batter_strikeouts
+    - batter_stolen_bases
+    - pitcher_strikeouts
+    - pitcher_hits_allowed
+    - pitcher_walks
+    - pitcher_earned_runs
+    - pitcher_outs
+    alternate_markets: []
+  wnba:
+    label: WNBA
+    key: basketball_wnba
+    markets:
+    - player_points
+    - player_points_q1
+    - player_rebounds
+    - player_rebounds_q1
+    - player_assists
+    - player_assists_q1
+    - player_threes
+    - player_blocks
+    - player_steals
+    - player_blocks_steals
+    - player_turnovers
+    - player_points_rebounds_assists
+    - player_points_rebounds
+    - player_points_assists
+    - player_rebounds_assists
+    - player_field_goals
+    - player_frees_made
+    - player_frees_attempts
+    alternate_markets: []
