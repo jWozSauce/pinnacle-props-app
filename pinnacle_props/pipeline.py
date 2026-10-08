@@ -1,7 +1,7 @@
 """Acquisition, immutable snapshots and explicit cache replay around the pure scan."""
 from contextlib import contextmanager
 from dataclasses import asdict
-from datetime import datetime,timezone
+from datetime import date,datetime,timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import fcntl
@@ -22,7 +22,7 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def options(config,sport,books=None,markets=None,min_edge=None,max_reference_margin=None,include_live=False):
+def options(config,sport,books=None,markets=None,min_edge=None,max_reference_margin=None,include_live=False,dates=None):
     if sport not in config['sports']:
         raise ValueError('Unknown configured sport')
     settings=config['sports'][sport]
@@ -33,7 +33,12 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
     allowed=settings['markets']+settings.get('alternate_markets',[])
     if not selected_markets or any(m not in allowed for m in selected_markets):
         raise ValueError('Choose at least one configured market')
-    return dict(sport=sport,sport_key=settings['key'],league=settings['label'],
+    selected_dates=None
+    if dates is not None:
+        if len(dates)!=2:raise ValueError('Choose both From and To dates')
+        selected_dates=[date.fromisoformat(str(d)).isoformat() for d in dates]
+        if selected_dates[0]>selected_dates[1]:raise ValueError('From date must not follow To date')
+    return dict(horizon={'mode':'date_range' if selected_dates else 'all_listed','dates':selected_dates},sport=sport,sport_key=settings['key'],league=settings['label'],
                 reference_book=config['reference_book'],books=selected_books,markets=selected_markets,
                 min_edge=config['min_edge'] if min_edge is None else min_edge,
                 max_reference_margin=max_reference_margin,include_live=include_live)
@@ -53,15 +58,23 @@ def scan_lock(data_dir):
             fcntl.flock(lock,fcntl.LOCK_UN)
 
 
-def discover(settings,*,data_dir=ROOT/'data',session=None,key=None):
+def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:datetime.now(timezone.utc)):
     """Free preparation for a user-reviewable cost estimate. Contains no credentials."""
     c=Client(data_dir=data_dir,run_cap=0,session=session,key=key)
     result=c.events(settings['sport_key'])
     if not isinstance(result.payload,list):
         raise APIError('Events endpoint did not return a list')
-    day=datetime.now(ZoneInfo('America/New_York')).date()
+    now=clock();day=now.astimezone(ZoneInfo('America/New_York')).date()
+    dates=settings.get('horizon',{}).get('dates')
     try:
-        events=[e for e in result.payload if datetime.fromisoformat(e['commence_time'].replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date()==day]
+        events=[]
+        for e in result.payload:
+            start=datetime.fromisoformat(e['commence_time'].replace('Z','+00:00'))
+            if start.tzinfo is None:raise ValueError('Naive event start')
+            event_day=start.astimezone(ZoneInfo('America/New_York')).date().isoformat()
+            if not settings['include_live'] and start<=now:continue
+            if dates and not dates[0]<=event_day<=dates[1]:continue
+            events.append(e)
     except (KeyError,TypeError,ValueError):
         raise APIError('Events list has an invalid start time') from None
     ids=[e['id'] for e in events]

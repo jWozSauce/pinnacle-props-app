@@ -1,5 +1,5 @@
 """Phone-first local Streamlit UI. Importing the app never requests odds or resolves a key."""
-from datetime import datetime
+from datetime import datetime,timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import json
@@ -110,6 +110,11 @@ with st.expander('Books, markets & scan settings',expanded=False):
     guard=st.checkbox('Limit Pinnacle margin',value=False,key='margin_guard')
     maximum=st.slider('Maximum Pinnacle margin (%)',0.0,50.0,10.0,.5,key='maximum')/100 if guard else None
     include_live=st.checkbox('Include live games',value=False,key='include_live')
+    limit_dates=st.checkbox('Limit game dates',value=False,key='limit_dates')
+    scan_dates=None
+    if limit_dates:
+        today=datetime.now(ZoneInfo('America/New_York')).date()
+        scan_dates=st.date_input('Game dates (Eastern)',value=(today,today+timedelta(days=7)),key='scan_dates')
     stale_minutes=st.slider('Grey out quotes older than (minutes)',1,120,15,key='stale_minutes')
     names=list(profiles)
     default_profile=config['kelly_profile']
@@ -122,19 +127,27 @@ with st.expander('Books, markets & scan settings',expanded=False):
         except ValueError as e:st.error(str(e))
 
 try:
-    settings=options(config,sport,books,markets,minimum,maximum,include_live)
+    settings=options(config,sport,books,markets,minimum,maximum,include_live,dates=scan_dates)
 except ValueError as e:
     settings=None;st.warning(str(e))
 
 if st.button('Estimate live refresh · free',disabled=settings is None,key='estimate',width='stretch'):
     try:
-        with st.spinner('Checking today’s slate…'):
+        with st.spinner('Checking available games…'):
             st.session_state.preview=discover(settings,key=key_for_live())
     except (APIError,ValueError) as e:
         st.session_state.pop('preview',None);st.error(str(e))
 preview=st.session_state.get('preview')
 if preview and preview['settings']==settings:
-    st.info(f"{len(preview['events'])} games today · refresh uses at most {preview['bound']} credits.")
+    date_counts={}
+    for event in preview['events']:
+        day=datetime.fromisoformat(event['commence_time'].replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date().isoformat()
+        date_counts[day]=date_counts.get(day,0)+1
+    dates=sorted(date_counts)
+    span=f", {dates[0]} to {dates[-1]}" if dates else ''
+    st.info(f"{len(preview['events'])} games{span} · refresh uses at most {preview['bound']} credits.")
+    with st.expander('Games by date'):
+        for day in dates:st.write(f"{day}: {date_counts[day]} games")
     if st.button('Refresh live prices',type='primary',disabled=not deployment['paid_enabled'] or not preview['events'] or profile_name not in profiles,
                  key='refresh',width='stretch'):
         try:

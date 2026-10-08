@@ -45,3 +45,26 @@ def test_responsive_view_switch_persists_in_url(monkeypatch):
         app.text_input(key='column_filter_nhl_player_name').set_value('no-such-player').run()
         assert not app.exception
         assert any('No opportunities' in x.value for x in app.info)
+
+
+def test_all_game_dates_default_and_optional_range(monkeypatch):
+    from datetime import date
+    monkeypatch.setattr('requests.sessions.Session.request',lambda *a,**k:(_ for _ in ()).throw(AssertionError('Network')))
+    monkeypatch.setattr('pinnacle_props.odds_api.resolve_key',lambda **k:'fixture')
+    seen=[]
+    def discover(settings,**kwargs):
+        seen.append(settings)
+        return dict(settings=settings,bound=30,events=[dict(id='thurs',commence_time='2099-01-08T00:00:00Z'),dict(id='sun',commence_time='2099-01-11T18:00:00Z')])
+    monkeypatch.setattr('pinnacle_props.pipeline.discover',discover)
+    app=AppTest.from_file(Path('app.py').resolve(),default_timeout=15).run()
+    assert not app.checkbox(key='limit_dates').value
+    app.button(key='estimate').click().run()
+    assert not app.exception and seen[-1]['horizon']['dates'] is None
+    assert any('2 games, 2099-01-07 to 2099-01-11' in x.value for x in app.info)
+    app.checkbox(key='limit_dates').check().run()
+    app.date_input(key='scan_dates').set_value((date(2026,10,8),date(2026,10,11))).run()
+    app.button(key='estimate').click().run()
+    assert not app.exception and seen[-1]['horizon']['dates']==['2026-10-08','2026-10-11']
+    app.checkbox(key='limit_dates').uncheck().run()
+    app.button(key='estimate').click().run()
+    assert seen[-1]['horizon']['dates'] is None
