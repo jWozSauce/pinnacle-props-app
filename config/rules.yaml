@@ -1,0 +1,21 @@
+version: 1
+sports:
+  nba:
+    default: {min_edge: 4.0, side: both, enabled: true}
+    markets:
+      player_threes: {min_edge: 2.0}
+      player_points_rebounds_assists: {enabled: false}
+  nhl:
+    default: {min_edge: 3.0, side: both, enabled: true}
+    markets:
+      player_assists: {min_edge: 2.0}
+      player_total_saves: {min_edge: 2.0}
+  nfl:
+    default: {min_edge: 2.0, side: both, enabled: true}
+    markets: {}
+  mlb:
+    default: {min_edge: 2.0, side: both, enabled: true}
+    markets: {}
+  wnba:
+    default: {min_edge: 2.0, side: both, enabled: true}
+    markets: {}

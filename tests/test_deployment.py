@@ -29,7 +29,7 @@ def test_cloud_reserve_migration_preserves_usage_and_is_idempotent(tmp_path):
     from pinnacle_props.odds_api import Client, PROJECT_CAP
     from pinnacle_props.deployment import reserve_cloud_budget
     client=Client(data_dir=tmp_path)
-    state=client._load();state.update(project_cap=PROJECT_CAP,spent=170000,runs={'historical':170000},
+    state=client._load();state.update(project_cap=2_000_000,spent=170000,runs={'historical':170000},
         records=[{'request_id':'fixture','run_id':'historical','actual':170000,'timestamp':'2026-10-07T00:00:00+00:00'}])
     client._save(state)
     reserve_cloud_budget(tmp_path)

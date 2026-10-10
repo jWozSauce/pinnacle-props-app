@@ -14,7 +14,7 @@ from .scan import aware
 
 COLUMNS=['sport','scan_id','row','scan_capture_time','event_id','book','player','market','line','side',
          'price_decimal','bet_implied_p','edge','close_over_decimal','close_under_decimal',
-         'close_fair_p','clv_pp','closing_line','line_moved','market_pulled','status','close_fetched_at']
+         'close_fair_p','clv_pp','closing_line','line_moved','market_pulled','status','close_fetched_at','rule_version','rule_pass']
 
 
 def evaluate(frame,closes):
@@ -23,7 +23,8 @@ def evaluate(frame,closes):
         price=decimal(getattr(r,'target_'+r.side+'_decimal'))
         row=dict.fromkeys(COLUMNS)
         row.update(sport=r.sport,scan_id=r.scan_id,row=r.row,event_id=r.event_id,book=r.book,
-                   scan_capture_time=r.scan_capture_time,
+                   scan_capture_time=r.scan_capture_time,rule_version=getattr(r,'rule_version','legacy-unrecorded'),
+                   rule_pass=getattr(r,'rule_pass',None),
                    player=r.player_name,market=r.prop_type,line=r.Target_line,side=r.side,
                    price_decimal=price,bet_implied_p=1/price,edge=r.edge,line_moved=False,
                    market_pulled=False,status='awaiting close')

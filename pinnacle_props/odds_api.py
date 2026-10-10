@@ -2,7 +2,8 @@
 
 Cost rule adapted from Josh's cbb/odds_api.py; standalone with no sibling runtime import.
 Provider contract: https://the-odds-api.com/liveapi/guides/v4/#get-event-odds
-No automatic retries. A crash/unknown charge leaves a reservation and blocks paid work.
+Local runtime: five transient retries with bounded backoff; ten consecutive failures halt.
+Unknown transient charges remain reserved against all caps; other unknown requests block paid work.
 The cross-process lock covers this project's requests; other projects share the account
 but not this lock, so provider headers are observations, not an account-wide guarantee.
 """
@@ -22,16 +23,18 @@ import os
 import re
 import subprocess
 import time
+import threading
 import uuid
 
 import pandas as pd
 import requests
 from dotenv import dotenv_values
 from .scan import INPUT_COLUMNS
+from .settings import accounting_dir
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = 'https://api.the-odds-api.com'
-PROJECT_CAP = 2_000_000
+PROJECT_CAP = 2_600_000
 ACCOUNT_FLOOR = 100_000
 CLOSE_DAILY_CAP = 2_500
 CLOUD_DAILY_CAP = 2_500
@@ -42,6 +45,10 @@ class APIError(RuntimeError):
     def __init__(self, message, status=None):
         super().__init__(message)
         self.status = status
+
+
+class TransientError(APIError):
+    pass
 
 
 class BudgetStop(APIError):
@@ -194,9 +201,14 @@ class Result:
 class Client:
     def __init__(self, *, data_dir=ROOT/'data', run_id=None, run_cap=0,
                  project_cap=PROJECT_CAP, floor=ACCOUNT_FLOOR, key=None, session=None,
-                 min_interval=1.0, paid_deadline=None, staged_run=False, lock_timeout=None, cloud_daily_cap=None):
+                 min_interval=1.0, paid_deadline=None, staged_run=False, lock_timeout=None, cloud_daily_cap=None, transient_retries=None):
+        self._state_mutex = threading.RLock()
+        self._lock_state = threading.local()
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.accounting_dir = accounting_dir(self.data_dir, cloud=cloud_daily_cap is not None)
+        self.accounting_dir.mkdir(parents=True, exist_ok=True)
+        self.transient_retries = (self.accounting_dir != self.data_dir) if transient_retries is None else transient_retries
         self.run_id = run_id or str(uuid.uuid4())
         if not re.fullmatch(r'[A-Za-z0-9_-]+', self.run_id):
             raise ValueError('Invalid run id')
@@ -220,9 +232,22 @@ class Client:
         if self.paid_deadline and self.paid_deadline.tzinfo is None:raise ValueError('Paid deadline requires timezone')
 
     @contextmanager
-    def _locked(self):
-        with (self.data_dir/'odds.lock').open('a') as lock:
-            start=time.monotonic();limit=self.lock_timeout
+    def _locked(self, timeout=None):
+        # Nested state reads/writes use the existing request lock; threads do not
+        # inherit another thread's ownership of it.
+        with self._state_mutex:
+            if getattr(self._lock_state, 'held', False):
+                yield
+                return
+            with self._file_locked(timeout):
+                self._lock_state.held = True
+                try: yield
+                finally: self._lock_state.held = False
+
+    @contextmanager
+    def _file_locked(self, timeout=None):
+        with (self.accounting_dir/'odds.lock').open('a') as lock:
+            start=time.monotonic();limit=self.lock_timeout if timeout is None else timeout
             waited=False
             while True:
                 try:
@@ -241,14 +266,27 @@ class Client:
                 fcntl.flock(lock, fcntl.LOCK_UN)
 
     def _load(self):
-        path = self.data_dir/'odds_budget.json'
-        if not path.exists():
-            if (self.data_dir/'odds_usage.csv').exists():
-                raise BudgetStop('Budget state missing beside an existing ledger; reconcile before continuing')
-            return {'version':1,'spent':0,'remaining':None,'quota_at':None,'halt':None,
-                    'reservations':{},'runs':{},'records':[]}
+        with Client._locked(self, timeout=180):
+            return self._load_unlocked()
+
+    def _load_unlocked(self):
+        path = self.accounting_dir/'odds_budget.json'
+        if self.accounting_dir != self.data_dir and not (self.accounting_dir/'migration.json').exists():
+            raise BudgetStop('Local runtime accounting migration required; no requests sent')
+        deadline = time.monotonic() + 5
+        while True:
+            try:
+                content = path.read_text()
+                break
+            except FileNotFoundError:
+                if not (self.accounting_dir/'odds_usage.csv').exists():
+                    return {'version':1,'spent':0,'remaining':None,'quota_at':None,'halt':None,
+                            'reservations':{},'runs':{},'records':[]}
+                if time.monotonic() >= deadline:
+                    raise BudgetStop('Budget state missing beside an existing ledger after 5 seconds; reconcile before continuing') from None
+                time.sleep(min(0.1, max(0, deadline-time.monotonic())))
         try:
-            state = json.loads(path.read_text())
+            state = json.loads(content)
             assert state['version']==1 and state['spent']>=0
             assert isinstance(state['records'],list) and isinstance(state['reservations'],dict)
             assert state['spent'] == sum(r['actual'] or 0 for r in state['records'])
@@ -258,17 +296,30 @@ class Client:
             raise BudgetStop('Budget state invalid; no request sent') from None
 
     def _save(self, state):
-        write_json(self.data_dir/'odds_budget.json', state)
+        with Client._locked(self, timeout=180):
+            self._save_unlocked(state)
+
+    def _save_unlocked(self, state):
+        write_json(self.accounting_dir/'odds_budget.json', state)
         fields = ['request_id','run_id','timestamp','endpoint','estimated','actual','remaining',
                   'status','cache_path','outcome']
         output = io.StringIO()
         writer = csv.DictWriter(output, fieldnames=fields)
         writer.writeheader()
         writer.writerows(state['records'])
-        atomic_write(self.data_dir/'odds_usage.csv', output.getvalue().encode())
+        atomic_write(self.accounting_dir/'odds_usage.csv', output.getvalue().encode())
+        if self.accounting_dir != self.data_dir:
+            # Reports only: a sync rollback of these copies cannot alter spending.
+            for name in ('odds_budget.json','odds_usage.csv'):
+                try:
+                    atomic_write(self.data_dir/name,(self.accounting_dir/name).read_bytes())
+                    (self.data_dir/name).chmod(0o444)
+                except OSError:
+                    print('Accounting snapshot export failed; authoritative runtime ledger retained',flush=True)
 
-    def _cache_path(self, path, params):
+    def _cache_path(self, path, params, attempt=0):
         identity = json.dumps([self.run_id,path,params,self._quota_nonce if path=='/v4/sports' else None],sort_keys=True).encode()
+        if attempt:identity += ('retry:'+str(attempt)).encode()
         digest = hashlib.sha256(identity).hexdigest()
         parts = path.split('/')
         sport = parts[4] if path.startswith('/v4/historical/') else (parts[3] if len(parts)>3 else 'sports')
@@ -282,7 +333,9 @@ class Client:
     def _decode(self, envelope, cache_path, cached=False):
         status = envelope['status']
         if status != 200:
-            raise APIError(f'Odds API request failed (status {status}); see the status ledger',status)
+            error = APIError(f'Odds API request failed (status {status}); see the status ledger',status)
+            error.request_id = envelope['request_id']
+            raise error
         try:
             payload = json.loads(envelope['body'])
         except (ValueError, TypeError):
@@ -291,20 +344,39 @@ class Client:
         self.records.append(result)
         return result
 
+    def _skippable_event_error(self,path,status):
+        return False  # Opt-in historical research policy; live behavior stays unchanged.
+
     def _cached(self, cache_path):
         envelope = json.loads(gzip.decompress(cache_path.read_bytes()))
-        records = self._load()['records']
+        state = self._load();records = state['records']
         matching = [r for r in records if r['request_id']==envelope['request_id']]
-        if len(matching)!=1 or matching[0]['outcome']!='ok':
+        if self.transient_retries and len(matching)==1 and matching[0]['outcome'].startswith('transient'):
+            if state['halt']:raise BudgetStop('API client halted: '+state['halt'])
+            error=TransientError('Transient provider response; see status ledger',envelope['status'])
+            error.request_id=envelope['request_id'];error.cached=True;raise error
+        accounted_error=(len(matching)==1 and matching[0]['outcome']=='error'
+            and self._skippable_event_error(envelope['endpoint'],envelope['status'])
+            and isinstance(matching[0]['actual'],int) and 0<=matching[0]['actual']<=matching[0]['estimated']
+            and not state['halt'] and envelope['request_id'] not in state['reservations'])
+        if len(matching)!=1 or (matching[0]['outcome']!='ok' and not accounted_error):
             raise APIError('Cached request did not pass accounting; review the ledger before reuse')
         return self._decode(envelope,cache_path,True)
 
     def request(self, path, params=None):
+        for attempt in range(6 if self.transient_retries else 1):
+            try:return self._request_once(path,params,attempt=attempt)
+            except TransientError as exc:
+                self.quota_checked=False
+                if attempt==5:raise
+                if not getattr(exc,'cached',False):time.sleep([2,4,8,16,30][attempt])
+
+    def _request_once(self, path, params=None, *, attempt=0):
         params = dict(params or {})
         if any(k.lower() in ('apikey','api_key') for k in params):
             raise ValueError('Credentials must not be supplied in request parameters')
         cost = estimated_cost(path, params)
-        cache_path = self._cache_path(path,params)
+        cache_path = self._cache_path(path,params,attempt)
         with self._locked():
             if cache_path.exists():
                 return self._cached(cache_path)
@@ -345,13 +417,15 @@ class Client:
             if state['halt']:
                 raise BudgetStop('API client halted: '+state['halt'])
             if cost:
-                if state['reservations']:
+                if any(not r.get('transient') for r in state['reservations'].values()):
                     raise BudgetStop('Unresolved request reservation; reconcile before paid work')
-                if state['remaining'] is None or state['remaining']-cost < self.floor:
+                reserved=sum(r['estimated'] for r in state['reservations'].values())
+                run_reserved=sum(r['estimated'] for r in state['reservations'].values() if r['run_id']==self.run_id)
+                if state['remaining'] is None or state['remaining']-reserved-cost < self.floor:
                     raise BudgetStop('Unknown quota or account floor would be breached; no paid request sent')
-                if state['spent']+cost > min(self.project_cap,persisted_cap):
+                if state['spent']+reserved+cost > min(self.project_cap,persisted_cap):
                     raise BudgetStop('Project credit cap would be exceeded; no paid request sent')
-                if state['runs'].get(self.run_id,0)+cost > self.run_cap:
+                if state['runs'].get(self.run_id,0)+run_reserved+cost > self.run_cap:
                     raise BudgetStop('Run credit cap would be exceeded; no paid request sent')
             request_id = str(uuid.uuid4())
             record = dict(request_id=request_id,run_id=self.run_id,timestamp=utcnow(),endpoint=path,
@@ -388,41 +462,55 @@ class Client:
                     pass
             actual = parsed_headers.get('x-requests-last')
             remaining = parsed_headers.get('x-requests-remaining')
+            transient=self.transient_retries and status not in (401,403,429) and (
+                status=='network_error' or isinstance(status,int) and 500<=status<600
+                or actual is None or remaining is None)
+            used=parsed_headers.get('x-requests-used');previous_used=state.get('provider_used')
+            # Zero unexplained counter delta proves pending attempts under this
+            # anchor were uncharged. Positive/shared-account deltas stay reserved.
+            if used is not None and previous_used is not None and actual is not None and used-previous_used==actual:
+                resolved=[]
+                for rid,reservation in list(state['reservations'].items()):
+                    if reservation.get('transient') and reservation.get('quota_anchor')==previous_used:
+                        row=next(r for r in state['records'] if r['request_id']==rid)
+                        row.update(actual=0,outcome='transient_no_charge');state['reservations'].pop(rid);resolved.append(rid)
+                if resolved:state.setdefault('transient_reconciliations',[]).append(dict(at=utcnow(),request_ids=resolved,used_before=previous_used,used_after=used,known_charge=actual))
+            if used is not None:state['provider_used']=used
             if remaining is not None:
-                state.update(remaining=remaining,quota_at=utcnow())
-                record['remaining']=remaining
+                state.update(remaining=remaining,quota_at=utcnow());record['remaining']=remaining
             if actual is not None:
                 state['spent'] += actual
                 state['runs'][self.run_id] = state['runs'].get(self.run_id,0)+actual
                 state['reservations'].pop(request_id)
                 record['actual']=actual
-            else:
-                state['halt']='charge headers unavailable; reservation retained'
-            if actual is not None and actual > cost:
-                state['halt']='actual charge exceeded preflight bound'
-            if status in (401,403,429):
-                state['halt']=f'HTTP {status}; no automatic retry'
-            if status != 200:
-                state['halt']=state['halt'] or (None if status in (404,422) else 'request failed; review before retry')
-            if cost and remaining is None:
-                state['halt']='remaining quota header unavailable'
-            if remaining is not None and remaining < self.floor:
-                # Free discovery can report low balance; later spending still fails closed.
-                if cost:
-                    state['halt']='account balance is below its floor'
-            if status == 200:
+            elif transient:
+                state['reservations'][request_id].update(transient=True,quota_anchor=previous_used)
+            else:state['halt']='charge headers unavailable; reservation retained'
+            if transient:
+                record['outcome']='transient'
+                state['consecutive_transient_failures']=state.get('consecutive_transient_failures',0)+1
+                if state['consecutive_transient_failures']>=10:state['halt']='ten consecutive transient provider failures'
+            if actual is not None and actual > cost:state['halt']='actual charge exceeded preflight bound'
+            if status in (401,403,429):state['halt']=f'HTTP {status}; no automatic retry'
+            if status != 200 and not transient:
+                state['halt']=state['halt'] or (None if status in (404,422) or self._skippable_event_error(path,status) else 'request failed; review before retry')
+            if cost and remaining is None and not transient:state['halt']='remaining quota header unavailable'
+            if remaining is not None and remaining < self.floor and cost:state['halt']='account balance is below its floor'
+            if status == 200 and not transient:
                 try:
-                    payload = json.loads(body)
-                    expected = response_cost(path,params,payload) if cost else 0
-                    if actual != expected:
-                        state['halt']='charge does not match returned-market billing'
+                    payload=json.loads(body);expected=response_cost(path,params,payload) if cost else 0
+                    if actual!=expected:state['halt']='charge does not match returned-market billing'
                     else:
                         record['outcome']='ok'
-                except (ValueError, TypeError, KeyError, AttributeError, APIError):
+                        if cost:state['consecutive_transient_failures']=0
+                except (ValueError,TypeError,KeyError,AttributeError,APIError):
                     state['halt']='response schema/JSON invalid; inspect cached response'
             self._save(state)
             if state['halt']:
                 raise BudgetStop('API client halted: '+state['halt']) from None
+            if transient:
+                error=TransientError('Transient provider response; see status ledger',status)
+                error.request_id=request_id;raise error
             if path == '/v4/sports':
                 self.quota_checked = True
                 self.quota_time = time.monotonic()

@@ -6,7 +6,7 @@ import json
 import pandas as pd
 from .odds_api import atomic_write
 from .pipeline import sha
-from .settings import ROOT
+from .settings import ROOT,lock_dir
 
 DATA = ROOT/'data'
 
@@ -19,7 +19,7 @@ def safe_id(value):
 
 @contextmanager
 def record_lock(data_dir, name):
-    folder=Path(data_dir); folder.mkdir(parents=True,exist_ok=True)
+    folder=lock_dir(data_dir); folder.mkdir(parents=True,exist_ok=True)
     with (folder/(name+'.lock')).open('a') as handle:
         try: fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError: raise ValueError('Another '+name+' writer is running') from None
@@ -57,6 +57,16 @@ def flags(path, manifest):
     frame.insert(0,'scan_id',manifest['scan_id'])
     frame.insert(0,'sport',manifest['settings']['sport'])
     frame['scan_capture_time']=manifest['capture_time']
+    if 'rules' in manifest:
+        from . import rules
+        digest=rules.version(manifest['rules'])
+        if digest!=manifest.get('rule_version') or 'rule_version' not in frame or not frame.rule_version.eq(digest).all():
+            raise ValueError('Snapshot rule provenance mismatch')
+        expected=rules.annotate(frame,manifest['rules'],manifest['settings']['sport'])
+        if 'rule_pass' not in frame or not frame.rule_pass.eq(expected.rule_pass).all():
+            raise ValueError('Snapshot rule decisions mismatch')
+    frame['rule_version']=manifest.get('rule_version','legacy-unrecorded')
+    if 'rule_pass' not in frame:frame['rule_pass']=None
     return frame
 
 

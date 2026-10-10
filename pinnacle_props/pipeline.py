@@ -47,7 +47,9 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
 @contextmanager
 def scan_lock(data_dir):
     data_dir=Path(data_dir);data_dir.mkdir(parents=True,exist_ok=True)
-    with (data_dir/'scan.lock').open('a') as lock:
+    from .settings import lock_dir
+    locks=lock_dir(data_dir);locks.mkdir(parents=True,exist_ok=True)
+    with (locks/'scan.lock').open('a') as lock:
         try:
             fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError:
@@ -98,9 +100,13 @@ def _frame(results):
 
 
 def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,results,event_results,
-                   bound,charged,mode='live'):
+                   bound,charged,mode='live',display_rules=None):
     frame=_frame(results)
     flagged,excluded,counts=_evaluate(frame,settings,profile,capture_time)
+    from . import rules
+    from .settings import ACCOUNTING_CLOUD
+    display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
+    flagged=rules.annotate(flagged,display_rules,settings['sport'])
     raw=frame.copy()
     raw['scan_id']=scan_id
     raw['exclusion_reason']=pd.Series([None]*len(raw),dtype='string')
@@ -131,13 +137,17 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
                   'sha256':sha(r.cache_path),'request_id':r.request_id} for r in results],
               'raw_rows':len(frame),'flagged_pairs':len(flagged),'excluded_pairs':len(excluded),'exclusions':counts,
               'candidate_pairs':len(flagged)+len(excluded),
+              'rules':display_rules,'rule_version':rules.version(display_rules),
               'artifacts':{s:{'name':scan_id+s,'sha256':sha(str(base)+s)} for s in suffixes if s!='.json'}}
     # Manifest is the completion marker; a partial output never qualifies for replay.
     write_json(str(base)+'.json',manifest)
     return manifest,flagged,excluded
 
 
-def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,cloud_daily_cap=None):
+def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,cloud_daily_cap=None,display_rules=None):
+    from . import rules
+    from .settings import ACCOUNTING_CLOUD
+    display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
     config=load_config()
     settings=preview['settings']
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
@@ -168,7 +178,7 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
         state=c._load()
         charged=state['runs'].get(scan_id,0)
         now=datetime.now(timezone.utc).isoformat()
-        return _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],charged)
+        return _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],charged,display_rules=display_rules)
 
 
 def manifest_path(sport,scan_id=None,data_dir=ROOT/'data'):
@@ -202,6 +212,10 @@ def replay(sport,scan_id=None,*,data_dir=ROOT/'data'):
         frames.append(normalize(json.loads(envelope['body'])))
     frame=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame(columns=INPUT_COLUMNS)
     flagged,excluded,counts=_evaluate(frame,manifest['settings'],Profile(**manifest['profile']),manifest['capture_time'],manifest.get('exclusion_version',1))
+    if 'rules' in manifest:
+        from . import rules
+        if rules.version(manifest['rules'])!=manifest.get('rule_version'):raise ValueError('Saved rule version mismatch')
+        flagged=rules.annotate(flagged,manifest['rules'],manifest['settings']['sport'])
     for suffix,df in [('_flagged.csv',flagged),('_excluded.csv',excluded)]:
         if hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()!=manifest['artifacts'][suffix]['sha256']:
             raise ValueError('Replay differs from the saved '+suffix+' artifact')

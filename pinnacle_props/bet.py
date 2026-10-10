@@ -7,7 +7,7 @@ import pandas as pd
 from .records import DATA, snapshots, flags, record_lock, csv_write
 
 COLUMNS=['logged_at','scan_id','row','sport','event_id','book','player','market','line','side',
-         'price_decimal','fair_p','edge','stake_suggested','stake_actual','note']
+         'price_decimal','fair_p','edge','stake_suggested','stake_actual','note','rule_version','scan_rule_version']
 
 
 def read_bets(data_dir=DATA):
@@ -15,7 +15,7 @@ def read_bets(data_dir=DATA):
     return pd.read_csv(path,keep_default_na=False) if path.exists() else pd.DataFrame(columns=COLUMNS)
 
 
-def log_bet(scan_id,row,stake=None,note='',*,data_dir=DATA):
+def log_bet(scan_id,row,stake=None,note='',*,data_dir=DATA,display_rules=None):
     if isinstance(row,bool) or not isinstance(row,int) or row<1: raise ValueError('Row is a one-based positive integer')
     path,manifest=snapshots(data_dir,scan_id=scan_id)[0]
     frame=flags(path,manifest)
@@ -24,7 +24,9 @@ def log_bet(scan_id,row,stake=None,note='',*,data_dir=DATA):
     amount=float(r.kellyAmount if stake is None else stake)
     if not math.isfinite(amount) or amount<=0: raise ValueError('Actual stake must be finite and positive')
     if len(note)>2000: raise ValueError('Note must be at most 2000 characters')
-    record=dict(logged_at=datetime.now(timezone.utc).isoformat(),scan_id=scan_id,row=row,sport=r.sport,
+    from . import rules
+    active_rules=rules.validate(display_rules) if display_rules is not None else rules.active()
+    record=dict(rule_version=rules.version(active_rules),scan_rule_version=manifest.get('rule_version','legacy-unrecorded'),logged_at=datetime.now(timezone.utc).isoformat(),scan_id=scan_id,row=row,sport=r.sport,
                 event_id=r.event_id,book=r.book,player=r.player_name,market=r.prop_type,line=r.Target_line,
                 side=side,price_decimal=r['target_'+side+'_decimal'],fair_p=r['noVig'+side.title()],
                 edge=r.edge,stake_suggested=r.kellyAmount,stake_actual=amount,note=note)

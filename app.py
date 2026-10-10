@@ -11,6 +11,8 @@ from pinnacle_props.kelly_sheet import fetch_profiles, parse_profiles
 from pinnacle_props.odds_api import APIError, resolve_key
 from pinnacle_props.pipeline import discover, options, replay, run_live
 from pinnacle_props.scan import LEGACY_COLUMNS
+from pinnacle_props import rules
+from pinnacle_props.rule_ui import initialize as initialize_rules, panel as rules_panel
 from pinnacle_props.settings import ROOT, load_config
 from pinnacle_props.deployment import deployment_settings
 from pinnacle_props.access import cloud_access
@@ -31,7 +33,10 @@ h1,h2,h3 {letter-spacing:-.025em}
 [data-testid="stVerticalBlockBorderWrapper"] {background:white;border-radius:14px}
 @media(max-width:640px){.block-container{padding:4.5rem .9rem 1rem}h1{font-size:2rem !important}}
 </style>''',unsafe_allow_html=True)
+from pinnacle_props.settings import ACCOUNTING_CLOUD
+ACCOUNTING_CLOUD.set(deployment['cloud'])
 config=load_config()
+active_rules=initialize_rules(deployment['cloud'])
 data_dir=ROOT/'data'
 clv_preview=deployment['cloud'] or st.query_params.get('preview_clv')=='1'
 
@@ -106,7 +111,7 @@ with st.expander('Books, markets & scan settings',expanded=False):
     markets=st.multiselect('Markets',available,default=selected_markets,key='markets_'+sport)
     st.query_params['books_'+sport]=','.join(books)
     st.query_params['markets_'+sport]=','.join(markets)
-    minimum=st.slider('Minimum edge (percentage points)',0.0,10.0,0.0,.1,key='minimum')/100
+    active_rules=rules_panel(config,deployment['cloud'])
     guard=st.checkbox('Limit Pinnacle margin',value=False,key='margin_guard')
     maximum=st.slider('Maximum Pinnacle margin (%)',0.0,50.0,10.0,.5,key='maximum')/100 if guard else None
     include_live=st.checkbox('Include live games',value=False,key='include_live')
@@ -127,7 +132,7 @@ with st.expander('Books, markets & scan settings',expanded=False):
         except ValueError as e:st.error(str(e))
 
 try:
-    settings=options(config,sport,books,markets,minimum,maximum,include_live,dates=scan_dates)
+    settings=options(config,sport,books,markets,0.0,maximum,include_live,dates=scan_dates)
 except ValueError as e:
     settings=None;st.warning(str(e))
 
@@ -157,7 +162,7 @@ if preview and preview['settings']==settings:
                 if profile_name not in current_profiles:
                     raise ValueError('Selected Kelly profile is no longer available')
                 result=run_live(preview,profile=current_profiles[profile_name],profile_name=profile_name,
-                                key=key_for_live(),progress=lambda _:None,project_cap=deployment['project_cap'],data_dir=data_dir,cloud_daily_cap=deployment['cloud_daily_cap'])
+                                key=key_for_live(),progress=lambda _:None,project_cap=deployment['project_cap'],data_dir=data_dir,cloud_daily_cap=deployment['cloud_daily_cap'],display_rules=active_rules)
                 st.session_state.profiles=current_profiles
                 st.session_state['scan_'+sport]=result
                 st.session_state.pop('preview',None)
@@ -173,14 +178,17 @@ if 'scan_'+sport not in st.session_state:
         st.error('Saved scan could not be verified: '+str(e))
 result=st.session_state.get('scan_'+sport)
 
-quota_file=data_dir/'odds_budget.json'
+from pinnacle_props.settings import accounting_dir
+quota_file=accounting_dir(data_dir,cloud=deployment['cloud'])/'odds_budget.json'
 if quota_file.exists():
     try:
         quota=json.loads(quota_file.read_text())
         remaining=quota.get('remaining')
         st.caption(f"Account credits: {remaining:,} · This ledger used: {quota['spent']:,} / {min(quota.get('project_cap',deployment['project_cap']),deployment['project_cap']):,}" if remaining is not None else 'Account quota has not been checked.')
-        if quota.get('halt') or quota.get('reservations'):
+        if quota.get('halt') or any(not r.get('transient') for r in quota.get('reservations',{}).values()):
             st.warning('Live requests are paused for a quota or request-accounting issue. Saved scans remain available.')
+        elif quota.get('reservations'):
+            st.caption(f"Credits reserved for unconfirmed responses: {sum(r['estimated'] for r in quota['reservations'].values()):,}")
     except (ValueError,KeyError):st.warning('Quota record is unavailable; live requests will fail closed.')
 
 tabs=st.tabs(['Price comparison','Kelly calculator']+(['Logged','Performance'] if clv_preview else []))
@@ -195,10 +203,16 @@ with tab_prices:
         manifest,flagged,excluded=result
         st.caption('SAVED SCAN · '+label_time(manifest['capture_time'])+' · '+manifest['profile_name'])
         st.caption('Saved prices load without an API key. Only an explicit live refresh requests new prices.')
+        st.write(rules.summary(active_rules,sport))
+        annotated=rules.annotate(flagged,active_rules,sport)
+        hidden=int((~annotated.rule_pass).sum())
+        st.caption(f'{hidden} bets hidden by the rule · {len(annotated)} saved opportunities')
+        show_all=st.checkbox('Show all saved opportunities',value=False,key='show_all_rules_'+sport)
+        visible=annotated if show_all else annotated[annotated.rule_pass]
         a,b,c=st.columns(3)
-        a.metric('Opportunities',len(flagged));b.metric('Games',len(manifest['event_results']));c.metric('Scan credits',manifest['credits_charged'])
+        a.metric('Opportunities',len(visible));b.metric('Games',len(manifest['event_results']));c.metric('Scan credits',manifest['credits_charged'])
         query=st.text_input('Filter by player, book or market',placeholder='Search these results…',key='search')
-        view=flagged
+        view=visible
         with st.expander('Filter result columns'):
             filter_books=st.multiselect('Result books',sorted(flagged['book'].unique()),key='filter_books_'+sport)
             filter_markets=st.multiselect('Result markets',sorted(flagged['prop_type'].unique()),key='filter_markets_'+sport)
@@ -252,7 +266,7 @@ with tab_prices:
                             note=st.text_input('Note',key='note_'+record_key,max_chars=2000)
                             if st.button('Log bet',key='log_'+record_key,disabled=exists):
                                 try:
-                                    log_bet(manifest['scan_id'],row_number,actual,note,data_dir=data_dir)
+                                    log_bet(manifest['scan_id'],row_number,actual,note,data_dir=data_dir,display_rules=active_rules)
                                     st.rerun()
                                 except (ValueError,OSError) as e:st.error(str(e))
         with st.expander('Compare all books & full details'):
@@ -300,9 +314,11 @@ if clv_preview:
             recorded=logged_view(clv_frame,data_dir=data_dir)
             if recorded.empty:st.info('No bets recorded on this deployment. Your Mac’s bet history is not connected.' if deployment['cloud'] else 'No bets recorded. Log only bets you already placed.')
             else:
+                recorded=recorded.rename(columns={'rule_version':'logged_rule_version'})
+                recorded=rules.annotate(recorded,active_rules).rename(columns={'rule_pass':'fits_current_rule','rule_version':'current_rule_version'})
                 recorded['logged_at']=recorded.logged_at.map(label_time)
                 st.dataframe(recorded,hide_index=True,width='stretch')
-                st.caption('CLV is a probability difference. Blank CLV means no valid same-line close is available.')
+                st.caption('Recorded bets remain visible even when they no longer fit the current rule. CLV is a probability difference; blank means no valid same-line close is available.')
         with tabs[3]:
             if deployment['cloud'] and clv_frame.empty:st.info('No performance history on this deployment. Your Mac’s closing prices and bet history are not connected.')
             else:st.markdown(report_text)

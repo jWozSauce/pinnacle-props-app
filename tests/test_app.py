@@ -1,6 +1,7 @@
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
 from pinnacle_props.pipeline import replay
+from pinnacle_props import rules
 
 
 def test_app_saved_scan_starts_without_credential_or_network(monkeypatch):
@@ -12,8 +13,8 @@ def test_app_saved_scan_starts_without_credential_or_network(monkeypatch):
     assert app.title[0].value=='Find the better price.'
     assert app.selectbox(key='sport').value=='nhl'
     if list(Path('data/snapshots/nhl').glob('*.json')):
-        expected=replay('nhl')[1]
-        assert app.metric[0].value==str(len(expected))
+        expected=rules.annotate(replay('nhl')[1],rules.active(),'nhl')
+        assert app.metric[0].value==str(int(expected.rule_pass.sum()))
         app.text_input(key='search').set_value('no-such-player').run()
         assert not app.exception
         assert any('No opportunities' in x.value for x in app.info)

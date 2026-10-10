@@ -2,7 +2,7 @@ reference_book: pinnacle
 kelly_profile: Player_Props
 min_edge: 0.0
 account_floor: 100000
-project_cap: 2000000
+project_cap: 2600000
 books:
   draftkings: DraftKings
   fanduel: FanDuel
