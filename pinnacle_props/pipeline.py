@@ -144,7 +144,7 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     return manifest,flagged,excluded
 
 
-def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,cloud_daily_cap=None,display_rules=None):
+def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,cloud_daily_cap=None,display_rules=None,paper_track=True):
     from . import rules
     from .settings import ACCOUNTING_CLOUD
     display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
@@ -178,7 +178,13 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
         state=c._load()
         charged=state['runs'].get(scan_id,0)
         now=datetime.now(timezone.utc).isoformat()
-        return _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],charged,display_rules=display_rules)
+        result = _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],charged,display_rules=display_rules)
+        from .bet_store import enabled
+        if enabled() and paper_track:
+            from .paper import track_scan
+            receipt=track_scan(scan_id,data_dir=data_dir,display_rules=display_rules)
+            if progress: progress(receipt['message'])
+        return result
 
 
 def manifest_path(sport,scan_id=None,data_dir=ROOT/'data'):

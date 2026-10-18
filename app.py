@@ -38,7 +38,10 @@ ACCOUNTING_CLOUD.set(deployment['cloud'])
 config=load_config()
 active_rules=initialize_rules(deployment['cloud'])
 data_dir=ROOT/'data'
-clv_preview=deployment['cloud'] or st.query_params.get('preview_clv')=='1'
+from pinnacle_props.bet_store import enabled as settlement_enabled, session_store
+from pinnacle_props import bet_duplicates as bd
+settlement_preview=settlement_enabled()
+clv_preview=settlement_preview or deployment['cloud'] or st.query_params.get('preview_clv')=='1'
 
 
 
@@ -65,6 +68,7 @@ def label_time(value):
     return datetime.fromisoformat(value.replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).strftime('%b %d, %I:%M %p %Z')
 
 
+if 'bet_receipt' in st.session_state:st.info(st.session_state.pop('bet_receipt'))
 st.caption('◈  PINNACLE PROPS')
 st.title('Find the better price.')
 st.write('Player props across your books, compared at the same line against Pinnacle.')
@@ -114,6 +118,7 @@ with st.expander('Books, markets & scan settings',expanded=False):
     active_rules=rules_panel(config,deployment['cloud'])
     guard=st.checkbox('Limit Pinnacle margin',value=False,key='margin_guard')
     maximum=st.slider('Maximum Pinnacle margin (%)',0.0,50.0,10.0,.5,key='maximum')/100 if guard else None
+    paper_track=st.checkbox('Paper-track rule-passing bets on every refresh',value=True,key='paper_track') if settlement_preview else False
     include_live=st.checkbox('Include live games',value=False,key='include_live')
     limit_dates=st.checkbox('Limit game dates',value=False,key='limit_dates')
     scan_dates=None
@@ -161,8 +166,12 @@ if preview and preview['settings']==settings:
                 current_profiles=fetch_profiles()
                 if profile_name not in current_profiles:
                     raise ValueError('Selected Kelly profile is no longer available')
+                scan_messages=[]
                 result=run_live(preview,profile=current_profiles[profile_name],profile_name=profile_name,
-                                key=key_for_live(),progress=lambda _:None,project_cap=deployment['project_cap'],data_dir=data_dir,cloud_daily_cap=deployment['cloud_daily_cap'],display_rules=active_rules)
+                                key=key_for_live(),progress=scan_messages.append,project_cap=deployment['project_cap'],data_dir=data_dir,cloud_daily_cap=deployment['cloud_daily_cap'],display_rules=active_rules,paper_track=paper_track)
+                st.session_state.pop('pp_bet_store_'+str(data_dir),None)
+                if settlement_preview and paper_track:
+                    st.session_state['bet_receipt']=scan_messages[-1] if scan_messages else 'Paper tracking finished; check shared logs.'
                 st.session_state.profiles=current_profiles
                 st.session_state['scan_'+sport]=result
                 st.session_state.pop('preview',None)
@@ -191,7 +200,7 @@ if quota_file.exists():
             st.caption(f"Credits reserved for unconfirmed responses: {sum(r['estimated'] for r in quota['reservations'].values()):,}")
     except (ValueError,KeyError):st.warning('Quota record is unavailable; live requests will fail closed.')
 
-tabs=st.tabs(['Price comparison','Kelly calculator']+(['Logged','Performance'] if clv_preview else []))
+tabs=st.tabs(['Price comparison','Kelly calculator']+((['Logged','Performance','Paper'] if settlement_preview else ['Logged','Performance']) if clv_preview else []))
 tab_prices,tab_calc=tabs[:2]
 if clv_preview:
     if not deployment['cloud']:st.caption('Local bet records and pre-start CLV')
@@ -201,6 +210,19 @@ with tab_prices:
         st.info('No scans saved on this deployment yet. Your Mac’s saved history is not connected.' if deployment['cloud'] else 'No saved scan for this sport yet. Estimate a live refresh to begin.')
     else:
         manifest,flagged,excluded=result
+        real_keys=None;allow_duplicates=False
+        if settlement_preview:
+            bet_store=session_store(data_dir)
+            reload_check=st.button('Refresh already-bet check',key='reload_real_check')
+            real_keys=bet_store.real_keys(reload=reload_check)
+            allow_duplicates=st.checkbox('Allow re-logging bets marked 🔴 ALREADY BET',value=False,key='allow_real_duplicates')
+        paper_all=st.button('Bet ALL qualifying (paper round)',key='paper_all') if settlement_preview else False
+        paper_saved=st.button('Paper-track this scan',key='paper_saved') if settlement_preview else False
+        if paper_all or paper_saved:
+            from pinnacle_props.paper import track_scan
+            receipt=track_scan(manifest['scan_id'],data_dir=data_dir,display_rules=active_rules)
+            st.session_state.pop('pp_bet_store_'+str(data_dir),None)
+            (st.warning if receipt['queued'] else st.success)(receipt['message'])
         st.caption('SAVED SCAN · '+label_time(manifest['capture_time'])+' · '+manifest['profile_name'])
         st.caption('Saved prices load without an API key. Only an explicit live refresh requests new prices.')
         st.write(rules.summary(active_rules,sport))
@@ -208,7 +230,25 @@ with tab_prices:
         hidden=int((~annotated.rule_pass).sum())
         st.caption(f'{hidden} bets hidden by the rule · {len(annotated)} saved opportunities')
         show_all=st.checkbox('Show all saved opportunities',value=False,key='show_all_rules_'+sport)
-        visible=annotated if show_all else annotated[annotated.rule_pass]
+        visible=(annotated if show_all else annotated[annotated.rule_pass]).copy()
+        if settlement_preview:
+            visible['⚠']=bd.flags(visible,real_keys)
+            exact=int(visible['⚠'].str.startswith('🔴').sum());same=int(visible['⚠'].str.startswith('🟡').sum())
+            if real_keys is None:st.warning('⚪ CHECK UNAVAILABLE. Real logging requires a successful fresh shared-log read.')
+            elif exact or same:st.warning(f'{exact} bets below are already in your bet log · {same} more are on games you already have a real bet on')
+            confirmed=st.checkbox('I already placed all qualifying real bets at the displayed suggested stakes',value=False,key='confirm_real_all')
+            if st.button('Log ALL qualifying real bets',key='real_all',disabled=not confirmed or real_keys is None):
+                written=queued=skipped=0
+                try:
+                    for i,r in annotated[annotated.rule_pass & (annotated.kellyAmount>0)].iterrows():
+                        receipt=log_bet(manifest['scan_id'],int(i)+1,float(r.kellyAmount),data_dir=data_dir,
+                                        display_rules=active_rules,allow_duplicates=allow_duplicates)['storage']
+                        written+=receipt['written'];queued+=receipt['queued'];skipped+=receipt.get('skipped',0)
+                    st.session_state.pop('pp_bet_store_'+str(data_dir),None)
+                    st.session_state['bet_receipt']=f'Real bets: {written} written; {queued} queued; {skipped} exact duplicates skipped.'
+                    st.rerun()
+                except (ValueError,OSError) as e:
+                    st.error(f'{written} written; {queued} queued; {skipped} skipped before stop. '+str(e))
         a,b,c=st.columns(3)
         a.metric('Opportunities',len(visible));b.metric('Games',len(manifest['event_results']));c.metric('Scan credits',manifest['credits_charged'])
         query=st.text_input('Filter by player, book or market',placeholder='Search these results…',key='search')
@@ -220,7 +260,7 @@ with tab_prices:
         if filter_books:view=view[view['book'].isin(filter_books)]
         if filter_markets:view=view[view['prop_type'].isin(filter_markets)]
         if filter_sides:view=view[view['side'].isin(filter_sides)]
-        if query:
+        if query and not view.empty:
             mask=view[['player_name','book','prop_type']].astype(str).agg(' '.join,axis=1).str.contains(query,case=False,regex=False)
             view=view[mask]
         table_columns=LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct']
@@ -232,9 +272,11 @@ with tab_prices:
         st.caption(f'{len(view)} results · largest suggested stake first')
         if view.empty:st.info('No opportunities match these filters.')
         with st.container(key='pp_table'):
-            st.dataframe(view[table_columns].style.apply(
-                lambda row:['color: #87929d' if row.pin_age_min>stale_minutes else '' for _ in row],axis=1),
-                hide_index=True,width='stretch',height=480,column_config={
+            table=view[(['⚠'] if settlement_preview else [])+table_columns].copy()
+            if settlement_preview:table.index=bd.index_labels(view)
+            st.dataframe(table.style.apply(
+                lambda row:bd.row_style(row) if settlement_preview and row.get('⚠','') else ['color: #87929d' if row.pin_age_min>stale_minutes else '' for _ in row],axis=1),
+                hide_index=not settlement_preview,width='stretch',height=480,column_config={
                     'kellyAmount':st.column_config.NumberColumn(format='$%.2f'),
                     **{c:st.column_config.NumberColumn(format='%.1f') for c in ['Target_line','PIN_line','pin_age_min']},
                     **{c:st.column_config.NumberColumn(format='%.0f') for c in ['Target_over','Target_under','PIN_over','PIN_under']},
@@ -245,10 +287,14 @@ with tab_prices:
             count=8
             pages=max(1,(len(view)+count-1)//count)
             page=st.selectbox('Page',range(1,pages+1),key='result_page')
+            st.markdown('<style>[class*="st-key-pp_card_red_"]{background:#7f1d1d!important;color:white!important}[class*="st-key-pp_card_amber_"]{background:#92600a!important;color:white!important}[class*="st-key-pp_card_red_"] *,[class*="st-key-pp_card_amber_"] *{color:white!important}</style>',unsafe_allow_html=True)
             for row in view.iloc[(page-1)*count:page*count].itertuples():
-                with st.container(border=True):
+                flag=view.loc[row.Index,'⚠'] if settlement_preview else ''
+                tone='red' if flag.startswith('🔴') else 'amber' if flag.startswith('🟡') else 'plain'
+                with st.container(border=True,key=f'pp_card_{tone}_{row.Index}'):
+                    if flag:st.write(flag)
                     age=stale_minutes<row.pin_age_min
-                    st.markdown(f'### {row.player_name}')
+                    st.markdown(f"### {flag.split(' ')[0]+' ' if flag else ''}{row.player_name}")
                     price=row.Target_over if row.side=='over' else row.Target_under
                     st.write(f"{row.side.title()} {row.Target_line:g} · {row.prop_type.removeprefix('player_').replace('_',' ')}")
                     st.markdown(f"**{config['books'].get(row.book,row.book)} {price:+.0f}** · Edge {100*row.edge:.2f} pp · EV {row.ev_pct:.2f}%")
@@ -256,17 +302,19 @@ with tab_prices:
                     if age:
                         st.caption(f'◷ Older quote · Pinnacle age at capture: {row.pin_age_min:.1f} min')
                     st.caption(f"Suggested stake ${row.kellyAmount:,.2f} · Pinnacle margin {100*row.pin_margin:.2f}%")
-                    if clv_preview and not deployment['cloud']:
+                    if clv_preview and (settlement_preview or not deployment['cloud']):
                         row_number=row.Index+1
                         record_key=manifest['scan_id']+'_'+str(row_number)
-                        exists=((logged.scan_id==manifest['scan_id'])&(logged.row==row_number)).any()
+                        exists=not settlement_preview and ((logged.scan_id==manifest['scan_id'])&(logged.row==row_number)).any()
                         with st.expander('Record a bet you already placed' if not exists else 'Bet recorded'):
                             st.caption(f"Saved row {row_number}. This records your action; it does not place a bet.")
                             actual=st.number_input('Actual stake ($)',min_value=0.01,value=max(.01,float(row.kellyAmount)),key='actual_'+record_key)
                             note=st.text_input('Note',key='note_'+record_key,max_chars=2000)
-                            if st.button('Log bet',key='log_'+record_key,disabled=exists):
+                            if st.button('Log bet',key='log_'+record_key,disabled=exists or (settlement_preview and (real_keys is None or (flag.startswith('🔴') and not allow_duplicates)))):
                                 try:
-                                    log_bet(manifest['scan_id'],row_number,actual,note,data_dir=data_dir,display_rules=active_rules)
+                                    receipt=log_bet(manifest['scan_id'],row_number,actual,note,data_dir=data_dir,display_rules=active_rules,allow_duplicates=allow_duplicates)
+                                    st.session_state.pop('pp_bet_store_'+str(data_dir),None)
+                                    st.session_state['bet_receipt']=receipt.get('storage',{}).get('message','Bet recorded')
                                     st.rerun()
                                 except (ValueError,OSError) as e:st.error(str(e))
         with st.expander('Compare all books & full details'):
@@ -306,7 +354,14 @@ with tab_calc:
             if amount==0:st.caption('No bet at these inputs.')
         except ValueError as e:st.error(str(e))
 
-if clv_preview:
+if settlement_preview:
+    from pinnacle_props.performance_ui import render
+    try:
+        from pinnacle_props.clv import rebuild
+        clv_frame=rebuild(data_dir=data_dir)
+    except (ValueError,OSError,KeyError):clv_frame=None
+    render(tabs[2],tabs[3],data_dir,clv=clv_frame,paper_tab=tabs[4])
+elif clv_preview:
     try:
         report_text,clv_frame=clv_report(data_dir=data_dir,output=None)
         with tabs[2]:

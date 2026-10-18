@@ -16,7 +16,7 @@ def reserve_cloud_budget(data_dir):
     client=Client(data_dir=data_dir,lock_timeout=180)
     with client._locked():
         state=client._load()
-        if state.get('project_cap') in (1_900_000,2_500_000):return
+        if state.get('project_cap') in (1_900_000,2_500_000,2_600_000):return
         if state.get('project_cap')!=2_000_000 or state['spent']>1_900_000 or state['halt'] or state['reservations']:
             raise BudgetStop('Unexpected ledger state; cannot reserve cloud allowance')
         state['project_cap']=1_900_000

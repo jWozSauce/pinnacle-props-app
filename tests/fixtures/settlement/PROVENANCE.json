@@ -1,0 +1,76 @@
+[
+  {
+    "file": "nfl_espn.json",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=401872965",
+    "retrieved": "2026-10-10",
+    "raw_sha256": "7c3e8bd6c8cef9021566eeb6dac026ff0a79ca7f9a521b33c72d486ab19efa29",
+    "projection": "identity, game status and original box-score fields; all recorded games final"
+  },
+  {
+    "file": "nhl_espn.json",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=401892465",
+    "retrieved": "2026-10-10",
+    "raw_sha256": "41ea4ba26184364311b81c07d4a3f0e040e450def888d18b6fd43b2b7982dec9",
+    "projection": "identity, game status and original box-score fields; all recorded games final; original play identities, types and base states"
+  },
+  {
+    "file": "nba_espn.json",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=401898395",
+    "retrieved": "2026-10-10",
+    "raw_sha256": "24ad0404871ba0dcaebc796c41d3be4c48cb42480a7279b9e95064c6e7fca052",
+    "projection": "identity, game status and original box-score fields; all recorded games final"
+  },
+  {
+    "file": "wnba_espn.json",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/summary?event=401857201",
+    "retrieved": "2026-10-10",
+    "raw_sha256": "de127aba7ca1087b6673b4baa34843b2b1ec7231b1168633b4eee1d0aae941e6",
+    "projection": "identity, game status and original box-score fields; all recorded games final"
+  },
+  {
+    "file": "mlb_espn.json",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=401907993",
+    "retrieved": "2026-10-10",
+    "raw_sha256": "47e12ccdb8414c2176adfd3a9e3570e873b9581d80f9af6ed6dcd44b0986cec6",
+    "projection": "identity, game status and original box-score fields; all recorded games final; original play identities, types and base states"
+  },
+  {
+    "file": "mlb_official.json",
+    "source": "https://statsapi.mlb.com/api/v1.1/game/849832/feed/live",
+    "retrieved": "2026-10-10",
+    "raw_sha256": "5a3a98870e82c6d10e494cd4521106a05340e502ab4d9bf28a14bb69f5ad6056",
+    "projection": "identity, final state, original player stats"
+  },
+  {
+    "file": "nhl_official.json",
+    "component": "play-by-play",
+    "source": "https://api-web.nhle.com/v1/gamecenter/2026020056/play-by-play",
+    "retrieved": "2026-10-16T22:03:51.709832+00:00",
+    "raw_sha256": "29bf97ee3b9c991974d39bb06949988c88bbfaad58ebccacba3485233dd15248",
+    "projection": "Official final game 2026020056: schedule identity, player boxes, roster and blocked-shot identities, scoring. No synthetic state changes."
+  },
+  {
+    "file": "nhl_official.json",
+    "component": "landing",
+    "source": "https://api-web.nhle.com/v1/gamecenter/2026020056/landing",
+    "retrieved": "2026-10-16T22:03:52.521027+00:00",
+    "raw_sha256": "bb2deb7c1fbd6e08769c31abf7a4e3fe145f8ce3a436f27200c980f19eb8e4bb",
+    "projection": "Official final game 2026020056: schedule identity, player boxes, roster and blocked-shot identities, scoring. No synthetic state changes."
+  },
+  {
+    "file": "nhl_official.json",
+    "component": "boxscore",
+    "source": "https://api-web.nhle.com/v1/gamecenter/2026020056/boxscore",
+    "retrieved": "2026-10-16T22:03:50.907233+00:00",
+    "raw_sha256": "cde879a8f59ef564d98330709f358693b7c0cf14adeb55fff0256b4def8ede75",
+    "projection": "Official final game 2026020056: schedule identity, player boxes, roster and blocked-shot identities, scoring. No synthetic state changes."
+  },
+  {
+    "file": "nhl_official.json",
+    "component": "schedule",
+    "source": "https://api-web.nhle.com/v1/schedule/2026-10-08",
+    "retrieved": "2026-10-16T22:04:35.513117+00:00",
+    "raw_sha256": "67ea7e33a55a1e70a8386df70ce887d8e345f707cd7f5bf4532967aa93d831ed",
+    "projection": "Official final game 2026020056: schedule identity, player boxes, roster and blocked-shot identities, scoring. No synthetic state changes."
+  }
+]

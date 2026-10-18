@@ -184,6 +184,13 @@ def main():
         else:results=capture_all(window=a.window,progress=log,key=key)
         log(f'run_completed captures={len(results)}'+(' idle/no new captures' if not results else ''))
     except (APIError,ValueError,OSError,KeyError) as e:
+        # Do not print source lines, locals, request URLs or credentials. File/line
+        # frames distinguish a File Provider read failure from a lock failure.
+        if isinstance(e,OSError):
+            import traceback
+            frames=traceback.extract_tb(e.__traceback__)
+            log('io_failure '+json.dumps({'errno':e.errno,'frames':[
+                {'file':Path(f.filename).name,'line':f.lineno,'function':f.name} for f in frames]}))
         log('run_failed '+str(e));p.exit(1)
 
 

@@ -1,0 +1,63 @@
+# TASK-14 main two-sided player props. Alternates and one-sided scorer markets
+# are outside the primary candidate definition and must be counted separately.
+nhl:
+  player_goals: {fields: [goals], participation: nhl_skater}
+  player_assists: {fields: [assists], participation: nhl_skater}
+  player_points: {fields: [goals, assists], participation: nhl_skater}
+  player_shots_on_goal: {fields: [shots_on_goal], participation: nhl_skater}
+  player_total_saves: {fields: [total_saves], participation: nhl_goalie}
+  player_power_play_points: {fields: [power_play_points], participation: nhl_skater}
+  player_blocked_shots: {fields: [blocked_shots], participation: nhl_skater}
+nfl:
+  player_pass_yds: {fields: [passing_yards], participation: row}
+  player_pass_tds: {fields: [passing_tds], participation: row}
+  player_pass_completions: {fields: [completions], participation: row}
+  player_pass_attempts: {fields: [attempts], participation: row}
+  player_pass_interceptions: {fields: [passing_interceptions], participation: row}
+  player_rush_yds: {fields: [rushing_yards], participation: row}
+  player_rush_attempts: {fields: [carries], participation: row}
+  player_rush_tds: {fields: [rushing_tds], participation: row}
+  player_receptions: {fields: [receptions], participation: row}
+  player_reception_yds: {fields: [receiving_yards], participation: row}
+  player_reception_tds: {fields: [receiving_tds], participation: row}
+  player_rush_reception_yds: {fields: [rushing_yards, receiving_yards], participation: row}
+  player_pass_rush_yds: {fields: [passing_yards, rushing_yards], participation: row}
+  player_field_goals: {fields: [fg_made], participation: row}
+  player_kicking_points: {fields: [fg_made, pat_made], coefficients: [3, 1], participation: row}
+  player_tackles_assists: {fields: [def_tackles_solo, def_tackle_assists], participation: row}
+  player_sacks: {fields: [def_sacks], participation: row}
+mlb:
+  batter_home_runs: {fields: [hitting_homeRuns], participation: mlb_hitter}
+  batter_total_bases: {fields: [hitting_totalBases], participation: mlb_hitter}
+  batter_hits: {fields: [hitting_hits], participation: mlb_hitter}
+  batter_singles: {fields: [hitting_hits, hitting_doubles, hitting_triples, hitting_homeRuns], coefficients: [1, -1, -1, -1], participation: mlb_hitter}
+  batter_doubles: {fields: [hitting_doubles], participation: mlb_hitter}
+  batter_triples: {fields: [hitting_triples], participation: mlb_hitter}
+  batter_runs_scored: {fields: [hitting_runs], participation: mlb_hitter}
+  batter_rbis: {fields: [hitting_rbi], participation: mlb_hitter}
+  batter_hits_runs_rbis: {fields: [hitting_hits, hitting_runs, hitting_rbi], participation: mlb_hitter}
+  batter_stolen_bases: {fields: [hitting_stolenBases], participation: mlb_hitter}
+  batter_strikeouts: {fields: [hitting_strikeOuts], participation: mlb_hitter}
+  batter_walks: {fields: [hitting_baseOnBalls], participation: mlb_hitter}
+  pitcher_earned_runs: {fields: [pitching_earnedRuns], participation: mlb_pitcher}
+  pitcher_hits_allowed: {fields: [pitching_hits], participation: mlb_pitcher}
+  pitcher_outs: {fields: [pitching_outs], participation: mlb_pitcher}
+  pitcher_strikeouts: {fields: [pitching_strikeOuts], participation: mlb_pitcher}
+  pitcher_walks: {fields: [pitching_baseOnBalls], participation: mlb_pitcher}
+nba: &basketball
+  player_points: {fields: [points], participation: row}
+  player_rebounds: {fields: [rebounds], participation: row}
+  player_assists: {fields: [assists], participation: row}
+  player_threes: {fields: [threes_made], participation: row}
+  player_blocks: {fields: [blocks], participation: row}
+  player_steals: {fields: [steals], participation: row}
+  player_turnovers: {fields: [turnovers], participation: row}
+  player_blocks_steals: {fields: [blocks, steals], participation: row}
+  player_points_rebounds: {fields: [points, rebounds], participation: row}
+  player_points_assists: {fields: [points, assists], participation: row}
+  player_points_rebounds_assists: {fields: [points, rebounds, assists], participation: row}
+  player_rebounds_assists: {fields: [rebounds, assists], participation: row}
+  player_field_goals: {fields: [field_goals_made], participation: row}
+  player_frees_made: {fields: [free_throws_made], participation: row}
+  player_frees_attempts: {fields: [free_throws_attempted], participation: row}
+wnba: *basketball

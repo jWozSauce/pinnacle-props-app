@@ -27,6 +27,8 @@ def fixture_rows(sport):
 
 @pytest.fixture
 def app_setup(tmp_path,monkeypatch):
+    # A mocked cloud must not read the owner's local ledger or private caches.
+    monkeypatch.setattr('pinnacle_props.settings.ROOT',tmp_path)
     monkeypatch.setattr(rules,'LIVE_PATH',tmp_path/'runtime/rules.json')
     monkeypatch.setattr('requests.sessions.Session.request',lambda *a,**k:pytest.fail('App attempted network'))
     monkeypatch.setattr('pinnacle_props.odds_api.resolve_key',lambda **k:pytest.fail('App attempted credential access'))
@@ -124,3 +126,12 @@ def test_save_default_is_explicit_and_cloud_uses_published_yaml(app_setup,monkey
     monkeypatch.setattr('pinnacle_props.deployment.deployment_settings',lambda _:dict(cloud=True,paid_enabled=False,project_cap=100000,cloud_daily_cap=2500))
     monkeypatch.setattr('pinnacle_props.access.cloud_access',lambda:None)
     fresh=start().run();assert not fresh.exception and fresh.metric[0].value=='2'
+
+
+def test_search_when_no_saved_opportunity_passes_rules(app_setup,monkeypatch):
+    original=fixture_rows
+    monkeypatch.setitem(globals(),'fixture_rows',lambda sport:original(sport).assign(edge=0.0))
+    app=start().run()
+    assert not app.exception and app.metric[0].value=='0'
+    app.text_input(key='search').set_value('player').run()
+    assert not app.exception and app.metric[0].value=='0'

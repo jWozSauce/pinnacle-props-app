@@ -11,11 +11,17 @@ COLUMNS=['logged_at','scan_id','row','sport','event_id','book','player','market'
 
 
 def read_bets(data_dir=DATA):
+    from .bet_store import enabled, session_store
+    if enabled():
+        frame=session_store(data_dir).read("real")
+        frame["stake_actual"]=pd.to_numeric(frame.stake,errors="coerce")
+        frame["row"]=pd.to_numeric(frame.row,errors="coerce")
+        return frame
     path=Path(data_dir)/'bets'/'bets.csv'
     return pd.read_csv(path,keep_default_na=False) if path.exists() else pd.DataFrame(columns=COLUMNS)
 
 
-def log_bet(scan_id,row,stake=None,note='',*,data_dir=DATA,display_rules=None):
+def log_bet(scan_id,row,stake=None,note='',*,data_dir=DATA,display_rules=None,allow_duplicates=False):
     if isinstance(row,bool) or not isinstance(row,int) or row<1: raise ValueError('Row is a one-based positive integer')
     path,manifest=snapshots(data_dir,scan_id=scan_id)[0]
     frame=flags(path,manifest)
@@ -30,6 +36,15 @@ def log_bet(scan_id,row,stake=None,note='',*,data_dir=DATA,display_rules=None):
                 event_id=r.event_id,book=r.book,player=r.player_name,market=r.prop_type,line=r.Target_line,
                 side=side,price_decimal=r['target_'+side+'_decimal'],fair_p=r['noVig'+side.title()],
                 edge=r.edge,stake_suggested=r.kellyAmount,stake_actual=amount,note=note)
+    from .bet_store import enabled, BetStore
+    if enabled():
+        from .paper import frozen, migrate
+        store=BetStore(data_dir)
+        migration=migrate(store)
+        saved=frozen(manifest,r,row,stake=amount,note=note,display_rules=active_rules)
+        receipt=store.append_real([saved],allow_duplicates=allow_duplicates)
+        record.update(saved,storage=receipt)
+        return record
     with record_lock(data_dir,'bets'):
         old=read_bets(data_dir)
         if ((old.scan_id==scan_id)&(old.row==row)).any():
@@ -47,6 +62,7 @@ def main():
     a=p.parse_args()
     try:
         result=log_bet(a.scan,a.row,a.stake,a.note)
+        if result.get("storage",{}).get("queued"): print(result["storage"]["message"])
         print(f"Recorded scan {result['scan_id']} row {result['row']}. No bet was placed by this software.")
     except (ValueError,OSError,KeyError) as e: p.exit(1,str(e)+'\n')
 

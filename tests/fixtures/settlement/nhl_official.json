@@ -1,0 +1,2411 @@
+{
+  "play-by-play": {
+    "id": 2026020056,
+    "gameState": "OFF",
+    "rosterSpots": [
+      {
+        "teamId": 68,
+        "playerId": 8475314,
+        "firstName": {
+          "default": "Anders"
+        },
+        "lastName": {
+          "default": "Lee"
+        },
+        "sweaterNumber": 72,
+        "positionCode": "L",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8475314.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8476389,
+        "firstName": {
+          "default": "Vincent"
+        },
+        "lastName": {
+          "default": "Trocheck"
+        },
+        "sweaterNumber": 16,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8476389.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8476854,
+        "firstName": {
+          "default": "Hampus"
+        },
+        "lastName": {
+          "default": "Lindholm"
+        },
+        "sweaterNumber": 27,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8476854.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8477220,
+        "firstName": {
+          "default": "Nate"
+        },
+        "lastName": {
+          "default": "Schmidt"
+        },
+        "sweaterNumber": 88,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8477220.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8477346,
+        "firstName": {
+          "default": "MacKenzie"
+        },
+        "lastName": {
+          "default": "Weegar"
+        },
+        "sweaterNumber": 52,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8477346.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8477365,
+        "firstName": {
+          "default": "Connor"
+        },
+        "lastName": {
+          "default": "Clifton"
+        },
+        "sweaterNumber": 75,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8477365.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8477496,
+        "firstName": {
+          "default": "Elias"
+        },
+        "lastName": {
+          "default": "Lindholm"
+        },
+        "sweaterNumber": 28,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8477496.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8477507,
+        "firstName": {
+          "default": "Nikita"
+        },
+        "lastName": {
+          "default": "Zadorov"
+        },
+        "sweaterNumber": 91,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8477507.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8477951,
+        "firstName": {
+          "default": "Nick"
+        },
+        "lastName": {
+          "default": "Schmaltz"
+        },
+        "sweaterNumber": 8,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8477951.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8477956,
+        "firstName": {
+          "default": "David"
+        },
+        "lastName": {
+          "default": "Pastrnak",
+          "cs": "Pastrňák",
+          "sk": "Pastrňák"
+        },
+        "sweaterNumber": 88,
+        "positionCode": "R",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8477956.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8478401,
+        "firstName": {
+          "default": "Pavel"
+        },
+        "lastName": {
+          "default": "Zacha"
+        },
+        "sweaterNumber": 18,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8478401.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8478474,
+        "firstName": {
+          "default": "Lawson"
+        },
+        "lastName": {
+          "default": "Crouse"
+        },
+        "sweaterNumber": 67,
+        "positionCode": "L",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8478474.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8478507,
+        "firstName": {
+          "default": "John"
+        },
+        "lastName": {
+          "default": "Marino"
+        },
+        "sweaterNumber": 6,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8478507.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8478831,
+        "firstName": {
+          "default": "Kevin"
+        },
+        "lastName": {
+          "default": "Stenlund"
+        },
+        "sweaterNumber": 82,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8478831.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8478840,
+        "firstName": {
+          "default": "Will",
+          "cs": "William",
+          "de": "William",
+          "es": "William",
+          "fi": "William",
+          "sk": "William",
+          "sv": "William"
+        },
+        "lastName": {
+          "default": "Borgen"
+        },
+        "sweaterNumber": 17,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8478840.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8478872,
+        "firstName": {
+          "default": "Karel"
+        },
+        "lastName": {
+          "default": "Vejmelka"
+        },
+        "sweaterNumber": 70,
+        "positionCode": "G",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8478872.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8479343,
+        "firstName": {
+          "default": "Clayton"
+        },
+        "lastName": {
+          "default": "Keller"
+        },
+        "sweaterNumber": 9,
+        "positionCode": "R",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8479343.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8479369,
+        "firstName": {
+          "default": "Andrew"
+        },
+        "lastName": {
+          "default": "Peeke"
+        },
+        "sweaterNumber": 20,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8479369.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8479410,
+        "firstName": {
+          "default": "Mikhail",
+          "cs": "Michail",
+          "fi": "Mihail",
+          "sk": "Michail"
+        },
+        "lastName": {
+          "default": "Sergachev",
+          "cs": "Sergačov",
+          "fi": "Sergatshov",
+          "sk": "Sergačov"
+        },
+        "sweaterNumber": 98,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8479410.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8479619,
+        "firstName": {
+          "default": "Michael"
+        },
+        "lastName": {
+          "default": "Carcone"
+        },
+        "sweaterNumber": 53,
+        "positionCode": "L",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8479619.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8479661,
+        "firstName": {
+          "default": "Tanner"
+        },
+        "lastName": {
+          "default": "Jeannot"
+        },
+        "sweaterNumber": 84,
+        "positionCode": "L",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8479661.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8479987,
+        "firstName": {
+          "default": "Morgan"
+        },
+        "lastName": {
+          "default": "Geekie"
+        },
+        "sweaterNumber": 39,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8479987.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8479999,
+        "firstName": {
+          "default": "Casey"
+        },
+        "lastName": {
+          "default": "Mittelstadt"
+        },
+        "sweaterNumber": 11,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8479999.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8480022,
+        "firstName": {
+          "default": "Michael"
+        },
+        "lastName": {
+          "default": "DiPietro",
+          "cs": "Dipietro",
+          "de": "Dipietro",
+          "es": "Dipietro",
+          "fi": "Dipietro",
+          "sk": "Dipietro",
+          "sv": "Dipietro"
+        },
+        "sweaterNumber": 30,
+        "positionCode": "G",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8480022.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8480280,
+        "firstName": {
+          "default": "Jeremy"
+        },
+        "lastName": {
+          "default": "Swayman"
+        },
+        "sweaterNumber": 1,
+        "positionCode": "G",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8480280.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8480355,
+        "firstName": {
+          "default": "Mark"
+        },
+        "lastName": {
+          "default": "Kastelic"
+        },
+        "sweaterNumber": 47,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8480355.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8480849,
+        "firstName": {
+          "default": "Barrett"
+        },
+        "lastName": {
+          "default": "Hayton"
+        },
+        "sweaterNumber": 27,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8480849.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8480855,
+        "firstName": {
+          "default": "Jack"
+        },
+        "lastName": {
+          "default": "McBain"
+        },
+        "sweaterNumber": 22,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8480855.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8482175,
+        "firstName": {
+          "default": "JJ"
+        },
+        "lastName": {
+          "default": "Peterka"
+        },
+        "sweaterNumber": 10,
+        "positionCode": "R",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8482175.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8482177,
+        "firstName": {
+          "default": "Marat"
+        },
+        "lastName": {
+          "default": "Khusnutdinov",
+          "cs": "Chusnutdinov",
+          "fi": "Husnutdinov",
+          "sk": "Chusnutdinov"
+        },
+        "sweaterNumber": 92,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8482177.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8482511,
+        "firstName": {
+          "default": "Mason"
+        },
+        "lastName": {
+          "default": "Lohrei"
+        },
+        "sweaterNumber": 6,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8482511.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8482657,
+        "firstName": {
+          "default": "Sebastian"
+        },
+        "lastName": {
+          "default": "Cossa"
+        },
+        "sweaterNumber": 33,
+        "positionCode": "G",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8482657.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8482699,
+        "firstName": {
+          "default": "Dylan"
+        },
+        "lastName": {
+          "default": "Guenther"
+        },
+        "sweaterNumber": 11,
+        "positionCode": "R",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8482699.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8483017,
+        "firstName": {
+          "default": "Frederic"
+        },
+        "lastName": {
+          "default": "Brunet"
+        },
+        "sweaterNumber": 42,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8483017.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8483431,
+        "firstName": {
+          "default": "Logan"
+        },
+        "lastName": {
+          "default": "Cooley"
+        },
+        "sweaterNumber": 92,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8483431.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8483489,
+        "firstName": {
+          "default": "Fraser"
+        },
+        "lastName": {
+          "default": "Minten"
+        },
+        "sweaterNumber": 93,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8483489.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8483505,
+        "firstName": {
+          "default": "Matthew"
+        },
+        "lastName": {
+          "default": "Poitras"
+        },
+        "sweaterNumber": 51,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8483505.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8484386,
+        "firstName": {
+          "default": "Dmitri"
+        },
+        "lastName": {
+          "default": "Simashev"
+        },
+        "sweaterNumber": 26,
+        "positionCode": "D",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8484386.png"
+      },
+      {
+        "teamId": 68,
+        "playerId": 8484388,
+        "firstName": {
+          "default": "Daniil"
+        },
+        "lastName": {
+          "default": "But"
+        },
+        "sweaterNumber": 50,
+        "positionCode": "L",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8484388.png"
+      },
+      {
+        "teamId": 6,
+        "playerId": 8485395,
+        "firstName": {
+          "default": "James"
+        },
+        "lastName": {
+          "default": "Hagens"
+        },
+        "sweaterNumber": 44,
+        "positionCode": "C",
+        "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8485395.png"
+      }
+    ],
+    "plays": [
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 59,
+          "yCoord": -12,
+          "zoneCode": "D",
+          "blockingPlayerId": 8475314,
+          "shootingPlayerId": 8482511,
+          "eventOwnerTeamId": 6,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -48,
+          "yCoord": 18,
+          "zoneCode": "D",
+          "blockingPlayerId": 8483017,
+          "shootingPlayerId": 8482699,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -67,
+          "yCoord": -13,
+          "zoneCode": "D",
+          "blockingPlayerId": 8483505,
+          "shootingPlayerId": 8479410,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -71,
+          "yCoord": -18,
+          "zoneCode": "D",
+          "blockingPlayerId": 8482511,
+          "shootingPlayerId": 8483431,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -66,
+          "yCoord": 13,
+          "zoneCode": "D",
+          "blockingPlayerId": 8483017,
+          "shootingPlayerId": 8477346,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 81,
+          "yCoord": -9,
+          "zoneCode": "D",
+          "blockingPlayerId": 8477220,
+          "shootingPlayerId": 8477956,
+          "eventOwnerTeamId": 6,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -78,
+          "yCoord": 2,
+          "zoneCode": "D",
+          "blockingPlayerId": 8483017,
+          "shootingPlayerId": 8479369,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -65,
+          "yCoord": 13,
+          "zoneCode": "D",
+          "blockingPlayerId": 8478840,
+          "shootingPlayerId": 8478474,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -47,
+          "yCoord": 3,
+          "zoneCode": "D",
+          "blockingPlayerId": 8485395,
+          "shootingPlayerId": 8484386,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -51,
+          "yCoord": 10,
+          "zoneCode": "D",
+          "blockingPlayerId": 8478474,
+          "shootingPlayerId": 8477956,
+          "eventOwnerTeamId": 6,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 88,
+          "yCoord": 0,
+          "zoneCode": "D",
+          "blockingPlayerId": 8482511,
+          "shootingPlayerId": 8479619,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 86,
+          "yCoord": 20,
+          "zoneCode": "D",
+          "blockingPlayerId": 8477496,
+          "shootingPlayerId": 8480855,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 71,
+          "yCoord": -2,
+          "zoneCode": "D",
+          "blockingPlayerId": 8478840,
+          "shootingPlayerId": 8477346,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 71,
+          "yCoord": -9,
+          "zoneCode": "D",
+          "blockingPlayerId": 8477507,
+          "shootingPlayerId": 8477346,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 66,
+          "yCoord": -11,
+          "zoneCode": "D",
+          "blockingPlayerId": 8478840,
+          "shootingPlayerId": 8478474,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 64,
+          "yCoord": -11,
+          "zoneCode": "D",
+          "blockingPlayerId": 8480355,
+          "shootingPlayerId": 8479343,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 70,
+          "yCoord": 22,
+          "zoneCode": "D",
+          "blockingPlayerId": 8477365,
+          "shootingPlayerId": 8479410,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -39,
+          "yCoord": -36,
+          "zoneCode": "D",
+          "blockingPlayerId": 8482511,
+          "shootingPlayerId": 8479410,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -73,
+          "yCoord": 33,
+          "zoneCode": "D",
+          "blockingPlayerId": 8476854,
+          "shootingPlayerId": 8477346,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 72,
+          "yCoord": 4,
+          "zoneCode": "D",
+          "blockingPlayerId": 8479410,
+          "shootingPlayerId": 8476854,
+          "eventOwnerTeamId": 6,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -44,
+          "yCoord": -15,
+          "zoneCode": "D",
+          "blockingPlayerId": 8485395,
+          "shootingPlayerId": 8477220,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 67,
+          "yCoord": -22,
+          "zoneCode": "D",
+          "blockingPlayerId": 8478831,
+          "shootingPlayerId": 8477956,
+          "eventOwnerTeamId": 6,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": 54,
+          "yCoord": -16,
+          "zoneCode": "D",
+          "blockingPlayerId": 8484386,
+          "shootingPlayerId": 8478401,
+          "eventOwnerTeamId": 6,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -63,
+          "yCoord": -5,
+          "zoneCode": "D",
+          "blockingPlayerId": 8483017,
+          "shootingPlayerId": 8480849,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -77,
+          "yCoord": -3,
+          "zoneCode": "D",
+          "blockingPlayerId": 8479661,
+          "shootingPlayerId": 8479410,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -79,
+          "yCoord": -2,
+          "zoneCode": "D",
+          "blockingPlayerId": 8479661,
+          "shootingPlayerId": 8479410,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -69,
+          "yCoord": -32,
+          "zoneCode": "D",
+          "blockingPlayerId": 8479999,
+          "shootingPlayerId": 8477220,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -64,
+          "yCoord": 7,
+          "zoneCode": "D",
+          "blockingPlayerId": 8478840,
+          "shootingPlayerId": 8484388,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -77,
+          "yCoord": 4,
+          "zoneCode": "O",
+          "blockingPlayerId": 8479343,
+          "shootingPlayerId": 8482699,
+          "eventOwnerTeamId": 68,
+          "reason": "teammate-blocked"
+        }
+      },
+      {
+        "typeDescKey": "blocked-shot",
+        "details": {
+          "xCoord": -61,
+          "yCoord": -8,
+          "zoneCode": "D",
+          "blockingPlayerId": 8479661,
+          "shootingPlayerId": 8479410,
+          "eventOwnerTeamId": 68,
+          "reason": "blocked"
+        }
+      }
+    ]
+  },
+  "landing": {
+    "id": 2026020056,
+    "gameState": "OFF",
+    "summary": {
+      "scoring": [
+        {
+          "periodDescriptor": {
+            "number": 1,
+            "periodType": "REG",
+            "maxRegulationPeriods": 3
+          },
+          "goals": [
+            {
+              "situationCode": "1551",
+              "eventId": 243,
+              "strength": "ev",
+              "playerId": 8479999,
+              "firstName": {
+                "default": "Casey"
+              },
+              "lastName": {
+                "default": "Mittelstadt"
+              },
+              "name": {
+                "default": "C. Mittelstadt"
+              },
+              "teamAbbrev": {
+                "default": "BOS"
+              },
+              "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8479999.png",
+              "highlightClipSharingUrl": "https://nhl.com/video/uta-bos-mittelstadt-scores-goal-against-sebastian-cossa-6406500874112",
+              "highlightClipSharingUrlFr": "https://nhl.com/fr/video/uta-bos-mittelstadt-marque-un-but-contre-sebastian-cossa-6406500288112",
+              "highlightClip": 6406500874112,
+              "highlightClipFr": 6406500288112,
+              "discreteClip": 6406502573112,
+              "discreteClipFr": 6406503334112,
+              "goalsToDate": 1,
+              "awayScore": 0,
+              "homeScore": 1,
+              "leadingTeamAbbrev": {
+                "default": "BOS"
+              },
+              "timeInPeriod": "10:06",
+              "shotType": "wrist",
+              "goalModifier": "none",
+              "assists": [
+                {
+                  "playerId": 8485395,
+                  "firstName": {
+                    "default": "James"
+                  },
+                  "lastName": {
+                    "default": "Hagens"
+                  },
+                  "name": {
+                    "default": "J. Hagens"
+                  },
+                  "assistsToDate": 1,
+                  "sweaterNumber": 44
+                },
+                {
+                  "playerId": 8477496,
+                  "firstName": {
+                    "default": "Elias"
+                  },
+                  "lastName": {
+                    "default": "Lindholm"
+                  },
+                  "name": {
+                    "default": "E. Lindholm"
+                  },
+                  "assistsToDate": 2,
+                  "sweaterNumber": 28
+                }
+              ],
+              "pptReplayUrl": "https://wsr.nhle.com/sprites/20262027/2026020056/ev243.json",
+              "homeTeamDefendingSide": "left",
+              "isHome": true
+            },
+            {
+              "situationCode": "1451",
+              "eventId": 318,
+              "strength": "pp",
+              "playerId": 8477956,
+              "firstName": {
+                "default": "David"
+              },
+              "lastName": {
+                "default": "Pastrnak",
+                "cs": "Pastrňák",
+                "sk": "Pastrňák"
+              },
+              "name": {
+                "default": "D. Pastrnak",
+                "cs": "D. Pastrňák",
+                "sk": "D. Pastrňák"
+              },
+              "teamAbbrev": {
+                "default": "BOS"
+              },
+              "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8477956.png",
+              "highlightClipSharingUrl": "https://nhl.com/video/uta-bos-pastrnak-scores-ppg-against-sebastian-cossa-6406501192112",
+              "highlightClipSharingUrlFr": "https://nhl.com/fr/video/uta-bos-pastrnak-marque-un-but-en-a-n-contre-sebastian-cossa-6406502637112",
+              "highlightClip": 6406501192112,
+              "highlightClipFr": 6406502637112,
+              "discreteClip": 6406501572112,
+              "discreteClipFr": 6406502559112,
+              "goalsToDate": 1,
+              "awayScore": 0,
+              "homeScore": 2,
+              "leadingTeamAbbrev": {
+                "default": "BOS"
+              },
+              "timeInPeriod": "14:22",
+              "shotType": "wrist",
+              "goalModifier": "none",
+              "assists": [
+                {
+                  "playerId": 8483017,
+                  "firstName": {
+                    "default": "Frederic"
+                  },
+                  "lastName": {
+                    "default": "Brunet"
+                  },
+                  "name": {
+                    "default": "F. Brunet"
+                  },
+                  "assistsToDate": 1,
+                  "sweaterNumber": 42
+                },
+                {
+                  "playerId": 8479987,
+                  "firstName": {
+                    "default": "Morgan"
+                  },
+                  "lastName": {
+                    "default": "Geekie"
+                  },
+                  "name": {
+                    "default": "M. Geekie"
+                  },
+                  "assistsToDate": 2,
+                  "sweaterNumber": 39
+                }
+              ],
+              "pptReplayUrl": "https://wsr.nhle.com/sprites/20262027/2026020056/ev318.json",
+              "homeTeamDefendingSide": "left",
+              "isHome": true
+            },
+            {
+              "situationCode": "1551",
+              "eventId": 342,
+              "strength": "ev",
+              "playerId": 8482511,
+              "firstName": {
+                "default": "Mason"
+              },
+              "lastName": {
+                "default": "Lohrei"
+              },
+              "name": {
+                "default": "M. Lohrei"
+              },
+              "teamAbbrev": {
+                "default": "BOS"
+              },
+              "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8482511.png",
+              "highlightClipSharingUrl": "https://nhl.com/video/uta-bos-lohrei-scores-goal-against-sebastian-cossa-6406501392112",
+              "highlightClipSharingUrlFr": "https://nhl.com/fr/video/uta-bos-lohrei-marque-un-but-contre-sebastian-cossa-6406501872112",
+              "highlightClip": 6406501392112,
+              "highlightClipFr": 6406501872112,
+              "discreteClip": 6406501700112,
+              "discreteClipFr": 6406503631112,
+              "goalsToDate": 1,
+              "awayScore": 0,
+              "homeScore": 3,
+              "leadingTeamAbbrev": {
+                "default": "BOS"
+              },
+              "timeInPeriod": "15:51",
+              "shotType": "wrist",
+              "goalModifier": "none",
+              "assists": [
+                {
+                  "playerId": 8483505,
+                  "firstName": {
+                    "default": "Matthew"
+                  },
+                  "lastName": {
+                    "default": "Poitras"
+                  },
+                  "name": {
+                    "default": "M. Poitras"
+                  },
+                  "assistsToDate": 1,
+                  "sweaterNumber": 51
+                },
+                {
+                  "playerId": 8480355,
+                  "firstName": {
+                    "default": "Mark"
+                  },
+                  "lastName": {
+                    "default": "Kastelic"
+                  },
+                  "name": {
+                    "default": "M. Kastelic"
+                  },
+                  "assistsToDate": 3,
+                  "sweaterNumber": 47
+                }
+              ],
+              "pptReplayUrl": "https://wsr.nhle.com/sprites/20262027/2026020056/ev342.json",
+              "homeTeamDefendingSide": "left",
+              "isHome": true
+            }
+          ]
+        },
+        {
+          "periodDescriptor": {
+            "number": 2,
+            "periodType": "REG",
+            "maxRegulationPeriods": 3
+          },
+          "goals": [
+            {
+              "situationCode": "1451",
+              "eventId": 512,
+              "strength": "pp",
+              "playerId": 8477956,
+              "firstName": {
+                "default": "David"
+              },
+              "lastName": {
+                "default": "Pastrnak",
+                "cs": "Pastrňák",
+                "sk": "Pastrňák"
+              },
+              "name": {
+                "default": "D. Pastrnak",
+                "cs": "D. Pastrňák",
+                "sk": "D. Pastrňák"
+              },
+              "teamAbbrev": {
+                "default": "BOS"
+              },
+              "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8477956.png",
+              "highlightClipSharingUrl": "https://nhl.com/video/uta-bos-pastrnak-scores-ppg-against-karel-vejmelka-6406504554112",
+              "highlightClipSharingUrlFr": "https://nhl.com/fr/video/uta-bos-pastrnak-marque-un-but-en-a-n-contre-karel-vejmelka-6406503879112",
+              "highlightClip": 6406504554112,
+              "highlightClipFr": 6406503879112,
+              "discreteClip": 6406504286112,
+              "discreteClipFr": 6406502799112,
+              "goalsToDate": 2,
+              "goalInGame": 2,
+              "awayScore": 0,
+              "homeScore": 4,
+              "leadingTeamAbbrev": {
+                "default": "BOS"
+              },
+              "timeInPeriod": "04:40",
+              "shotType": "slap",
+              "goalModifier": "none",
+              "assists": [
+                {
+                  "playerId": 8479987,
+                  "firstName": {
+                    "default": "Morgan"
+                  },
+                  "lastName": {
+                    "default": "Geekie"
+                  },
+                  "name": {
+                    "default": "M. Geekie"
+                  },
+                  "assistsToDate": 3,
+                  "sweaterNumber": 39
+                },
+                {
+                  "playerId": 8476854,
+                  "firstName": {
+                    "default": "Hampus"
+                  },
+                  "lastName": {
+                    "default": "Lindholm"
+                  },
+                  "name": {
+                    "default": "H. Lindholm"
+                  },
+                  "assistsToDate": 2,
+                  "sweaterNumber": 27
+                }
+              ],
+              "pptReplayUrl": "https://wsr.nhle.com/sprites/20262027/2026020056/ev512.json",
+              "homeTeamDefendingSide": "right",
+              "isHome": true
+            },
+            {
+              "situationCode": "1451",
+              "eventId": 610,
+              "strength": "pp",
+              "playerId": 8479987,
+              "firstName": {
+                "default": "Morgan"
+              },
+              "lastName": {
+                "default": "Geekie"
+              },
+              "name": {
+                "default": "M. Geekie"
+              },
+              "teamAbbrev": {
+                "default": "BOS"
+              },
+              "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8479987.png",
+              "highlightClipSharingUrl": "https://nhl.com/video/uta-bos-geekie-scores-ppg-against-karel-vejmelka-6406505093112",
+              "highlightClipSharingUrlFr": "https://nhl.com/fr/video/uta-bos-geekie-marque-un-but-en-a-n-contre-karel-vejmelka-6406505761112",
+              "highlightClip": 6406505093112,
+              "highlightClipFr": 6406505761112,
+              "discreteClip": 6406504584112,
+              "discreteClipFr": 6406505368112,
+              "goalsToDate": 1,
+              "awayScore": 0,
+              "homeScore": 5,
+              "leadingTeamAbbrev": {
+                "default": "BOS"
+              },
+              "timeInPeriod": "07:57",
+              "shotType": "slap",
+              "goalModifier": "none",
+              "assists": [
+                {
+                  "playerId": 8477956,
+                  "firstName": {
+                    "default": "David"
+                  },
+                  "lastName": {
+                    "default": "Pastrnak",
+                    "cs": "Pastrňák",
+                    "sk": "Pastrňák"
+                  },
+                  "name": {
+                    "default": "D. Pastrnak",
+                    "cs": "D. Pastrňák",
+                    "sk": "D. Pastrňák"
+                  },
+                  "assistsToDate": 3,
+                  "sweaterNumber": 88
+                },
+                {
+                  "playerId": 8478401,
+                  "firstName": {
+                    "default": "Pavel"
+                  },
+                  "lastName": {
+                    "default": "Zacha"
+                  },
+                  "name": {
+                    "default": "P. Zacha"
+                  },
+                  "assistsToDate": 1,
+                  "sweaterNumber": 18
+                }
+              ],
+              "pptReplayUrl": "https://wsr.nhle.com/sprites/20262027/2026020056/ev610.json",
+              "homeTeamDefendingSide": "right",
+              "isHome": true
+            },
+            {
+              "situationCode": "1551",
+              "eventId": 686,
+              "strength": "ev",
+              "playerId": 8483505,
+              "firstName": {
+                "default": "Matthew"
+              },
+              "lastName": {
+                "default": "Poitras"
+              },
+              "name": {
+                "default": "M. Poitras"
+              },
+              "teamAbbrev": {
+                "default": "BOS"
+              },
+              "headshot": "https://assets.nhle.com/mugs/nhl/20262027/BOS/8483505.png",
+              "highlightClipSharingUrl": "https://nhl.com/video/uta-bos-poitras-scores-goal-against-karel-vejmelka-6406507579112",
+              "highlightClipSharingUrlFr": "https://nhl.com/fr/video/uta-bos-poitras-marque-un-but-contre-karel-vejmelka-6406506097112",
+              "highlightClip": 6406507579112,
+              "highlightClipFr": 6406506097112,
+              "discreteClip": 6406505031112,
+              "discreteClipFr": 6406506682112,
+              "goalsToDate": 1,
+              "awayScore": 0,
+              "homeScore": 6,
+              "leadingTeamAbbrev": {
+                "default": "BOS"
+              },
+              "timeInPeriod": "14:08",
+              "shotType": "wrist",
+              "goalModifier": "none",
+              "assists": [
+                {
+                  "playerId": 8477956,
+                  "firstName": {
+                    "default": "David"
+                  },
+                  "lastName": {
+                    "default": "Pastrnak",
+                    "cs": "Pastrňák",
+                    "sk": "Pastrňák"
+                  },
+                  "name": {
+                    "default": "D. Pastrnak",
+                    "cs": "D. Pastrňák",
+                    "sk": "D. Pastrňák"
+                  },
+                  "assistsToDate": 4,
+                  "sweaterNumber": 88
+                }
+              ],
+              "pptReplayUrl": "https://wsr.nhle.com/sprites/20262027/2026020056/ev686.json",
+              "homeTeamDefendingSide": "right",
+              "isHome": true
+            }
+          ]
+        },
+        {
+          "periodDescriptor": {
+            "number": 3,
+            "periodType": "REG",
+            "maxRegulationPeriods": 3
+          },
+          "goals": [
+            {
+              "situationCode": "1551",
+              "eventId": 908,
+              "strength": "ev",
+              "playerId": 8480855,
+              "firstName": {
+                "default": "Jack"
+              },
+              "lastName": {
+                "default": "McBain"
+              },
+              "name": {
+                "default": "J. McBain"
+              },
+              "teamAbbrev": {
+                "default": "UTA"
+              },
+              "headshot": "https://assets.nhle.com/mugs/nhl/20262027/UTA/8480855.png",
+              "highlightClipSharingUrl": "https://nhl.com/video/uta-bos-mcbain-scores-goal-against-jeremy-swayman-6406510215112",
+              "highlightClipSharingUrlFr": "https://nhl.com/fr/video/uta-bos-mcbain-marque-un-but-contre-jeremy-swayman-6406509333112",
+              "highlightClip": 6406510215112,
+              "highlightClipFr": 6406509333112,
+              "discreteClip": 6406510305112,
+              "discreteClipFr": 6406510110112,
+              "goalsToDate": 1,
+              "awayScore": 1,
+              "homeScore": 6,
+              "leadingTeamAbbrev": {
+                "default": "BOS"
+              },
+              "timeInPeriod": "09:48",
+              "shotType": "snap",
+              "goalModifier": "none",
+              "assists": [
+                {
+                  "playerId": 8484386,
+                  "firstName": {
+                    "default": "Dmitri"
+                  },
+                  "lastName": {
+                    "default": "Simashev"
+                  },
+                  "name": {
+                    "default": "D. Simashev"
+                  },
+                  "assistsToDate": 2,
+                  "sweaterNumber": 26
+                },
+                {
+                  "playerId": 8480849,
+                  "firstName": {
+                    "default": "Barrett"
+                  },
+                  "lastName": {
+                    "default": "Hayton"
+                  },
+                  "name": {
+                    "default": "B. Hayton"
+                  },
+                  "assistsToDate": 2,
+                  "sweaterNumber": 27
+                }
+              ],
+              "pptReplayUrl": "https://wsr.nhle.com/sprites/20262027/2026020056/ev908.json",
+              "homeTeamDefendingSide": "left",
+              "isHome": false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boxscore": {
+    "id": 2026020056,
+    "gameState": "OFF",
+    "playerByGameStats": {
+      "awayTeam": {
+        "forwards": [
+          {
+            "playerId": 8477951,
+            "sweaterNumber": 8,
+            "name": {
+              "default": "N. Schmaltz"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 3,
+            "faceoffWinningPctg": 0.8,
+            "toi": "19:52",
+            "blockedShots": 0,
+            "shifts": 21,
+            "giveaways": 0,
+            "takeaways": 1
+          },
+          {
+            "playerId": 8479343,
+            "sweaterNumber": 9,
+            "name": {
+              "default": "C. Keller"
+            },
+            "position": "R",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 2,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 4,
+            "faceoffWinningPctg": 0.0,
+            "toi": "19:41",
+            "blockedShots": 0,
+            "shifts": 20,
+            "giveaways": 3,
+            "takeaways": 1
+          },
+          {
+            "playerId": 8482699,
+            "sweaterNumber": 11,
+            "name": {
+              "default": "D. Guenther"
+            },
+            "position": "R",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 0.0,
+            "toi": "18:32",
+            "blockedShots": 0,
+            "shifts": 19,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8476389,
+            "sweaterNumber": 16,
+            "name": {
+              "default": "V. Trocheck"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -2,
+            "pim": 2,
+            "hits": 2,
+            "powerPlayGoals": 0,
+            "sog": 3,
+            "faceoffWinningPctg": 0.642857,
+            "toi": "17:02",
+            "blockedShots": 0,
+            "shifts": 22,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8480855,
+            "sweaterNumber": 22,
+            "name": {
+              "default": "J. McBain"
+            },
+            "position": "C",
+            "goals": 1,
+            "assists": 0,
+            "points": 1,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 3,
+            "powerPlayGoals": 0,
+            "sog": 3,
+            "faceoffWinningPctg": 1.0,
+            "toi": "13:50",
+            "blockedShots": 0,
+            "shifts": 20,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8480849,
+            "sweaterNumber": 27,
+            "name": {
+              "default": "B. Hayton"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 0,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 3,
+            "faceoffWinningPctg": 0.615385,
+            "toi": "14:41",
+            "blockedShots": 0,
+            "shifts": 22,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8484388,
+            "sweaterNumber": 50,
+            "name": {
+              "default": "D. But"
+            },
+            "position": "L",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 0,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 3,
+            "faceoffWinningPctg": 0.0,
+            "toi": "10:01",
+            "blockedShots": 0,
+            "shifts": 15,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8479619,
+            "sweaterNumber": 53,
+            "name": {
+              "default": "M. Carcone"
+            },
+            "position": "L",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 0,
+            "pim": 2,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 7,
+            "faceoffWinningPctg": 1.0,
+            "toi": "13:10",
+            "blockedShots": 0,
+            "shifts": 16,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8478474,
+            "sweaterNumber": 67,
+            "name": {
+              "default": "L. Crouse"
+            },
+            "position": "L",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 1,
+            "pim": 2,
+            "hits": 2,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.0,
+            "toi": "14:42",
+            "blockedShots": 1,
+            "shifts": 22,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8475314,
+            "sweaterNumber": 72,
+            "name": {
+              "default": "A. Lee"
+            },
+            "position": "L",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 2,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 1.0,
+            "toi": "15:19",
+            "blockedShots": 1,
+            "shifts": 21,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8478831,
+            "sweaterNumber": 82,
+            "name": {
+              "default": "K. Stenlund"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.285714,
+            "toi": "12:27",
+            "blockedShots": 1,
+            "shifts": 18,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8483431,
+            "sweaterNumber": 92,
+            "name": {
+              "default": "L. Cooley"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 0.421053,
+            "toi": "20:30",
+            "blockedShots": 0,
+            "shifts": 21,
+            "giveaways": 2,
+            "takeaways": 0
+          }
+        ],
+        "defense": [
+          {
+            "playerId": 8478507,
+            "sweaterNumber": 6,
+            "name": {
+              "default": "J. Marino"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.0,
+            "toi": "19:33",
+            "blockedShots": 0,
+            "shifts": 25,
+            "giveaways": 2,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8479369,
+            "sweaterNumber": 20,
+            "name": {
+              "default": "A. Peeke"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.0,
+            "toi": "12:56",
+            "blockedShots": 0,
+            "shifts": 21,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8484386,
+            "sweaterNumber": 26,
+            "name": {
+              "default": "D. Simashev"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 0,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 2,
+            "faceoffWinningPctg": 0.0,
+            "toi": "14:36",
+            "blockedShots": 1,
+            "shifts": 22,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8477346,
+            "sweaterNumber": 52,
+            "name": {
+              "default": "M. Weegar"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 0,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 2,
+            "faceoffWinningPctg": 0.0,
+            "toi": "17:31",
+            "blockedShots": 0,
+            "shifts": 24,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8477220,
+            "sweaterNumber": 88,
+            "name": {
+              "default": "N. Schmidt"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 2,
+            "faceoffWinningPctg": 0.0,
+            "toi": "18:48",
+            "blockedShots": 1,
+            "shifts": 25,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8479410,
+            "sweaterNumber": 98,
+            "name": {
+              "default": "M. Sergachev",
+              "cs": "M. Sergačov",
+              "fi": "M. Sergatshov",
+              "sk": "M. Sergačov"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 3,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 0.0,
+            "toi": "23:16",
+            "blockedShots": 1,
+            "shifts": 24,
+            "giveaways": 1,
+            "takeaways": 1
+          }
+        ],
+        "goalies": [
+          {
+            "playerId": 8482657,
+            "sweaterNumber": 33,
+            "name": {
+              "default": "S. Cossa"
+            },
+            "position": "G",
+            "evenStrengthShotsAgainst": "5/7",
+            "powerPlayShotsAgainst": "0/1",
+            "shorthandedShotsAgainst": "0/0",
+            "saveShotsAgainst": "5/8",
+            "savePctg": 0.625,
+            "evenStrengthGoalsAgainst": 2,
+            "powerPlayGoalsAgainst": 1,
+            "shorthandedGoalsAgainst": 0,
+            "pim": 0,
+            "goalsAgainst": 3,
+            "toi": "15:51",
+            "starter": true,
+            "decision": "L",
+            "shotsAgainst": 8,
+            "saves": 5
+          },
+          {
+            "playerId": 8478872,
+            "sweaterNumber": 70,
+            "name": {
+              "default": "K. Vejmelka"
+            },
+            "position": "G",
+            "evenStrengthShotsAgainst": "11/12",
+            "powerPlayShotsAgainst": "0/2",
+            "shorthandedShotsAgainst": "0/0",
+            "saveShotsAgainst": "11/14",
+            "savePctg": 0.785714,
+            "evenStrengthGoalsAgainst": 1,
+            "powerPlayGoalsAgainst": 2,
+            "shorthandedGoalsAgainst": 0,
+            "pim": 0,
+            "goalsAgainst": 3,
+            "toi": "43:49",
+            "starter": false,
+            "shotsAgainst": 14,
+            "saves": 11
+          }
+        ]
+      },
+      "homeTeam": {
+        "forwards": [
+          {
+            "playerId": 8482175,
+            "sweaterNumber": 10,
+            "name": {
+              "default": "J. Peterka"
+            },
+            "position": "R",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 2,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 0.0,
+            "toi": "12:28",
+            "blockedShots": 0,
+            "shifts": 15,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8479999,
+            "sweaterNumber": 11,
+            "name": {
+              "default": "C. Mittelstadt"
+            },
+            "position": "C",
+            "goals": 1,
+            "assists": 0,
+            "points": 1,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.0,
+            "toi": "11:19",
+            "blockedShots": 1,
+            "shifts": 13,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8478401,
+            "sweaterNumber": 18,
+            "name": {
+              "default": "P. Zacha"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 0,
+            "pim": 2,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.538462,
+            "toi": "16:25",
+            "blockedShots": 0,
+            "shifts": 21,
+            "giveaways": 2,
+            "takeaways": 2
+          },
+          {
+            "playerId": 8477496,
+            "sweaterNumber": 28,
+            "name": {
+              "default": "E. Lindholm"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 2,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 0.5,
+            "toi": "18:15",
+            "blockedShots": 1,
+            "shifts": 22,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8479987,
+            "sweaterNumber": 39,
+            "name": {
+              "default": "M. Geekie"
+            },
+            "position": "C",
+            "goals": 1,
+            "assists": 2,
+            "points": 3,
+            "plusMinus": 0,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 1,
+            "sog": 1,
+            "faceoffWinningPctg": 0.5,
+            "toi": "12:45",
+            "blockedShots": 0,
+            "shifts": 16,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8485395,
+            "sweaterNumber": 44,
+            "name": {
+              "default": "J. Hagens"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 1.0,
+            "toi": "11:37",
+            "blockedShots": 2,
+            "shifts": 13,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8480355,
+            "sweaterNumber": 47,
+            "name": {
+              "default": "M. Kastelic"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 1,
+            "pim": 2,
+            "hits": 4,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.6,
+            "toi": "14:05",
+            "blockedShots": 1,
+            "shifts": 22,
+            "giveaways": 0,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8483505,
+            "sweaterNumber": 51,
+            "name": {
+              "default": "M. Poitras"
+            },
+            "position": "C",
+            "goals": 1,
+            "assists": 1,
+            "points": 2,
+            "plusMinus": 2,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 2,
+            "faceoffWinningPctg": 0.0,
+            "toi": "09:51",
+            "blockedShots": 1,
+            "shifts": 14,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8479661,
+            "sweaterNumber": 84,
+            "name": {
+              "default": "T. Jeannot"
+            },
+            "position": "L",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 2,
+            "pim": 2,
+            "hits": 2,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 0.5,
+            "toi": "13:58",
+            "blockedShots": 3,
+            "shifts": 20,
+            "giveaways": 0,
+            "takeaways": 1
+          },
+          {
+            "playerId": 8477956,
+            "sweaterNumber": 88,
+            "name": {
+              "default": "D. Pastrnak",
+              "cs": "D. Pastrňák",
+              "sk": "D. Pastrňák"
+            },
+            "position": "R",
+            "goals": 2,
+            "assists": 2,
+            "points": 4,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 2,
+            "powerPlayGoals": 2,
+            "sog": 4,
+            "faceoffWinningPctg": 0.0,
+            "toi": "16:25",
+            "blockedShots": 0,
+            "shifts": 18,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8482177,
+            "sweaterNumber": 92,
+            "name": {
+              "default": "M. Khusnutdinov",
+              "cs": "M. Chusnutdinov",
+              "fi": "M. Husnutdinov",
+              "sk": "M. Chusnutdinov"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.285714,
+            "toi": "15:23",
+            "blockedShots": 0,
+            "shifts": 21,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8483489,
+            "sweaterNumber": 93,
+            "name": {
+              "default": "F. Minten"
+            },
+            "position": "C",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": -1,
+            "pim": 0,
+            "hits": 1,
+            "powerPlayGoals": 0,
+            "sog": 4,
+            "faceoffWinningPctg": 0.357143,
+            "toi": "15:22",
+            "blockedShots": 0,
+            "shifts": 21,
+            "giveaways": 0,
+            "takeaways": 1
+          }
+        ],
+        "defense": [
+          {
+            "playerId": 8482511,
+            "sweaterNumber": 6,
+            "name": {
+              "default": "M. Lohrei"
+            },
+            "position": "D",
+            "goals": 1,
+            "assists": 0,
+            "points": 1,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 2,
+            "faceoffWinningPctg": 0.0,
+            "toi": "15:43",
+            "blockedShots": 3,
+            "shifts": 18,
+            "giveaways": 2,
+            "takeaways": 1
+          },
+          {
+            "playerId": 8478840,
+            "sweaterNumber": 17,
+            "name": {
+              "default": "W. Borgen"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 0,
+            "pim": 6,
+            "hits": 2,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.0,
+            "toi": "20:47",
+            "blockedShots": 4,
+            "shifts": 26,
+            "giveaways": 1,
+            "takeaways": 1
+          },
+          {
+            "playerId": 8476854,
+            "sweaterNumber": 27,
+            "name": {
+              "default": "H. Lindholm"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 0,
+            "pim": 0,
+            "hits": 0,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.0,
+            "toi": "19:09",
+            "blockedShots": 1,
+            "shifts": 25,
+            "giveaways": 3,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8483017,
+            "sweaterNumber": 42,
+            "name": {
+              "default": "F. Brunet"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 1,
+            "points": 1,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 2,
+            "powerPlayGoals": 0,
+            "sog": 2,
+            "faceoffWinningPctg": 0.0,
+            "toi": "18:42",
+            "blockedShots": 4,
+            "shifts": 21,
+            "giveaways": 2,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8477365,
+            "sweaterNumber": 75,
+            "name": {
+              "default": "C. Clifton"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 3,
+            "powerPlayGoals": 0,
+            "sog": 0,
+            "faceoffWinningPctg": 0.0,
+            "toi": "21:37",
+            "blockedShots": 1,
+            "shifts": 27,
+            "giveaways": 1,
+            "takeaways": 0
+          },
+          {
+            "playerId": 8477507,
+            "sweaterNumber": 91,
+            "name": {
+              "default": "N. Zadorov"
+            },
+            "position": "D",
+            "goals": 0,
+            "assists": 0,
+            "points": 0,
+            "plusMinus": 1,
+            "pim": 0,
+            "hits": 3,
+            "powerPlayGoals": 0,
+            "sog": 1,
+            "faceoffWinningPctg": 0.0,
+            "toi": "22:09",
+            "blockedShots": 1,
+            "shifts": 28,
+            "giveaways": 2,
+            "takeaways": 0
+          }
+        ],
+        "goalies": [
+          {
+            "playerId": 8480280,
+            "sweaterNumber": 1,
+            "name": {
+              "default": "J. Swayman"
+            },
+            "position": "G",
+            "evenStrengthShotsAgainst": "25/26",
+            "powerPlayShotsAgainst": "11/11",
+            "shorthandedShotsAgainst": "0/0",
+            "saveShotsAgainst": "36/37",
+            "savePctg": 0.972973,
+            "evenStrengthGoalsAgainst": 1,
+            "powerPlayGoalsAgainst": 0,
+            "shorthandedGoalsAgainst": 0,
+            "pim": 0,
+            "goalsAgainst": 1,
+            "toi": "60:00",
+            "starter": true,
+            "decision": "W",
+            "shotsAgainst": 37,
+            "saves": 36
+          },
+          {
+            "playerId": 8480022,
+            "sweaterNumber": 30,
+            "name": {
+              "default": "M. DiPietro",
+              "cs": "M. Dipietro",
+              "de": "M. Dipietro",
+              "es": "M. Dipietro",
+              "fi": "M. Dipietro",
+              "sk": "M. Dipietro",
+              "sv": "M. Dipietro"
+            },
+            "position": "G",
+            "evenStrengthShotsAgainst": "0/0",
+            "powerPlayShotsAgainst": "0/0",
+            "shorthandedShotsAgainst": "0/0",
+            "saveShotsAgainst": "0/0",
+            "evenStrengthGoalsAgainst": 0,
+            "powerPlayGoalsAgainst": 0,
+            "shorthandedGoalsAgainst": 0,
+            "pim": 0,
+            "goalsAgainst": 0,
+            "toi": "00:00",
+            "starter": false,
+            "shotsAgainst": 0,
+            "saves": 0
+          }
+        ]
+      }
+    }
+  },
+  "schedule": {
+    "gameWeek": [
+      {
+        "date": "2026-10-08",
+        "games": [
+          {
+            "id": 2026020056,
+            "gameState": "OFF",
+            "startTimeUTC": "2026-10-08T23:00:00Z",
+            "homeTeam": {
+              "id": 6,
+              "commonName": {
+                "default": "Bruins"
+              },
+              "placeName": {
+                "default": "Boston"
+              },
+              "placeNameWithPreposition": {
+                "default": "Boston",
+                "fr": "de Boston"
+              },
+              "abbrev": "BOS",
+              "logo": "https://assets.nhle.com/logos/nhl/svg/BOS_light.svg",
+              "darkLogo": "https://assets.nhle.com/logos/nhl/svg/BOS_dark.svg",
+              "homeSplitSquad": false,
+              "score": 6
+            },
+            "awayTeam": {
+              "id": 68,
+              "commonName": {
+                "default": "Mammoth"
+              },
+              "placeName": {
+                "default": "Utah"
+              },
+              "placeNameWithPreposition": {
+                "default": "Utah",
+                "fr": "de l'Utah"
+              },
+              "abbrev": "UTA",
+              "logo": "https://assets.nhle.com/logos/nhl/svg/UTA_light.svg",
+              "darkLogo": "https://assets.nhle.com/logos/nhl/svg/UTA_dark.svg",
+              "awaySplitSquad": false,
+              "score": 1
+            }
+          }
+        ]
+      },
+      {
+        "date": "2026-10-09",
+        "games": []
+      },
+      {
+        "date": "2026-10-10",
+        "games": []
+      },
+      {
+        "date": "2026-10-11",
+        "games": []
+      },
+      {
+        "date": "2026-10-12",
+        "games": []
+      },
+      {
+        "date": "2026-10-13",
+        "games": []
+      },
+      {
+        "date": "2026-10-14",
+        "games": []
+      }
+    ]
+  }
+}
