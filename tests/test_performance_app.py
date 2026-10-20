@@ -70,7 +70,7 @@ def test_full_app_enabled_uses_new_panels(tmp_path,monkeypatch):
     assert not app.exception
     assert len(app.tabs)==5
     assert app.checkbox(key='paper_track').value is True
-    assert app.button(key='paper_all').label=='Bet ALL qualifying (paper round)'
+    assert app.button(key='paper_all').label=='Bet ALL 4 qualifying (paper round)'
     assert app.tabs[4].label=='Paper'
     assert any(b.label=='Grade pending bets (real + paper)' for b in app.button)
     assert sum(m.label=='Official P/L' for m in app.metric)==2
@@ -109,5 +109,5 @@ def test_flags_cards_frozen_table_and_guard_controls(tmp_path,monkeypatch):
     sheet.worksheet=lambda _:(_ for _ in ()).throw(RuntimeError('offline'))
     app.button(key='reload_real_check').click().run()
     assert not app.exception and app.button(key='log_fixture_1').disabled
-    assert app.button(key='real_all').disabled
+    assert app.button(key='log_selected').disabled
     assert any('CHECK UNAVAILABLE' in w.value for w in app.warning)

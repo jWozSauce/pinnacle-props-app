@@ -81,7 +81,7 @@ view_mode=st.radio('View',choices,index=choices.index(initial_view),horizontal=T
 st.query_params['view']=view_mode
 st.markdown('<style>.block-container{max-width:none}</style>',unsafe_allow_html=True)
 if view_mode=='Auto':
-    css='@media(min-width:901px){.st-key-pp_cards{display:none}} @media(max-width:900px){.st-key-pp_table{display:none}}'
+    css='@media(min-width:901px){.st-key-pp_cards{display:none}}'
 elif view_mode=='Table':css='.st-key-pp_cards{display:none}'
 else:css='.st-key-pp_table{display:none}'
 st.markdown('<style>'+css+'</style>',unsafe_allow_html=True)
@@ -210,19 +210,11 @@ with tab_prices:
         st.info('No scans saved on this deployment yet. Your Mac’s saved history is not connected.' if deployment['cloud'] else 'No saved scan for this sport yet. Estimate a live refresh to begin.')
     else:
         manifest,flagged,excluded=result
-        real_keys=None;allow_duplicates=False
+        real_keys=None;allow_duplicates=bool(st.session_state.get('allow_real_duplicates',False))
         if settlement_preview:
             bet_store=session_store(data_dir)
             reload_check=st.button('Refresh already-bet check',key='reload_real_check')
             real_keys=bet_store.real_keys(reload=reload_check)
-            allow_duplicates=st.checkbox('Allow re-logging bets marked 🔴 ALREADY BET',value=False,key='allow_real_duplicates')
-        paper_all=st.button('Bet ALL qualifying (paper round)',key='paper_all') if settlement_preview else False
-        paper_saved=st.button('Paper-track this scan',key='paper_saved') if settlement_preview else False
-        if paper_all or paper_saved:
-            from pinnacle_props.paper import track_scan
-            receipt=track_scan(manifest['scan_id'],data_dir=data_dir,display_rules=active_rules)
-            st.session_state.pop('pp_bet_store_'+str(data_dir),None)
-            (st.warning if receipt['queued'] else st.success)(receipt['message'])
         st.caption('SAVED SCAN · '+label_time(manifest['capture_time'])+' · '+manifest['profile_name'])
         st.caption('Saved prices load without an API key. Only an explicit live refresh requests new prices.')
         st.write(rules.summary(active_rules,sport))
@@ -236,19 +228,6 @@ with tab_prices:
             exact=int(visible['⚠'].str.startswith('🔴').sum());same=int(visible['⚠'].str.startswith('🟡').sum())
             if real_keys is None:st.warning('⚪ CHECK UNAVAILABLE. Real logging requires a successful fresh shared-log read.')
             elif exact or same:st.warning(f'{exact} bets below are already in your bet log · {same} more are on games you already have a real bet on')
-            confirmed=st.checkbox('I already placed all qualifying real bets at the displayed suggested stakes',value=False,key='confirm_real_all')
-            if st.button('Log ALL qualifying real bets',key='real_all',disabled=not confirmed or real_keys is None):
-                written=queued=skipped=0
-                try:
-                    for i,r in annotated[annotated.rule_pass & (annotated.kellyAmount>0)].iterrows():
-                        receipt=log_bet(manifest['scan_id'],int(i)+1,float(r.kellyAmount),data_dir=data_dir,
-                                        display_rules=active_rules,allow_duplicates=allow_duplicates)['storage']
-                        written+=receipt['written'];queued+=receipt['queued'];skipped+=receipt.get('skipped',0)
-                    st.session_state.pop('pp_bet_store_'+str(data_dir),None)
-                    st.session_state['bet_receipt']=f'Real bets: {written} written; {queued} queued; {skipped} exact duplicates skipped.'
-                    st.rerun()
-                except (ValueError,OSError) as e:
-                    st.error(f'{written} written; {queued} queued; {skipped} skipped before stop. '+str(e))
         a,b,c=st.columns(3)
         a.metric('Opportunities',len(visible));b.metric('Games',len(manifest['event_results']));c.metric('Scan credits',manifest['credits_charged'])
         query=st.text_input('Filter by player, book or market',placeholder='Search these results…',key='search')
@@ -271,18 +250,6 @@ with tab_prices:
                 if text:view=view[view[column].astype(str).str.contains(text,case=False,regex=False,na=False)]
         st.caption(f'{len(view)} results · largest suggested stake first')
         if view.empty:st.info('No opportunities match these filters.')
-        with st.container(key='pp_table'):
-            table=view[(['⚠'] if settlement_preview else [])+table_columns].copy()
-            if settlement_preview:table.index=bd.index_labels(view)
-            st.dataframe(table.style.apply(
-                lambda row:bd.row_style(row) if settlement_preview and row.get('⚠','') else ['color: #87929d' if row.pin_age_min>stale_minutes else '' for _ in row],axis=1),
-                hide_index=not settlement_preview,width='stretch',height=480,column_config={
-                    'kellyAmount':st.column_config.NumberColumn(format='$%.2f'),
-                    **{c:st.column_config.NumberColumn(format='%.1f') for c in ['Target_line','PIN_line','pin_age_min']},
-                    **{c:st.column_config.NumberColumn(format='%.0f') for c in ['Target_over','Target_under','PIN_over','PIN_under']},
-                    **{c:st.column_config.NumberColumn(format='%.4f') for c in ['edge','pin_margin','noVigOver','noVigUnder','Target_over_p','Target_under_p','over_diffTRUE','under_diffTRUE']},
-                    **{c:st.column_config.NumberColumn(format='%.2f') for c in ['best_price','ev_pct']}})
-            st.caption('Best price is decimal odds; legacy price columns are American. Pinnacle age is measured at capture. All columns remain available by scrolling across the table.')
         with st.container(key='pp_cards'):
             count=8
             pages=max(1,(len(view)+count-1)//count)
@@ -317,6 +284,58 @@ with tab_prices:
                                     st.session_state['bet_receipt']=receipt.get('storage',{}).get('message','Bet recorded')
                                     st.rerun()
                                 except (ValueError,OSError) as e:st.error(str(e))
+        with st.container(key='pp_table'):
+            table=view[(['⚠'] if settlement_preview else [])+table_columns].copy()
+            if settlement_preview:
+                table.index=bd.index_labels(view)
+                table.insert(0,'log',False)
+            column_config={
+                '_index':st.column_config.TextColumn('Saved row',disabled=True),
+                'log':st.column_config.CheckboxColumn('log',default=False),
+                'kellyAmount':st.column_config.NumberColumn('Stake ($)',format='$%.2f',min_value=0.01,step=0.01,help='Starts at the Kelly suggestion; enter the amount you actually bet.'),
+                **{c:st.column_config.NumberColumn(format='%.1f') for c in ['Target_line','PIN_line','pin_age_min']},
+                **{c:st.column_config.NumberColumn(format='%.0f') for c in ['Target_over','Target_under','PIN_over','PIN_under']},
+                **{c:st.column_config.NumberColumn(format='%.4f') for c in ['edge','pin_margin','noVigOver','noVigUnder','Target_over_p','Target_under_p','over_diffTRUE','under_diffTRUE']},
+                **{c:st.column_config.NumberColumn(format='%.2f') for c in ['best_price','ev_pct']}}
+            styled=table.style.apply(
+                lambda row:bd.row_style(row) if settlement_preview and row.get('⚠','') else ['color: #87929d' if row.pin_age_min>stale_minutes else '' for _ in row],axis=1)
+            if settlement_preview:
+                from pinnacle_props.bet_selection import editor_key, selected_rows
+                edited=st.data_editor(styled,key=editor_key(manifest['scan_id'],table),
+                    disabled=[c for c in table.columns if c not in ('log','kellyAmount')],
+                    hide_index=False,width='stretch',height=480,column_config=column_config)
+            else:
+                st.dataframe(styled,hide_index=True,width='stretch',height=480,column_config=column_config)
+            st.caption('Best price is decimal odds; legacy price columns are American. Pinnacle age is measured at capture. All columns remain available by scrolling across the table.')
+        if settlement_preview:
+            allow_duplicates=st.checkbox('Allow re-logging bets marked 🔴 ALREADY BET',value=False,key='allow_real_duplicates')
+            action_real,action_paper,action_download=st.columns(3)
+            selected_action=action_real.button('Log selected bets',type='primary',key='log_selected',disabled=real_keys is None)
+            qualifying=int((annotated.rule_pass & (annotated.kellyAmount>0)).sum())
+            paper_action=action_paper.button(f'Bet ALL {qualifying} qualifying (paper round)',key='paper_all',disabled=qualifying==0)
+            action_download.download_button('Download bet card',view.to_csv(index=False),'pinnacle_props.csv','text/csv',key='download')
+            if selected_action:
+                written=queued=skipped=0
+                try:
+                    picks=selected_rows(view,table,edited)
+                    if not picks:
+                        st.warning('Tick the log box on the bets you placed')
+                    else:
+                        for row_number,amount in picks:
+                            receipt=log_bet(manifest['scan_id'],row_number,amount,data_dir=data_dir,
+                                            display_rules=active_rules,allow_duplicates=allow_duplicates)['storage']
+                            written+=receipt['written'];queued+=receipt['queued'];skipped+=receipt.get('skipped',0)
+                        st.session_state.pop('pp_bet_store_'+str(data_dir),None)
+                        st.session_state['bet_receipt']=f'Real bets: {written} logged; {queued} queued; {skipped} exact duplicates skipped.'
+                        st.session_state.pop(editor_key(manifest['scan_id'],table),None)
+                        st.rerun()
+                except (ValueError,OSError) as e:
+                    st.error(f'{written} logged; {queued} queued; {skipped} skipped before stop. '+str(e))
+            if paper_action:
+                from pinnacle_props.paper import track_scan
+                receipt=track_scan(manifest['scan_id'],data_dir=data_dir,display_rules=active_rules)
+                st.session_state.pop('pp_bet_store_'+str(data_dir),None)
+                (st.warning if receipt['queued'] else st.success)(receipt['message'])
         with st.expander('Compare all books & full details'):
             if not view.empty:
                 price_columns=[c for c in view if c.startswith('price_')]
@@ -334,7 +353,7 @@ with tab_prices:
             st.write(f"{manifest['raw_rows']:,} raw outcomes · {manifest['candidate_pairs']:,} soft-book line pairs")
             st.dataframe(pd.DataFrame([{'Reason':k,'Pairs':v} for k,v in manifest['exclusions'].items() if v]),hide_index=True,width='stretch')
             st.caption('Missing or mismatched lines remain in the saved snapshot. Only complete same-line pairs can qualify.')
-        st.download_button('Download results CSV',view.to_csv(index=False),'pinnacle_props.csv','text/csv',key='download')
+        if not settlement_preview:st.download_button('Download results CSV',view.to_csv(index=False),'pinnacle_props.csv','text/csv',key='download')
 
 with tab_calc:
     if not profiles:
