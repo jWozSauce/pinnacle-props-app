@@ -24,12 +24,17 @@ class StoreUnavailable(ValueError):
 
 
 def enabled():
-    """Acceptance switch. Merely importing or opening the old app has no new writes."""
-    if 'PP_SETTLEMENT_ENABLED' in os.environ:return os.environ['PP_SETTLEMENT_ENABLED']=='1'
+    """Accepted features default on with credentials; either explicit opt-out wins."""
+    def is_false(value):
+        return value is False or str(value).strip().lower() in ('false', '0')
+    if is_false(os.environ.get('PP_SETTLEMENT_ENABLED')):
+        return False
     try:
         import streamlit as st
-        return st.secrets.get('PP_SETTLEMENT_ENABLED',False) is True
-    except Exception:return False
+        return ('gcp_service_account' in st.secrets
+                and not is_false(st.secrets.get('PP_SETTLEMENT_ENABLED')))
+    except Exception:
+        return False
 
 
 def session_store(data_dir=DATA):

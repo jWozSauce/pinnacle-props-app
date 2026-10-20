@@ -151,3 +151,33 @@ def test_google_empty_sheet_response_is_empty_row(tmp_path):
     store=BetStore(tmp_path,spreadsheet=sheet)
     assert store.append('real',[record()])['written']==1
     assert ws.values[0]==HEADER and len(store.read('real'))==1
+
+
+@pytest.mark.parametrize('environment,secret,credential,expected', [
+    (None, None, True, True), (None, True, True, True),
+    ('1', None, True, True), ('true', None, True, True),
+    (None, 'anything', True, True), (None, False, True, False),
+    (None, ' false ', True, False), ('0', True, True, False),
+    ('FALSE', True, True, False), ('1', False, True, False),
+    (None, None, False, False), ('1', None, False, False),
+])
+def test_settlement_defaults_and_explicit_opt_out(monkeypatch,environment,secret,credential,expected):
+    import streamlit as st
+    from pinnacle_props.bet_store import enabled
+    monkeypatch.delenv('PP_SETTLEMENT_ENABLED',raising=False)
+    if environment is not None:monkeypatch.setenv('PP_SETTLEMENT_ENABLED',environment)
+    secrets={}
+    if credential:secrets['gcp_service_account']={'project_id':'fixture'}
+    if secret is not None:secrets['PP_SETTLEMENT_ENABLED']=secret
+    monkeypatch.setattr(st,'secrets',secrets)
+    assert enabled() is expected
+
+
+def test_settlement_missing_secret_file_is_disabled(monkeypatch):
+    import streamlit as st
+    from pinnacle_props.bet_store import enabled
+    class Missing:
+        def __contains__(self,key):raise FileNotFoundError('missing fixture')
+    monkeypatch.delenv('PP_SETTLEMENT_ENABLED',raising=False)
+    monkeypatch.setattr(st,'secrets',Missing())
+    assert enabled() is False

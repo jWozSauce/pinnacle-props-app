@@ -52,7 +52,7 @@ def test_full_app_enabled_uses_new_panels(tmp_path,monkeypatch):
     from tests.test_bet_store import Spreadsheet
     from tests.test_rules_app import fixture_rows
     import pinnacle_props.performance_ui as ui
-    monkeypatch.setenv('PP_SETTLEMENT_ENABLED','1')
+    monkeypatch.delenv('PP_SETTLEMENT_ENABLED',raising=False)
     monkeypatch.setattr(rules,'LIVE_PATH',tmp_path/'rules.json')
     store=BetStore(tmp_path,spreadsheet=Spreadsheet())
     monkeypatch.setattr(ui,'BetStore',lambda *a,**k:store)
@@ -64,7 +64,9 @@ def test_full_app_enabled_uses_new_panels(tmp_path,monkeypatch):
         f=fixture_rows(sport)
         return dict(scan_id='fixture',capture_time='2026-10-09T12:00:00Z',profile_name='Fixture',event_results=[],credits_charged=0,raw_rows=len(f)*4,candidate_pairs=len(f),exclusions={}),f,pd.DataFrame()
     monkeypatch.setattr('pinnacle_props.pipeline.replay',replay)
-    app=AppTest.from_file(Path('app.py').resolve()).run(timeout=20)
+    app=AppTest.from_file(Path('app.py').resolve())
+    app.secrets['gcp_service_account']={'project_id':'fixture'}
+    app.run(timeout=20)
     assert not app.exception
     assert len(app.tabs)==5
     assert app.checkbox(key='paper_track').value is True
@@ -80,7 +82,7 @@ def test_flags_cards_frozen_table_and_guard_controls(tmp_path,monkeypatch):
     from tests.test_bet_store import Spreadsheet,record
     from tests.test_rules_app import fixture_rows
     import pinnacle_props.performance_ui as ui
-    monkeypatch.setenv('PP_SETTLEMENT_ENABLED','1')
+    monkeypatch.delenv('PP_SETTLEMENT_ENABLED',raising=False)
     monkeypatch.setattr('pinnacle_props.settings.ROOT',tmp_path)
     monkeypatch.setattr(rules,'LIVE_PATH',tmp_path/'rules.json')
     sheet=Spreadsheet();store=BetStore(tmp_path,spreadsheet=sheet)
@@ -93,7 +95,9 @@ def test_flags_cards_frozen_table_and_guard_controls(tmp_path,monkeypatch):
         return dict(scan_id='fixture',capture_time='2026-10-09T12:00:00Z',profile_name='Fixture',event_results=[],credits_charged=0,raw_rows=len(f)*4,candidate_pairs=len(f),exclusions={}),f,pd.DataFrame()
     monkeypatch.setattr('pinnacle_props.pipeline.replay',replay)
     monkeypatch.setattr('requests.sessions.Session.request',lambda *a,**k:(_ for _ in ()).throw(AssertionError('network forbidden')))
-    app=AppTest.from_file(Path('app.py').resolve()).run(timeout=20)
+    app=AppTest.from_file(Path('app.py').resolve())
+    app.secrets['gcp_service_account']={'project_id':'fixture'}
+    app.run(timeout=20)
     assert not app.exception
     assert app.button(key='log_fixture_1').disabled
     table=next(d.value for d in app.dataframe if '⚠' in d.value)
