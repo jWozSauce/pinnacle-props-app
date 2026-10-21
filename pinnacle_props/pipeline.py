@@ -47,7 +47,7 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
                 reference_book=config['reference_book'],books=selected_books,markets=selected_markets,
                 min_edge=config['min_edge'] if min_edge is None else min_edge,
                 max_reference_margin=max_reference_margin,include_live=include_live,
-                **({'advisory_version':1,'observation_books':consensus.observation_books()} if consensus.enabled() else {}))
+                **({'advisory_version':consensus.VERSION,'observation_books':consensus.observation_books()} if consensus.enabled() else {}))
 
 
 @contextmanager
@@ -95,7 +95,7 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
 
 
 def _evaluate(frame,settings,profile,capture_time,exclusion_version=2):
-    if settings.get('advisory_version') not in (None,1):raise ValueError('Unsupported advisory version')
+    if settings.get('advisory_version') not in (None,1,2):raise ValueError('Unsupported advisory version')
     return scan(frame,profile,reference_book=settings['reference_book'],min_edge=settings['min_edge'],
                 max_reference_margin=settings['max_reference_margin'],include_live=settings['include_live'],
                 now=capture_time,exclusion_version=exclusion_version,
@@ -116,7 +116,7 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
     flagged=rules.annotate(flagged,display_rules,settings['sport'])
     if settings.get('advisory_version'):
-        flagged=consensus.annotate(flagged,frame,reference=settings['reference_book'],capture_time=capture_time)
+        flagged=consensus.annotate(flagged,frame,reference=settings['reference_book'],capture_time=capture_time,version=settings['advisory_version'])
     raw=frame.copy()
     if settings.get('advisory_version'):raw['kind']=raw.book.map(lambda b:'exchange' if b in consensus.EXCHANGES else 'sportsbook')
     raw['scan_id']=scan_id
@@ -245,7 +245,7 @@ def replay(sport,scan_id=None,*,data_dir=ROOT/'data'):
         if rules.version(manifest['rules'])!=manifest.get('rule_version'):raise ValueError('Saved rule version mismatch')
         flagged=rules.annotate(flagged,manifest['rules'],manifest['settings']['sport'])
     if manifest['settings'].get('advisory_version'):
-        flagged=consensus.annotate(flagged,frame,reference=manifest['settings']['reference_book'],capture_time=manifest['capture_time'])
+        flagged=consensus.annotate(flagged,frame,reference=manifest['settings']['reference_book'],capture_time=manifest['capture_time'],version=manifest['settings']['advisory_version'])
     for suffix,df in [('_flagged.csv',flagged),('_excluded.csv',excluded)]:
         if hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()!=manifest['artifacts'][suffix]['sha256']:
             raise ValueError('Replay differs from the saved '+suffix+' artifact')

@@ -16,7 +16,8 @@ from .odds_api import atomic_write
 TABS = {'real': 'PP_Bet_Log', 'paper': 'PP_Paper_Log'}
 HEADER = 'round logged_at sport game_date start_time event_id away_team home_team player market line side book price_decimal odds_american stake edge fair_p scan_id row rule_version status profit stat graded_at regraded_at source note row_id'.split()
 BASE_HEADER=HEADER.copy()
-from .consensus import FIELDS
+from .consensus import FIELDS, LEGACY_FIELDS
+LEGACY_HEADER=BASE_HEADER+LEGACY_FIELDS
 HEADER=HEADER+FIELDS
 GRADING = HEADER[21:28]
 FROZEN = HEADER[:21] + ['row_id'] + FIELDS
@@ -90,6 +91,12 @@ def duplicate_audit(frame, kind):
                         columns=['log','key','count','canonical_row_id'])
 
 
+def column_name(number):
+    result=''
+    while number:
+        number,remainder=divmod(number-1,26);result=chr(65+remainder)+result
+    return result
+
 def _frame(rows):
     return pd.DataFrame(rows, columns=HEADER).fillna('')
 
@@ -126,18 +133,18 @@ class BetStore:
         values = ws.get_all_values()
         if not any(any(str(cell) for cell in row) for row in values):
             if getattr(ws,'col_count',len(active_header))<len(active_header):ws.add_cols(len(active_header)-ws.col_count)
-            ws.update([active_header], 'A1:AJ1' if advisory_enabled() else 'A1:AC1', value_input_option='RAW')
+            ws.update([active_header], 'A1:'+column_name(len(active_header))+'1', value_input_option='RAW')
             values = [active_header]
         header=values[0].copy()
         while header and header[-1]=='':header.pop()
-        if header == BASE_HEADER and advisory_enabled():
-            if any(any(str(c) for c in row[len(BASE_HEADER):]) for row in values[1:]):
+        if header in (BASE_HEADER,LEGACY_HEADER) and advisory_enabled():
+            if any(any(str(c) for c in row[len(header):]) for row in values[1:]):
                 raise StoreUnavailable('Unlabelled extra cells; no migration made')
             # Append header cells only: no existing row or column is rewritten.
             if getattr(ws,'col_count',len(HEADER))<len(HEADER):ws.add_cols(len(HEADER)-ws.col_count)
-            ws.update([FIELDS], 'AD1:AJ1', value_input_option='RAW')
+            ws.update([HEADER[len(header):]], column_name(len(header)+1)+'1:'+column_name(len(HEADER))+'1', value_input_option='RAW')
             values=ws.get_all_values();header=values[0]
-        if header not in (BASE_HEADER,HEADER): raise StoreUnavailable('Shared log header mismatch; no rows changed')
+        if header not in (BASE_HEADER,LEGACY_HEADER,HEADER): raise StoreUnavailable('Shared log header mismatch; no rows changed')
         return ws, values
 
     @staticmethod

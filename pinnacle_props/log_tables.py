@@ -7,7 +7,7 @@ from .settle import metadata, OFFICIAL
 from .live_money import performance
 
 LABELS={'won':'✅ won (official)','lost':'❌ lost (official)','push':'🟨 push (official)','void':'⚪ void (official)'}
-RECORDED_FLAGS=['⚠','already_bet','same_game','island_flag','books_q','cons_edge','sharp_books_q','sharp_gap_pp','cons_line','pin_age_min']
+RECORDED_FLAGS=['⚠','already_bet','same_game','island_flag','books_q','cons_edge','sharp_books_q','sharp_gap_pp','market_gap_pp','market_edge_pp','sharp_edge_pp','market_books_q','advisory_version','cons_line','pin_age_min']
 
 
 def eastern(series):

@@ -263,7 +263,7 @@ with tab_prices:
         from pinnacle_props import consensus
         flagged=consensus.defaults(flagged)
         annotated=rules.annotate(flagged,active_rules,sport)
-        if manifest.get('settings',{}).get('advisory_version'):st.caption(consensus.LEGEND)
+        if manifest.get('settings',{}).get('advisory_version'):st.caption(consensus.LEGEND if manifest['settings']['advisory_version']>=2 else consensus.LEGACY_LEGEND)
         hidden=int((~annotated.rule_pass).sum())
         st.caption(f'{hidden} bets hidden by the rule · {len(annotated)} saved opportunities')
         show_all=st.checkbox('Show all saved opportunities',value=False,key='show_all_rules_'+sport)
@@ -290,7 +290,8 @@ with tab_prices:
         if query and not view.empty:
             mask=view[['player_name','book','prop_type']].astype(str).agg(' '.join,axis=1).str.contains(query,case=False,regex=False)
             view=view[mask]
-        advisory_columns=['island_flag','books_q','cons_edge','sharp_books_q','sharp_gap_pp'] if manifest.get('settings',{}).get('advisory_version') else []
+        advisory_columns=['island_flag','books_q','market_books_q','sharp_books_q'] if manifest.get('settings',{}).get('advisory_version') else []
+        advisory_details=advisory_columns+['cons_edge','market_gap_pp','market_edge_pp','sharp_gap_pp','sharp_edge_pp','advisory_version'] if advisory_columns else []
         table_columns=['start_status']+advisory_columns+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct']
         with st.expander('Filter individual columns'):
             columns=st.multiselect('Columns to filter',table_columns,key='column_filters_'+sport)
@@ -407,7 +408,7 @@ with tab_prices:
         with st.expander('Compare all books & full details'):
             if not view.empty:
                 price_columns=[c for c in view if c.startswith('price_')]
-                display_columns=['start_status']+advisory_columns+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']+price_columns
+                display_columns=['start_status']+advisory_details+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']+price_columns
                 display=view[display_columns].copy()
                 def style_row(row):
                     styles=pd.Series('',index=row.index)
