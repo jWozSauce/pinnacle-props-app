@@ -133,3 +133,25 @@ def test_card_path_retains_same_real_record_schema(checked_app):
     rows=store.read('real',reload=True)
     assert len(rows)==1 and rows.iloc[0].player=='Fixture 0'
     assert float(rows.iloc[0].stake)==23.45 and int(rows.iloc[0].row)==1
+
+
+def test_settlement_enabled_with_zero_rule_passing_rows(checked_app):
+    app,store,frame=checked_app
+    frame['edge']=0.0
+    app.run()
+    assert not app.exception
+    assert app.metric[0].value=='0'
+    assert any('No opportunities match these filters.' in item.value for item in app.info)
+    app.text_input(key='search').set_value('player').run()
+    assert not app.exception and app.metric[0].value=='0'
+
+
+@pytest.mark.parametrize('blank',[None,float('nan'),'',0])
+def test_blank_or_nonstring_duplicate_flags_are_safe(checked_app,monkeypatch,blank):
+    app,store,frame=checked_app
+    monkeypatch.setattr(bd,'flags',lambda visible,keys:[blank]*len(visible))
+    app.run()
+    assert not app.exception and app.metric[0].value=='4'
+    assert not any('already in your bet log' in item.value for item in app.warning)
+    table=next(t.value for t in app.dataframe if 'log' in t.value.columns)
+    assert not table['log'].any() and len(table)==4

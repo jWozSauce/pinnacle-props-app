@@ -224,8 +224,8 @@ with tab_prices:
         show_all=st.checkbox('Show all saved opportunities',value=False,key='show_all_rules_'+sport)
         visible=(annotated if show_all else annotated[annotated.rule_pass]).copy()
         if settlement_preview:
-            visible['⚠']=bd.flags(visible,real_keys)
-            exact=int(visible['⚠'].str.startswith('🔴').sum());same=int(visible['⚠'].str.startswith('🟡').sum())
+            visible['⚠']=pd.Series(bd.flags(visible,real_keys),index=visible.index,dtype='string').fillna('')
+            exact=int(visible['⚠'].str.startswith('🔴',na=False).sum());same=int(visible['⚠'].str.startswith('🟡',na=False).sum())
             if real_keys is None:st.warning('⚪ CHECK UNAVAILABLE. Real logging requires a successful fresh shared-log read.')
             elif exact or same:st.warning(f'{exact} bets below are already in your bet log · {same} more are on games you already have a real bet on')
         a,b,c=st.columns(3)
