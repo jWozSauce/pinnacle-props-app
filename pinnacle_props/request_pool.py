@@ -5,6 +5,8 @@ from contextvars import copy_context
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 import math
+import logging
+from queue import SimpleQueue, Empty
 import threading
 import time
 
@@ -21,6 +23,32 @@ def retry_after(value,default=2.):
         try:delay=(parsedate_to_datetime(value)-datetime.now(timezone.utc)).total_seconds()
         except (ValueError,TypeError,OverflowError):return default
     return max(0.,delay) if math.isfinite(delay) else default
+
+
+class Progress:
+    """Deliver callbacks only on the caller's thread (including Streamlit script threads)."""
+    def __init__(self, callback=None):
+        self.callback=callback or (lambda message:None)
+        self.owner=threading.get_ident()
+        self.pending=SimpleQueue()
+
+    def __call__(self,message):
+        self.pending.put(message)
+        if threading.get_ident()==self.owner:self.drain()
+        else:logging.getLogger(__name__).debug('Progress queued for caller thread')
+
+    def drain(self):
+        if threading.get_ident()!=self.owner:
+            logging.getLogger(__name__).warning('Off-thread progress drain skipped')
+            return
+        while True:
+            try:message=self.pending.get_nowait()
+            except Empty:return
+            self.callback(message)
+
+
+def caller_progress(callback):
+    return callback if isinstance(callback,Progress) else Progress(callback)
 
 
 class Pool:

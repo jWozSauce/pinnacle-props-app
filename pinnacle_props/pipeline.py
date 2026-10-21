@@ -168,7 +168,8 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
     scan_id=stamp+'-'+str(uuid.uuid4())[:8]
     profile_name=profile_name or config['kelly_profile']
     profile=profile or fetch_profiles()[profile_name]
-    from .request_pool import Pool,workers
+    from .request_pool import Pool,workers,caller_progress
+    progress=caller_progress(progress)
     pool=Pool(workers(config,'scans',concurrency))
     with scan_lock(data_dir):
         c=operational_client(data_dir=data_dir,run_id=scan_id,run_cap=preview['bound'],
@@ -191,8 +192,18 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
                 except APIError as e:
                     if e.status not in (404,422):raise
                     return None,{'event_id':event['id'],'status':e.status}
-        finished,errors=pool.map(preview['events'],fetch,
-            progress=lambda done,total:progress(f'Captured {done} of {total} games') if progress else None)
+        # Free whole-run check and its UI update precede every worker submission.
+        with failure_receipt(c,Path(data_dir)/'incomplete_scans'/(scan_id+'.json'),{'preview':preview}):
+            from .game_time import started
+            eligible=settings.get('include_live',False) and bool(preview['events'])
+            for event in preview['events']:
+                try:eligible=eligible or not started(event.get('commence_time'))
+                except ValueError:pass
+            if eligible and preview['bound']:c.preflight()
+        try:
+            finished,errors=pool.map(preview['events'],fetch,
+                progress=lambda done,total:progress(f'Captured {done} of {total} games'))
+        finally:progress.drain()
         for event,value,error in zip(preview['events'],finished,errors):
             if error is not None:
                 statuses.append({'event_id':event['id'],'status':'unfetched or failed: '+type(error).__name__})

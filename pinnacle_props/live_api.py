@@ -14,7 +14,7 @@ import time
 import uuid
 import requests
 from . import odds_api as api
-from .request_pool import Pool
+from .request_pool import Pool, caller_progress
 
 POLICY='account-floor-v1'
 
@@ -46,7 +46,7 @@ class LiveClient(api.Client):
         if self.paid_deadline and self.paid_deadline.tzinfo is None:raise ValueError('Paid deadline requires timezone')
         self.quota_check=None;self.remaining=None;self.records=[];self.charges={}
         self.sent_estimate=0;self.failed=False;self.resume_only=resume_only
-        self.progress=progress or (lambda text:None)
+        self.progress=caller_progress(progress)
 
     def _load(self):raise RuntimeError('Live runs do not read a ledger')
     def _save(self,state):raise RuntimeError('Live runs do not write a ledger')

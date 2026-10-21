@@ -209,7 +209,12 @@ if preview and preview['settings']==settings:
                     raise ValueError('Selected Kelly profile is no longer available')
                 scan_messages=[]
                 progress_text=st.empty()
+                import threading,logging
+                scan_thread=threading.get_ident()
                 def report_scan(message):
+                    if threading.get_ident()!=scan_thread:
+                        logging.getLogger(__name__).warning('Off-thread scan progress suppressed')
+                        return
                     scan_messages.append(message);progress_text.caption(message)
                 result=run_live(preview,profile=current_profiles[profile_name],profile_name=profile_name,
                                 key=key_for_live(),progress=report_scan,data_dir=data_dir,display_rules=active_rules,paper_track=paper_track)
