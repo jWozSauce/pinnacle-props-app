@@ -27,18 +27,26 @@ class StoreUnavailable(ValueError):
     pass
 
 
-def enabled():
-    """Accepted features default on with credentials; either explicit opt-out wins."""
+def settlement_unavailable_reason():
+    """Return a fixed diagnostic; never include secret values or exceptions."""
     def is_false(value):
         return value is False or str(value).strip().lower() in ('false', '0')
     if is_false(os.environ.get('PP_SETTLEMENT_ENABLED')):
-        return False
+        return 'PP_SETTLEMENT_ENABLED is explicitly false in the process environment'
     try:
         import streamlit as st
-        return ('gcp_service_account' in st.secrets
-                and not is_false(st.secrets.get('PP_SETTLEMENT_ENABLED')))
+        if is_false(st.secrets.get('PP_SETTLEMENT_ENABLED')):
+            return 'PP_SETTLEMENT_ENABLED is explicitly false in Streamlit secrets'
+        if 'gcp_service_account' not in st.secrets:
+            return 'gcp_service_account configuration is absent'
     except Exception:
-        return False
+        return 'Streamlit secrets configuration is unavailable'
+    return ''
+
+
+def enabled():
+    """Accepted features default on with credentials; either explicit opt-out wins."""
+    return not settlement_unavailable_reason()
 
 
 def session_store(data_dir=DATA):

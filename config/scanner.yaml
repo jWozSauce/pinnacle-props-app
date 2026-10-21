@@ -1,3 +1,7 @@
+request_workers:
+  scans: 6
+  closes: 4
+  historical: 3
 reference_book: pinnacle
 kelly_profile: Player_Props
 min_edge: 0.0

@@ -7,7 +7,7 @@ Unknown transient charges remain reserved against all caps; other unknown reques
 The cross-process lock covers this project's requests; other projects share the account
 but not this lock, so provider headers are observations, not an account-wide guarantee.
 """
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -200,7 +200,11 @@ class Result:
 class Client:
     def __init__(self, *, data_dir=ROOT/'data', run_id=None, run_cap=0,
                  project_cap=PROJECT_CAP, floor=ACCOUNT_FLOOR, key=None, session=None,
-                 min_interval=1.0, paid_deadline=None, staged_run=False, lock_timeout=None, cloud=False, transient_retries=None):
+                 min_interval=1.0, paid_deadline=None, staged_run=False, lock_timeout=None, cloud=False, transient_retries=None, pool=None):
+        self.pool=pool
+        self._quota_mutex=threading.RLock()
+        self._transport_state=threading.local()
+        self._provided_session=session
         self._state_mutex = threading.RLock()
         self._lock_state = threading.local()
         self.data_dir = Path(data_dir)
@@ -210,7 +214,7 @@ class Client:
         if cloud:project_cap=min(project_cap,100_000)
         self.accounting_dir = accounting_dir(self.data_dir, cloud=cloud)
         self.accounting_dir.mkdir(parents=True, exist_ok=True)
-        self.transient_retries = (self.accounting_dir != self.data_dir) if transient_retries is None else transient_retries
+        self.transient_retries = bool(pool) or ((self.accounting_dir != self.data_dir) if transient_retries is None else transient_retries)
         self.run_id = run_id or str(uuid.uuid4())
         if not re.fullmatch(r'[A-Za-z0-9_-]+', self.run_id):
             raise ValueError('Invalid run id')
@@ -230,6 +234,37 @@ class Client:
         self.paid_deadline = datetime.fromisoformat(paid_deadline.replace('Z','+00:00')) if paid_deadline else None
         if self.paid_deadline and self.paid_deadline.tzinfo is None:raise ValueError('Paid deadline requires timezone')
 
+    @property
+    def paid_deadline(self):return getattr(self._lock_state,'deadline',self._paid_deadline)
+
+    @paid_deadline.setter
+    def paid_deadline(self,value):self._paid_deadline=value
+
+    @contextmanager
+    def deadline(self,value):
+        old=getattr(self._lock_state,'deadline',self._paid_deadline)
+        if isinstance(value,str):value=datetime.fromisoformat(value.replace('Z','+00:00'))
+        self._lock_state.deadline=value
+        try:yield
+        finally:self._lock_state.deadline=old
+
+    def _active_reservation(self,rid,reservation):
+        if self.pool and self.pool.owns(rid):return True
+        name=reservation.get('inflight')
+        if name!=rid+'.lock' or not re.fullmatch(r'[A-Za-z0-9_-]+\.lock',name or ''):return False
+        try:
+            with (self.accounting_dir/'inflight'/name).open('r') as handle:
+                try:fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                except BlockingIOError:return True
+                fcntl.flock(handle,fcntl.LOCK_UN)
+        except FileNotFoundError:pass
+        return False
+
+    def _transport(self):
+        if not self.pool or self._provided_session is not None:return self.session
+        if not hasattr(self._transport_state,'session'):self._transport_state.session=requests.Session()
+        return self._transport_state.session
+
     @contextmanager
     def _locked(self, timeout=None):
         # Nested state reads/writes use the existing request lock; threads do not
@@ -246,7 +281,7 @@ class Client:
     @contextmanager
     def _file_locked(self, timeout=None):
         with (self.accounting_dir/'odds.lock').open('a') as lock:
-            start=time.monotonic();limit=self.lock_timeout if timeout is None else timeout
+            start=time.monotonic();limit=(180 if self.pool else self.lock_timeout) if timeout is None else timeout
             waited=False
             while True:
                 try:
@@ -256,9 +291,9 @@ class Client:
                     if elapsed>=limit:
                         if waited:print(f'{utcnow()} API lock timeout after {elapsed:.3f}s; no request sent',flush=True)
                         raise BudgetStop('Another project API request is running; no request sent') from None
-                    if not waited:print(f'{utcnow()} Waiting for project API lock, limit {limit:g}s',flush=True)
-                    waited=True;time.sleep(min(2,limit-elapsed))
-            if waited:print(f'{utcnow()} API lock acquired after {time.monotonic()-start:.3f}s',flush=True)
+                    if not waited and not self.pool:print(f'{utcnow()} Waiting for project API lock, limit {limit:g}s',flush=True)
+                    waited=True;time.sleep(min(.01 if self.pool else 2,limit-elapsed))
+            if waited and not self.pool:print(f'{utcnow()} API lock acquired after {time.monotonic()-start:.3f}s',flush=True)
             try:
                 yield
             finally:
@@ -370,7 +405,20 @@ class Client:
                 if attempt==5:raise
                 if not getattr(exc,'cached',False):time.sleep([2,4,8,16,30][attempt])
 
+    def _stop_pool_for_budget(self,error):
+        if self.pool:self.pool.stop()
+
     def _request_once(self, path, params=None, *, attempt=0):
+        params=dict(params or {})
+        cache_path=self._cache_path(path,params,attempt)
+        guard=self.pool.identity(cache_path) if self.pool else self._locked()
+        try:
+            with guard:return self._execute_request(path,params,attempt=attempt)
+        except BudgetStop as exc:
+            self._stop_pool_for_budget(exc)
+            raise
+
+    def _execute_request(self,path,params,*,attempt=0):
         params = dict(params or {})
         if any(k.lower() in ('apikey','api_key') for k in params):
             raise ValueError('Credentials must not be supplied in request parameters')
@@ -379,129 +427,171 @@ class Client:
         with self._locked():
             if cache_path.exists():
                 return self._cached(cache_path)
-        if cost and (not self.quota_checked or time.monotonic()-self.quota_time > 60):
-            self._quota_nonce = str(uuid.uuid4())
-            self.request('/v4/sports')
+        with self._quota_mutex:
+            if cost and (not self.quota_checked or time.monotonic()-self.quota_time > 60):
+                self._quota_nonce = str(uuid.uuid4())
+                self.request('/v4/sports')
         key = self._key if self._key is not None else resolve_key()
         self._key = key  # Invocation-local memory only; never persist or expose it.
-        with self._locked():
-            # A different process may have completed this exact request in the meantime.
-            if cache_path.exists():
-                return self._cached(cache_path)
-            state = self._load()
-            if cost and self.paid_deadline and datetime.fromisoformat(utcnow())>=self.paid_deadline:
-                raise BudgetStop('Game start reached while waiting; no paid request sent')
-            persisted_cap=state.get('project_cap',500_000)
-            if type(persisted_cap) is not int or not 0<=persisted_cap<=PROJECT_CAP:
-                raise BudgetStop('Invalid persisted project cap')
-            if self.run_id.startswith('close-'):
-                cap=state.setdefault('close_daily_cap',CLOSE_DAILY_CAP)
-                if not isinstance(cap,int) or not 0<=cap<=CLOSE_DAILY_CAP:
-                    raise BudgetStop('Invalid persisted close daily cap')
-                day=datetime.fromisoformat(utcnow()).astimezone(ZoneInfo('America/New_York')).date().isoformat()
-                if cost and close_day_spend(state,day)+cost>cap:
-                    raise BudgetStop('Daily close credit cap would be exceeded; no paid request sent')
-            if state['halt']:
-                raise BudgetStop('API client halted: '+state['halt'])
-            if cost:
-                if any(not r.get('transient') for r in state['reservations'].values()):
-                    raise BudgetStop('Unresolved request reservation; reconcile before paid work')
-                reserved=sum(r['estimated'] for r in state['reservations'].values())
-                run_reserved=sum(r['estimated'] for r in state['reservations'].values() if r['run_id']==self.run_id)
-                if state['remaining'] is None or state['remaining']-reserved-cost < self.floor:
-                    raise BudgetStop('Unknown quota or account floor would be breached; no paid request sent')
-                if state['spent']+reserved+cost > min(self.project_cap,persisted_cap):
-                    raise BudgetStop('Project credit cap would be exceeded; no paid request sent')
-                if state['runs'].get(self.run_id,0)+run_reserved+cost > self.run_cap:
-                    raise BudgetStop('Run credit cap would be exceeded; no paid request sent')
-            request_id = str(uuid.uuid4())
-            record = dict(request_id=request_id,run_id=self.run_id,timestamp=utcnow(),endpoint=path,
-                          estimated=cost,actual=None,remaining=state['remaining'],status='pending',
-                          cache_path=str(cache_path),outcome='reserved')
-            state['records'].append(record)
-            state['reservations'][request_id]={'estimated':cost,'run_id':self.run_id}
-            self._save(state)
-            delay = self.min_interval - (time.monotonic()-self.last_send)
-            if delay > 0:
-                time.sleep(delay)
-            self.last_send = time.monotonic()
-            status, body, headers = 'network_error', '', {}
+        with self.pool.slot() if self.pool else nullcontext():
+            request_id=None;inflight_handle=None;inflight_path=None
             try:
-                response = self.session.get(HOST+path,params=dict(params,apiKey=key),timeout=30,
-                                            allow_redirects=False)
-                status = response.status_code
-                body = response.text.replace(key,'[REDACTED]')
-                headers = {h:response.headers.get(h) for h in QUOTA_HEADERS}
-            except requests.RequestException:
-                # Exception strings often contain the credential-bearing URL. Never persist them.
-                pass
-            envelope = {'request_id':request_id,'captured_at':utcnow(),'endpoint':path,
-                        'params':params,'status':status,'headers':headers,'body':body}
-            atomic_write(cache_path,gzip.compress(json.dumps(envelope).encode()))
-            record.update(status=status,outcome='error')
-            parsed_headers = {}
-            for name,value in headers.items():
+                with self._locked():
+                    # A different process may have completed this exact request in the meantime.
+                    if cache_path.exists():
+                        return self._cached(cache_path)
+                    if self.pool:self.pool.check()
+                    state = self._load()
+                    if cost and self.paid_deadline and datetime.fromisoformat(utcnow())>=self.paid_deadline:
+                        raise BudgetStop('Game start reached while waiting; no paid request sent')
+                    persisted_cap=state.get('project_cap',500_000)
+                    if type(persisted_cap) is not int or not 0<=persisted_cap<=PROJECT_CAP:
+                        raise BudgetStop('Invalid persisted project cap')
+                    if self.run_id.startswith('close-'):
+                        cap=state.setdefault('close_daily_cap',CLOSE_DAILY_CAP)
+                        if not isinstance(cap,int) or not 0<=cap<=CLOSE_DAILY_CAP:
+                            raise BudgetStop('Invalid persisted close daily cap')
+                        day=datetime.fromisoformat(utcnow()).astimezone(ZoneInfo('America/New_York')).date().isoformat()
+                        if cost and close_day_spend(state,day)+cost>cap:
+                            raise BudgetStop('Daily close credit cap would be exceeded; no paid request sent')
+                    if state['halt']:
+                        raise BudgetStop('API client halted: '+state['halt'])
+                    if cost:
+                        if any(not v.get('transient') and not self._active_reservation(rid,v) for rid,v in state['reservations'].items()):
+                            raise BudgetStop('Unresolved request reservation; reconcile before paid work')
+                        reserved=sum(r['estimated'] for r in state['reservations'].values())
+                        run_reserved=sum(r['estimated'] for r in state['reservations'].values() if r['run_id']==self.run_id)
+                        if state['remaining'] is None or state['remaining']-reserved-cost < self.floor:
+                            raise BudgetStop('Unknown quota or account floor would be breached; no paid request sent')
+                        if state['spent']+reserved+cost > min(self.project_cap,persisted_cap):
+                            raise BudgetStop('Project credit cap would be exceeded; no paid request sent')
+                        if state['runs'].get(self.run_id,0)+run_reserved+cost > self.run_cap:
+                            raise BudgetStop('Run credit cap would be exceeded; no paid request sent')
+                    quota_anchor_before=state.get('provider_used')
+                    request_id = str(uuid.uuid4())
+                    record = dict(request_id=request_id,run_id=self.run_id,timestamp=utcnow(),endpoint=path,
+                                  estimated=cost,actual=None,remaining=state['remaining'],status='pending',
+                                  cache_path=str(cache_path),outcome='reserved')
+                    state['records'].append(record)
+                    state['reservations'][request_id]={'estimated':cost,'run_id':self.run_id}
+                    if self.pool:
+                        directory=self.accounting_dir/'inflight';directory.mkdir(exist_ok=True)
+                        inflight_path=directory/(request_id+'.lock');inflight_handle=inflight_path.open('x')
+                        fcntl.flock(inflight_handle,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                        state['reservations'][request_id]['inflight']=inflight_path.name
+                    self._save(state)
+                    if self.pool:self.pool.claim(request_id)
+                delay = self.min_interval - (time.monotonic()-getattr(self._transport_state,'last_send',0.) if self.pool else time.monotonic()-self.last_send)
+                if delay > 0:
+                    time.sleep(delay)
                 try:
-                    number = float(value)
-                    if math.isfinite(number) and number>=0 and number.is_integer():
-                        parsed_headers[name] = int(number)
-                except (ValueError, TypeError):
+                    if self.pool:self.pool.wait_send()
+                    if cost and self.paid_deadline and datetime.fromisoformat(utcnow())>=self.paid_deadline:
+                        raise BudgetStop('Game start reached before send; no paid request sent')
+                    with Client._locked(self,timeout=180):
+                        if self._load()['halt']:raise BudgetStop('API client halted before send; no request sent')
+                except BudgetStop:
+                    with Client._locked(self,timeout=180):
+                        cancelled=self._load()
+                        row=next(x for x in cancelled['records'] if x['request_id']==request_id)
+                        row.update(actual=0,status='not_sent',outcome='pool_cancelled')
+                        cancelled['reservations'].pop(request_id)
+                        self._save(cancelled)
+                    raise
+                self._transport_state.last_send = time.monotonic()
+                self.last_send=self._transport_state.last_send
+                status, body, headers = 'network_error', '', {}
+                try:
+                    response = self._transport().get(HOST+path,params=dict(params,apiKey=key),timeout=30,
+                                                allow_redirects=False)
+                    status = response.status_code
+                    body = response.text.replace(key,'[REDACTED]')
+                    headers = {h:response.headers.get(h) for h in QUOTA_HEADERS}
+                    if self.pool and (status==429 or response.headers.get('Retry-After') is not None):
+                        headers['retry-after']=response.headers.get('Retry-After')
+                        self.pool.backoff(headers['retry-after'],status)
+                except requests.RequestException:
+                    # Exception strings often contain the credential-bearing URL. Never persist them.
                     pass
-            actual = parsed_headers.get('x-requests-last')
-            remaining = parsed_headers.get('x-requests-remaining')
-            transient=self.transient_retries and status not in (401,403,429) and (
-                status=='network_error' or isinstance(status,int) and 500<=status<600
-                or actual is None or remaining is None)
-            used=parsed_headers.get('x-requests-used');previous_used=state.get('provider_used')
-            # Zero unexplained counter delta proves pending attempts under this
-            # anchor were uncharged. Positive/shared-account deltas stay reserved.
-            if used is not None and previous_used is not None and actual is not None and used-previous_used==actual:
-                resolved=[]
-                for rid,reservation in list(state['reservations'].items()):
-                    if reservation.get('transient') and reservation.get('quota_anchor')==previous_used:
-                        row=next(r for r in state['records'] if r['request_id']==rid)
-                        row.update(actual=0,outcome='transient_no_charge');state['reservations'].pop(rid);resolved.append(rid)
-                if resolved:state.setdefault('transient_reconciliations',[]).append(dict(at=utcnow(),request_ids=resolved,used_before=previous_used,used_after=used,known_charge=actual))
-            if used is not None:state['provider_used']=used
-            if remaining is not None:
-                state.update(remaining=remaining,quota_at=utcnow());record['remaining']=remaining
-            if actual is not None:
-                state['spent'] += actual
-                state['runs'][self.run_id] = state['runs'].get(self.run_id,0)+actual
-                state['reservations'].pop(request_id)
-                record['actual']=actual
-            elif transient:
-                state['reservations'][request_id].update(transient=True,quota_anchor=previous_used)
-            else:state['halt']='charge headers unavailable; reservation retained'
-            if transient:
-                record['outcome']='transient'
-                state['consecutive_transient_failures']=state.get('consecutive_transient_failures',0)+1
-                if state['consecutive_transient_failures']>=10:state['halt']='ten consecutive transient provider failures'
-            if actual is not None and actual > cost:state['halt']='actual charge exceeded preflight bound'
-            if status in (401,403,429):state['halt']=f'HTTP {status}; no automatic retry'
-            if status != 200 and not transient:
-                state['halt']=state['halt'] or (None if status in (404,422) or self._skippable_event_error(path,status) else 'request failed; review before retry')
-            if cost and remaining is None and not transient:state['halt']='remaining quota header unavailable'
-            if remaining is not None and remaining < self.floor and cost:state['halt']='account balance is below its floor'
-            if status == 200 and not transient:
-                try:
-                    payload=json.loads(body);expected=response_cost(path,params,payload) if cost else 0
-                    if actual!=expected:state['halt']='charge does not match returned-market billing'
-                    else:
-                        record['outcome']='ok'
-                        if cost:state['consecutive_transient_failures']=0
-                except (ValueError,TypeError,KeyError,AttributeError,APIError):
-                    state['halt']='response schema/JSON invalid; inspect cached response'
-            self._save(state)
-            if state['halt']:
-                raise BudgetStop('API client halted: '+state['halt']) from None
-            if transient:
-                error=TransientError('Transient provider response; see status ledger',status)
-                error.request_id=request_id;raise error
-            if path == '/v4/sports':
-                self.quota_checked = True
-                self.quota_time = time.monotonic()
-            return self._decode(envelope,cache_path)
+                envelope = {'request_id':request_id,'captured_at':utcnow(),'endpoint':path,
+                            'params':params,'status':status,'headers':headers,'body':body}
+                atomic_write(cache_path,gzip.compress(json.dumps(envelope).encode()))
+                with Client._locked(self,timeout=180):
+                    state=self._load()
+                    record=next(x for x in state['records'] if x['request_id']==request_id)
+                    record.update(status=status,outcome='error')
+                    parsed_headers = {}
+                    for name,value in headers.items():
+                        try:
+                            number = float(value)
+                            if math.isfinite(number) and number>=0 and number.is_integer():
+                                parsed_headers[name] = int(number)
+                        except (ValueError, TypeError):
+                            pass
+                    actual = parsed_headers.get('x-requests-last')
+                    remaining = parsed_headers.get('x-requests-remaining')
+                    transient=self.transient_retries and status not in ((401,403) if self.pool else (401,403,429)) and (
+                            (status==429 and self.pool is not None) or
+                        status=='network_error' or isinstance(status,int) and 500<=status<600
+                        or actual is None or remaining is None)
+                    used=parsed_headers.get('x-requests-used');previous_used=state.get('provider_used')
+                    # Zero unexplained counter delta proves pending attempts under this
+                    # anchor were uncharged. Positive/shared-account deltas stay reserved.
+                    if (not self.pool or not any(rid!=request_id and self._active_reservation(rid,v) for rid,v in state['reservations'].items())) and used is not None and previous_used is not None and actual is not None and used-previous_used==actual:
+                        resolved=[]
+                        for rid,reservation in list(state['reservations'].items()):
+                            if reservation.get('transient') and reservation.get('quota_anchor')==previous_used:
+                                row=next(r for r in state['records'] if r['request_id']==rid)
+                                row.update(actual=0,outcome='transient_no_charge');state['reservations'].pop(rid);resolved.append(rid)
+                        if resolved:state.setdefault('transient_reconciliations',[]).append(dict(at=utcnow(),request_ids=resolved,used_before=previous_used,used_after=used,known_charge=actual))
+                    if used is not None:state['provider_used']=max(previous_used or 0,used) if self.pool else used
+                    if remaining is not None:
+                        observed=remaining
+                        if self.pool and state['remaining'] is not None:
+                            observed=min(observed,state['remaining'])
+                        state.update(remaining=observed,quota_at=utcnow());record['remaining']=remaining
+                    if actual is not None:
+                        state['spent'] += actual
+                        state['runs'][self.run_id] = state['runs'].get(self.run_id,0)+actual
+                        state['reservations'].pop(request_id)
+                        record['actual']=actual
+                    elif transient:
+                        state['reservations'][request_id].update(transient=True,quota_anchor=quota_anchor_before if self.pool else previous_used)
+                    else:state['halt']='charge headers unavailable; reservation retained'
+                    if transient:
+                        record['outcome']='transient'
+                        state['consecutive_transient_failures']=state.get('consecutive_transient_failures',0)+1
+                        if state['consecutive_transient_failures']>=10:state['halt']='ten consecutive transient provider failures'
+                    if actual is not None and actual > cost:state['halt']='actual charge exceeded preflight bound'
+                    if status in (401,403) or (status==429 and not self.pool):state['halt']=f'HTTP {status}; no automatic retry'
+                    if status != 200 and not transient:
+                        state['halt']=state['halt'] or (None if status in (404,422) or self._skippable_event_error(path,status) else 'request failed; review before retry')
+                    if cost and remaining is None and not transient:state['halt']='remaining quota header unavailable'
+                    if remaining is not None and remaining < self.floor and cost:state['halt']='account balance is below its floor'
+                    if status == 200 and not transient:
+                        try:
+                            payload=json.loads(body);expected=response_cost(path,params,payload) if cost else 0
+                            if actual!=expected:state['halt']='charge does not match returned-market billing'
+                            else:
+                                record['outcome']='ok'
+                                if cost:state['consecutive_transient_failures']=0
+                        except (ValueError,TypeError,KeyError,AttributeError,APIError):
+                            state['halt']='response schema/JSON invalid; inspect cached response'
+                    if self.pool and self.pool.rate_limit:state.setdefault('rate_limits',{})[self.run_id]=dict(self.pool.rate_limit)
+                    self._save(state)
+                    if state['halt']:
+                        raise BudgetStop('API client halted: '+state['halt']) from None
+                    if transient:
+                        error=TransientError('Transient provider response; see status ledger',status)
+                        error.request_id=request_id;raise error
+                    if path == '/v4/sports':
+                        self.quota_checked = True
+                        self.quota_time = time.monotonic()
+                    return self._decode(envelope,cache_path)
+            finally:
+                if self.pool and request_id:self.pool.release(request_id)
+                if inflight_handle is not None:
+                    inflight_handle.close();inflight_path.unlink(missing_ok=True)
 
     def sports(self):
         return self.request('/v4/sports')

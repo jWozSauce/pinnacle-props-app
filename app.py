@@ -208,8 +208,11 @@ if preview and preview['settings']==settings:
                 if profile_name not in current_profiles:
                     raise ValueError('Selected Kelly profile is no longer available')
                 scan_messages=[]
+                progress_text=st.empty()
+                def report_scan(message):
+                    scan_messages.append(message);progress_text.caption(message)
                 result=run_live(preview,profile=current_profiles[profile_name],profile_name=profile_name,
-                                key=key_for_live(),progress=scan_messages.append,project_cap=deployment['project_cap'],data_dir=data_dir,display_rules=active_rules,paper_track=paper_track)
+                                key=key_for_live(),progress=report_scan,project_cap=deployment['project_cap'],data_dir=data_dir,display_rules=active_rules,paper_track=paper_track)
                 st.session_state.pop('pp_bet_store_'+str(data_dir),None)
                 if settlement_preview and paper_track:
                     st.session_state['bet_receipt']=scan_messages[-1] if scan_messages else 'Paper tracking finished; check shared logs.'

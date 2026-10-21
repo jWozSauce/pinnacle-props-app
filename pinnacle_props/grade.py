@@ -155,7 +155,9 @@ def main():
     p.add_argument('--scheduled',action='store_true');p.add_argument('--archive',action='store_true');p.add_argument('--backup',action='store_true')
     p.add_argument('--capture-live',action='store_true',help='Retain real NHL/NBA live-card evidence alongside grades')
     a=p.parse_args();now=datetime.now(timezone.utc).isoformat()
-    if not enabled():p.exit(2,'Settlement is disabled or service-account configuration is absent.\n')
+    from .startup import check_settlement
+    if not check_settlement('grade', data_dir=DATA, scheduled=a.scheduled):
+        p.exit(2)
     if a.scheduled and not in_window(now):return
     try:
         if a.archive:print(json.dumps({'archive_rows':grade_archive(now=now)}))

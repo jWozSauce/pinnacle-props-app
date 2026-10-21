@@ -155,7 +155,7 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     return manifest,flagged,excluded
 
 
-def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,display_rules=None,paper_track=True):
+def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,display_rules=None,paper_track=True,concurrency=None):
     from . import rules
     from .settings import ACCOUNTING_CLOUD
     display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
@@ -165,38 +165,41 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
     scan_id=stamp+'-'+str(uuid.uuid4())[:8]
     profile_name=profile_name or config['kelly_profile']
     profile=profile or fetch_profiles()[profile_name]
+    from .request_pool import Pool,workers
+    pool=Pool(workers(config,'scans',concurrency))
     with scan_lock(data_dir):
         c=Client(data_dir=data_dir,run_id=scan_id,run_cap=preview['bound'],
-                 floor=config['account_floor'],project_cap=min(config['project_cap'],project_cap) if project_cap is not None else config['project_cap'],key=key,session=session)
+                 floor=config['account_floor'],project_cap=min(config['project_cap'],project_cap) if project_cap is not None else config['project_cap'],key=key,session=session,pool=pool)
         results=[];statuses=[]
         progress(f"Preflight: {len(preview['events'])} events; upper bound {preview['bound']} credits.")
         if preview['bound']>20_000:
             raise BudgetStop('Run exceeds the 20,000-credit staging threshold')
-        for event in preview['events']:
+        def fetch(event):
             from .game_time import started,start_time
-            # Discovery may precede execution by minutes; check again for every event.
             if not settings.get('include_live',False):
                 try:skip=started(event.get('commence_time'))
-                except ValueError:
-                    statuses.append({'event_id':event['id'],'status':'skipped: start time unavailable'})
-                    continue
-                if skip:
-                    statuses.append({'event_id':event['id'],'status':'skipped: game started'})
-                    continue
-            c.paid_deadline=None if settings.get('include_live',False) else start_time(event['commence_time'])
-            try:
-                result=c.event_odds(settings['sport_key'],event['id'],settings['markets'],
-                                    consensus.request_books(settings))
-                results.append(result)
-                statuses.append({'event_id':event['id'],'status':result.status,'request_id':result.request_id})
-            except BudgetStop:
-                write_json(Path(data_dir)/'incomplete_scans'/(scan_id+'.json'),{'preview':preview,'event_results':statuses,'state':'stopped'})
-                raise
-            except APIError as e:
-                if e.status not in (404,422):
-                    raise
-                statuses.append({'event_id':event['id'],'status':e.status})
-            progress(f"Captured {len(statuses)}/{len(preview['events'])} events.")
+                except ValueError:return None,{'event_id':event['id'],'status':'skipped: start time unavailable'}
+                if skip:return None,{'event_id':event['id'],'status':'skipped: game started'}
+            deadline=None if settings.get('include_live',False) else start_time(event['commence_time'])
+            with c.deadline(deadline):
+                try:
+                    result=c.event_odds(settings['sport_key'],event['id'],settings['markets'],consensus.request_books(settings))
+                    return result,{'event_id':event['id'],'status':result.status,'request_id':result.request_id}
+                except APIError as e:
+                    if e.status not in (404,422):raise
+                    return None,{'event_id':event['id'],'status':e.status}
+        finished,errors=pool.map(preview['events'],fetch,
+            progress=lambda done,total:progress(f'Captured {done} of {total} games') if progress else None)
+        for event,value,error in zip(preview['events'],finished,errors):
+            if error is not None:
+                statuses.append({'event_id':event['id'],'status':'unfetched or failed: '+type(error).__name__})
+            else:
+                response,status=value;statuses.append(status)
+                if response is not None:results.append(response)
+        if any(errors):
+            write_json(Path(data_dir)/'incomplete_scans'/(scan_id+'.json'),
+                       {'preview':preview,'event_results':statuses,'state':'stopped','rate_limit':pool.rate_limit})
+            raise next(e for e in errors if e is not None)
         state=c._load()
         charged=state['runs'].get(scan_id,0)
         now=datetime.now(timezone.utc).isoformat()
