@@ -4,6 +4,7 @@ from streamlit.testing.v1 import AppTest
 
 
 def cloud(monkeypatch,secret='fixture-pass'):
+    monkeypatch.setattr('pinnacle_props.kelly_sheet.fetch_profiles',lambda:{})
     monkeypatch.setattr('requests.sessions.Session.request',lambda *a,**k:pytest.fail('Network at access gate'))
     app=AppTest.from_file(Path('app.py').resolve(),default_timeout=15)
     app.secrets['PP_DEPLOYMENT']='cloud'

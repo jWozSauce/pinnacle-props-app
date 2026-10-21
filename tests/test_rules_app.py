@@ -93,6 +93,7 @@ def test_cloud_default_ignores_mac_and_url_survives_new_session(app_setup,monkey
     changed=rules.load();changed['sports']['nhl']['default']['min_edge']=9.;rules.save(changed)
     monkeypatch.setattr('pinnacle_props.deployment.deployment_settings',lambda _:dict(cloud=True,paid_enabled=False,project_cap=100000,cloud_daily_cap=2500))
     monkeypatch.setattr('pinnacle_props.access.cloud_access',lambda:None)
+    monkeypatch.setattr('pinnacle_props.kelly_sheet.fetch_profiles',lambda:{})
     app=start().run()
     assert not app.exception and app.metric[0].value=='4'
     assert not any(b.label=='Save as default' for b in app.button)
@@ -125,6 +126,7 @@ def test_save_default_is_explicit_and_cloud_uses_published_yaml(app_setup,monkey
     assert not app.exception and rules.load()['sports']['nhl']['default']['min_edge']==5.
     monkeypatch.setattr('pinnacle_props.deployment.deployment_settings',lambda _:dict(cloud=True,paid_enabled=False,project_cap=100000,cloud_daily_cap=2500))
     monkeypatch.setattr('pinnacle_props.access.cloud_access',lambda:None)
+    monkeypatch.setattr('pinnacle_props.kelly_sheet.fetch_profiles',lambda:{})
     fresh=start().run();assert not fresh.exception and fresh.metric[0].value=='2'
 
 

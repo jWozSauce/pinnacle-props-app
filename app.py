@@ -95,14 +95,25 @@ sport=st.selectbox('Sport',sport_names,index=sport_names.index(initial),
 st.query_params['sport']=sport
 
 if 'profiles' not in st.session_state:
-    st.session_state.profiles=local_profiles()
+    st.session_state.profiles={} if deployment['cloud'] else local_profiles()
+
+def reload_profiles():
+    try:
+        st.session_state.profiles=fetch_profiles()
+        st.session_state.pop('kelly_error',None)
+        return True
+    except ValueError as e:
+        st.session_state.kelly_error='Kelly settings unavailable: '+str(e)
+        return False
+
+if deployment['cloud'] and not st.session_state.get('kelly_auto_attempted'):
+    st.session_state.kelly_auto_attempted=True
+    reload_profiles()
 profiles=st.session_state.profiles
 if not profiles:
     st.info('Load Kelly profiles to prepare a live scan. Saved scans retain their original settings.')
     if st.button('Load Kelly profiles',key='load_profiles'):
-        try:
-            st.session_state.profiles=fetch_profiles();st.rerun()
-        except ValueError as e:st.error(str(e))
+        if reload_profiles():st.rerun()
 
 with st.expander('Books, markets & scan settings',expanded=False):
     query_books=st.query_params.get('books_'+sport,'').split(',')
@@ -132,9 +143,7 @@ with st.expander('Books, markets & scan settings',expanded=False):
                              index=names.index(default_profile) if default_profile in names else 0,key='profile')
     st.caption('New scan settings apply on refresh. Saved results keep the inputs captured with that scan.')
     if st.button('Reload Kelly settings',key='reload_profiles'):
-        try:
-            st.session_state.profiles=fetch_profiles();st.rerun()
-        except ValueError as e:st.error(str(e))
+        if reload_profiles():st.rerun()
 
 try:
     settings=options(config,sport,books,markets,0.0,maximum,include_live,dates=scan_dates)
@@ -148,6 +157,8 @@ if st.button('Estimate live refresh · free',disabled=settings is None,key='esti
     except (APIError,ValueError) as e:
         st.session_state.pop('preview',None);st.error(str(e))
 preview=st.session_state.get('preview')
+if st.session_state.get('kelly_error') and not (preview and preview['settings']==settings):
+    st.error(st.session_state.kelly_error)
 if preview and preview['settings']==settings:
     date_counts={}
     for event in preview['events']:
@@ -156,9 +167,21 @@ if preview and preview['settings']==settings:
     dates=sorted(date_counts)
     span=f", {dates[0]} to {dates[-1]}" if dates else ''
     st.info(f"{len(preview['events'])} games{span} · refresh uses at most {preview['bound']} credits.")
+    if dates and (datetime.fromisoformat(dates[-1])-datetime.fromisoformat(dates[0])).days>=3:
+        st.caption('Tick Limit game dates to scan fewer.')
     with st.expander('Games by date'):
         for day in dates:st.write(f"{day}: {date_counts[day]} games")
-    if st.button('Refresh live prices',type='primary',disabled=not deployment['paid_enabled'] or not preview['events'] or profile_name not in profiles,
+    if st.session_state.get('kelly_error'):st.error(st.session_state.kelly_error)
+    refresh_reasons=[]
+    if not deployment['paid_enabled']:refresh_reasons.append('Live refresh is unavailable on this deployment.')
+    if not preview['events']:refresh_reasons.append('No upcoming games.')
+    if profile_name not in profiles:refresh_reasons.append('Load Kelly profiles first.')
+    if deployment['cloud']:
+        from pinnacle_props.deployment import cloud_refresh_reason
+        reason=cloud_refresh_reason(data_dir,preview['bound'],deployment['cloud_daily_cap'])
+        if reason:refresh_reasons.append(reason)
+    if refresh_reasons:st.warning(' '.join(refresh_reasons))
+    if st.button('Refresh live prices',type='primary',disabled=bool(refresh_reasons),
                  key='refresh',width='stretch'):
         try:
             with st.spinner('Capturing prices and comparing lines…'):
