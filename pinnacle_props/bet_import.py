@@ -3,6 +3,7 @@
 Historical contract: https://the-odds-api.com/liveapi/guides/v4/#get-historical-event-odds
 Snapshots are at or before placement, never rounded into the future.
 """
+from .live_api import LiveClient, operational_client, charged, accounting, failure_receipt
 import argparse
 import csv
 from datetime import datetime, timezone
@@ -177,12 +178,22 @@ def quote(result,r,book,*,require_pair=True):
 
 
 def prepare(items,client,*,data_dir=DATA,store=None):
-    if not 0<client.run_cap<=1000:raise ValueError('Per-import cap must be 1–1,000 credits')
+    with failure_receipt(client,Path(data_dir)/'imports'/('prepared-'+client.run_id)/'failed.json',{'run_id':client.run_id}):
+        return _prepare(items,client,data_dir=data_dir,store=store)
+
+
+def _prepare(items,client,*,data_dir=DATA,store=None):
+    if client.run_cap<=0:raise ValueError('Import requires a positive estimate')
     if store is not None:
         seen=preview(items,store);items=seen[~seen.duplicate].drop(columns='duplicate').to_dict('records')
     if not items:return {'records':[],'credits':0,'message':'All rows already imported'}
     if estimate(items)>client.run_cap:raise ValueError('Estimated import exceeds the selected cap; split the file')
     root=Path(data_dir)/'imports'/('prepared-'+client.run_id);root.mkdir(parents=True,exist_ok=True)
+    if isinstance(client,LiveClient):
+        attempt=root/'attempt.json';client.resume_only=attempt.exists()
+        if not attempt.exists():
+            client.preflight()
+            write_json(attempt,{'at':datetime.now(timezone.utc).isoformat(),'estimate':client.run_cap})
     config=load_config();listings={};results={};records=[]
     for r in items:
         sport=config['sports'][r['sport']]['key'];base='/v4/historical/sports/'+sport+'/events'
@@ -222,7 +233,7 @@ def prepare(items,client,*,data_dir=DATA,store=None):
             fair_p=pin.get('fair_p',''),edge=pin['fair_p']-1/r['price_decimal'] if pin['status']=='matched' else '',
             source=json.dumps({'import':provenance},sort_keys=True),note=f"Imported from {r['source_file']}, bet #{r['number']}, slip id {r['slip_id'] or 'unknown'}. Entry: {pin['status']}. Placement time: {r['placed_at'] or 'unknown; logged_at is import time'}. Owner result: {r['owner_result']}.")
         records.append(record)
-    report=dict(records=records,credits=client._load()['runs'].get(client.run_id,0),cap=client.run_cap,run_id=client.run_id)
+    report=dict(records=records,credits=charged(client),accounting=accounting(client),cap=client.run_cap,run_id=client.run_id)
     write_json(root/'prepared.json',report)
     return report
 
@@ -265,18 +276,18 @@ def main():
     p.add_argument('file',type=Path);p.add_argument('--data-dir',type=Path,default=DATA)
     p.add_argument('--backfill',action='store_true',help='Authorize the displayed historical estimate')
     p.add_argument('--write',action='store_true',help='Append prepared rows and grade from official sources')
-    p.add_argument('--cap',type=int,default=1000);a=p.parse_args()
+    a=p.parse_args()
     try:
         items=parse(a.file.read_bytes(),a.file.name);store=BetStore(a.data_dir)
         view=preview(items,store);todo=view[~view.duplicate].drop(columns='duplicate').to_dict('records')
         print(view[['number','game_date','player','book','stake','placed_at','duplicate']].to_string(index=False))
-        print(f'Historical bound: {estimate(todo)} credits; cap {a.cap}')
+        print(f'Historical bound: {estimate(todo)} credits')
         if not a.backfill:
             if a.write:raise ValueError('--write requires --backfill')
             return
         rid=run_id(todo)
         path=a.data_dir/'imports'/('prepared-'+rid)/'prepared.json'
-        report=json.loads(path.read_text()) if path.exists() else prepare(todo,Client(data_dir=a.data_dir,run_id=rid,run_cap=a.cap),data_dir=a.data_dir,store=store)
+        report=json.loads(path.read_text()) if path.exists() else prepare(todo,operational_client(data_dir=a.data_dir,run_id=rid,run_cap=estimate(todo)),data_dir=a.data_dir,store=store)
         feed=FreeFeed(a.data_dir/'settlement_cache')
         print(json.dumps(grade_preview(report['records'],feed),indent=2))
         if a.write:print(json.dumps(commit(report,store,feed),indent=2))

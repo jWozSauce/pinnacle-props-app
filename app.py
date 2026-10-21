@@ -212,7 +212,7 @@ if preview and preview['settings']==settings:
                 def report_scan(message):
                     scan_messages.append(message);progress_text.caption(message)
                 result=run_live(preview,profile=current_profiles[profile_name],profile_name=profile_name,
-                                key=key_for_live(),progress=report_scan,project_cap=deployment['project_cap'],data_dir=data_dir,display_rules=active_rules,paper_track=paper_track)
+                                key=key_for_live(),progress=report_scan,data_dir=data_dir,display_rules=active_rules,paper_track=paper_track)
                 st.session_state.pop('pp_bet_store_'+str(data_dir),None)
                 if settlement_preview and paper_track:
                     st.session_state['bet_receipt']=scan_messages[-1] if scan_messages else 'Paper tracking finished; check shared logs.'
@@ -231,19 +231,15 @@ if 'scan_'+sport not in st.session_state:
         st.error('Saved scan could not be verified: '+str(e))
 result=st.session_state.get('scan_'+sport)
 
-from pinnacle_props.settings import accounting_dir
-quota_file=accounting_dir(data_dir,cloud=deployment['cloud'])/'odds_budget.json'
-if deployment['cloud']:st.caption('Cloud reserve: 100,000 credits · Account floor: 100,000 credits.')
+quota_file=Path(data_dir)/'quota.json'
+st.caption('Account floor: 100,000 credits · Fresh balance check before each paid run.')
 if quota_file.exists():
     try:
         quota=json.loads(quota_file.read_text())
-        remaining=quota.get('remaining')
-        st.caption(f"Account credits: {remaining:,} · This ledger used: {quota['spent']:,} / {min(quota.get('project_cap',deployment['project_cap']),deployment['project_cap']):,}" if remaining is not None else 'Account quota has not been checked.')
-        if quota.get('halt') or any(not r.get('transient') for r in quota.get('reservations',{}).values()):
-            st.warning('Live requests are paused for a quota or request-accounting issue. Saved scans remain available.')
-        elif quota.get('reservations'):
-            st.caption(f"Credits reserved for unconfirmed responses: {sum(r['estimated'] for r in quota['reservations'].values()):,}")
-    except (ValueError,KeyError):st.warning('Quota record is unavailable; live requests will fail closed.')
+        remaining=quota.get('remaining',quota.get('x-requests-remaining'))
+        if remaining is not None:st.caption(f"Account remaining: {int(remaining):,} credits (last free check).")
+    except (ValueError,KeyError,TypeError):st.caption('Account remaining unavailable; the next run will check before spending.')
+else:st.caption('Account remaining: not yet checked. The next run checks it for free.')
 
 tabs=st.tabs(['Price comparison','Live','Kelly calculator']+((['Logged','Performance','Paper'] if settlement_preview else ['Logged','Performance']) if clv_preview else []))
 tab_prices,tab_live,tab_calc=tabs[:3]
@@ -266,7 +262,8 @@ with tab_prices:
         from pinnacle_props import consensus
         flagged=consensus.defaults(flagged)
         annotated=rules.annotate(flagged,active_rules,sport)
-        if manifest.get('settings',{}).get('advisory_version'):st.caption(consensus.LEGEND if manifest['settings']['advisory_version']>=2 else consensus.LEGACY_LEGEND)
+        if manifest.get('settings',{}).get('advisory_version'):st.caption(consensus.LEGEND if manifest['settings']['advisory_version']>=3 else consensus.SIGNED_LEGEND if manifest['settings']['advisory_version']==2 else consensus.LEGACY_LEGEND)
+        if manifest.get('settings',{}).get('advisory_version') in (1,2):st.caption('Saved scan uses the earlier ISLAND definition. Refresh prices to apply the current labels.')
         hidden=int((~annotated.rule_pass).sum())
         st.caption(f'{hidden} bets hidden by the rule · {len(annotated)} saved opportunities')
         show_all=st.checkbox('Show all saved opportunities',value=False,key='show_all_rules_'+sport)

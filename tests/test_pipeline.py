@@ -91,18 +91,17 @@ def test_formatted_sheet_bankroll_preserves_source_value():
         parse_profiles(csv.replace('5,000','50,00'))
 
 
-def test_deployment_cap_blocks_paid_request_before_send(tmp_path):
+def test_account_floor_blocks_paid_request_before_send(tmp_path):
     from pinnacle_props.odds_api import BudgetStop
     preview={'events':[{'id':'game-1','commence_time':'2099-01-01T00:00:00Z'}],'bound':1,'settings':settings()}
-    session=Session(Response())
-    with pytest.raises(BudgetStop,match='Project credit cap'):
+    session=Session(Response(remaining=100000))
+    with pytest.raises(BudgetStop,match='account floor'):
         run_live(preview,data_dir=tmp_path,profile=PROFILE,key='test-key',
                  session=session,progress=lambda _:None,project_cap=0)
     # Only the free quota preflight consumed the one mocked response.
     assert not session.results
     assert len(session.calls)==1 and session.calls[0][0].endswith("/v4/sports")
-    state=json.loads((tmp_path/'odds_budget.json').read_text())
-    assert state['spent']==0 and not state['reservations']
+    assert not (tmp_path/'odds_budget.json').exists()
 
 
 def test_discovery_all_upcoming_and_optional_eastern_dates(tmp_path):
@@ -170,5 +169,4 @@ def test_game_start_during_free_preflight_blocks_paid_transport(tmp_path,monkeyp
     with pytest.raises(BudgetStop,match='start reached'):
         run_live(preview,data_dir=tmp_path,profile=PROFILE,key='fixture',session=AdvancingSession(),progress=lambda _:None,paper_track=False)
     assert len(base.calls)==1 and base.calls[0][0].endswith('/v4/sports')
-    state=json.loads((tmp_path/'odds_budget.json').read_text())
-    assert state['spent']==0 and not state['reservations']
+    assert not (tmp_path/'odds_budget.json').exists()

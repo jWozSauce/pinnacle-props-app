@@ -67,7 +67,7 @@ def test_unknown_entry_and_limits(tmp_path):
     with pytest.raises(ValueError):prepare(items,c,data_dir=tmp_path)
     assert not c.calls
     c.run_cap=1001
-    with pytest.raises(ValueError):prepare(items,c,data_dir=tmp_path)
+    assert prepare(items,c,data_dir=tmp_path)['records'] # live no longer has the old 1,000-credit allowance
 
 
 def test_shared_read_failure_blocks_before_paid(tmp_path):

@@ -61,8 +61,8 @@ def build_catalog(definitions, preview, client, *, receipt_dir, cap=CAP):
     leagues go first; actual response charges determine whether later pulls fit.
     A budget stop leaves complete receipts for earlier sports, never a false zero.
     """
-    if not 0 < cap <= CAP or client.run_cap > cap:
-        raise ValueError('Catalog cap must not exceed 600 credits')
+    if not 0 < cap or client.run_cap > cap:
+        raise ValueError('Catalog requires a positive reviewed estimate')
     folder = Path(receipt_dir)
     folder.mkdir(parents=True, exist_ok=True)
     books = {b['key']: dict(b, sports={}) for b in definitions}
@@ -107,7 +107,9 @@ def build_catalog(definitions, preview, client, *, receipt_dir, cap=CAP):
             if markets:
                 entry['sports'][sport] = dict(markets=markets, receipt=receipt['request_id'])
         write_json(folder / f'{sport}-receipt.json', receipt)
-    catalog['credits'] = total
+    from .live_api import accounting,charged
+    catalog['accounting']=accounting(client)
+    catalog['credits'] = charged(client)
     catalog['complete'] = all(v['status'] in ('observed', 'deferred: no listed future games')
                               for v in catalog['sports'].values())
     return catalog

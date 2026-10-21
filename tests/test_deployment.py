@@ -8,7 +8,7 @@ from pinnacle_props import rules, book_catalog
 
 def test_cloud_preserves_reserve_without_daily_policy():
     cloud=deployment_settings({'PP_DEPLOYMENT':'cloud'})
-    assert cloud['project_cap']==100000 and cloud['paid_enabled'] and 'cloud_daily_cap' not in cloud
+    assert cloud['account_floor']==100000 and 'project_cap' not in cloud and cloud['paid_enabled'] and 'cloud_daily_cap' not in cloud
     assert deployment_settings({})['paid_enabled']
     with pytest.raises(ValueError):deployment_settings({'PP_STORE':'s3'})
 
@@ -111,8 +111,8 @@ def test_refresh_no_games_and_reserve_reasons(cloud_kelly):
     data=root/'data';data.mkdir(exist_ok=True)
     (data/'odds_budget.json').write_text(json.dumps(dict(spent=99990,project_cap=100000,remaining=900000,reservations={})))
     app.button(key='estimate').click().run()
-    assert not app.exception and app.button(key='refresh').disabled
-    assert any('remaining cloud reserve (10 credits)' in x.value for x in app.warning)
+    assert not app.exception and not app.button(key='refresh').disabled
+    assert not any('reserve' in x.value.lower() for x in app.warning)
     assert any('Account floor: 100,000' in x.value for x in app.caption)
     assert not any('Tick Limit game dates' in x.value for x in app.caption)
 
@@ -130,14 +130,18 @@ def test_estimate_above_old_daily_cap_is_enabled_even_with_legacy_ledger(cloud_k
     assert not any('daily cloud cap' in x.value.lower() for x in app.warning)
 
 
-def test_cloud_ui_retains_reserve_floor_and_unreadable_state_guards(tmp_path):
-    import json
+def test_cloud_ui_ignores_retired_ledger_and_checks_only_on_explicit_refresh(tmp_path):
     from pinnacle_props.deployment import cloud_refresh_reason
-    assert cloud_refresh_reason(tmp_path,2501) is None
-    assert 'reserve' in cloud_refresh_reason(tmp_path,100001)
-    path=tmp_path/'odds_budget.json'
-    path.write_text(json.dumps(dict(spent=5000,cloud_daily_cap=0,remaining=103000)))
-    assert cloud_refresh_reason(tmp_path,3000) is None
-    assert 'floor' in cloud_refresh_reason(tmp_path,3001)
-    path.write_text('{broken')
-    assert 'Quota record is unavailable' in cloud_refresh_reason(tmp_path,14)
+    path=tmp_path/'odds_budget.json';path.write_text('{broken')
+    assert cloud_refresh_reason(tmp_path,3001) is None
+    assert path.read_text()=='{broken'
+
+
+def test_account_remaining_caption_from_free_check(cloud_kelly):
+    import json
+    app,_,_,_,_,root=cloud_kelly
+    data=root/'data';data.mkdir(exist_ok=True)
+    (data/'quota.json').write_text(json.dumps({'remaining':123456,'at':'fixture'}))
+    unlock(app)
+    assert any('Account remaining: 123,456' in x.value for x in app.caption)
+    assert not any('reserve' in x.value.lower() or 'ledger used' in x.value.lower() for x in app.caption)

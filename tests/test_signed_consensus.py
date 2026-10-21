@@ -24,7 +24,7 @@ def test_signed_fair_probability_uses_bet_side_and_excludes_target(p,side,gap,le
     assert a.market_gap_pp==pytest.approx(gap) and a.sharp_gap_pp==pytest.approx(gap)
     assert a.market_edge_pp==pytest.approx(5+gap) and a.sharp_edge_pp==pytest.approx(5+gap)
     assert 'Market '+lean+' Pinnacle' in a.island_flag and 'Exchanges '+lean+' Pinnacle' in a.island_flag
-    assert a.edge==.05 and a.rule_pass and a.advisory_version==2
+    assert a.edge==.05 and a.rule_pass and a.advisory_version==3
 
 
 @pytest.mark.parametrize('p,flag',[(.48999,True),(.49,False),(.49001,False),(.53,False)])
@@ -48,3 +48,37 @@ def test_legacy_semantics_and_columns_remain_frozen():
     assert a.sharp_gap_pp==pytest.approx(-4) and 'SHARP-OFF' in a.island_flag
     assert 'market_gap_pp' not in a and 'advisory_version' not in a
     assert set(a.index)-set(f.columns)==set(LEGACY_FIELDS)
+
+
+@pytest.mark.parametrize('side',['over','under'])
+@pytest.mark.parametrize('gap',[-4.,-1.0001,-1.,-.9999,0.,4.])
+@pytest.mark.parametrize('count',[2,3,4])
+def test_current_island_and_market_direction_are_exclusive(side,gap,count):
+    p=.5+gap/100 if side=='over' else .5-gap/100
+    f,q=board(p,side,books=count);a=annotate(f,q).iloc[0]
+    expected=count>=3 and gap>=-1.
+    assert ('ISLAND' in a.island_flag)==expected
+    assert ('Market against Pinnacle' in a.island_flag)==(count>=3 and gap< -1.)
+    assert ('Market with Pinnacle' in a.island_flag)==expected
+    assert 'Exchanges' in a.island_flag
+    assert not ('ISLAND' in a.island_flag and 'Market against' in a.island_flag)
+
+
+def test_vig_can_no_longer_make_against_market_an_island():
+    f,q=board(.48)
+    # Vig makes legacy raw edge zero even though paired fair market is two pp lower.
+    old=annotate(f,q,version=2).iloc[0];new=annotate(f,q).iloc[0]
+    assert 'ISLAND' in old.island_flag and 'Market against' in old.island_flag
+    assert 'ISLAND' not in new.island_flag and 'Market against' in new.island_flag
+    for name in ['market_gap_pp','sharp_gap_pp','market_edge_pp','sharp_edge_pp','edge']:
+        assert new[name]==old[name]
+    f.rule_pass=False;q=board(.54)[1];new=annotate(f,q).iloc[0]
+    assert 'ISLAND' not in new.island_flag and 'Market with' in new.island_flag
+
+
+def test_current_one_sided_peers_never_supply_island():
+    f,q=board(.5);q=q[(q.side=='over')|(q.book=='novig')]
+    a=annotate(f,q).iloc[0]
+    assert a.books_q==3 and a.market_books_q==0
+    assert 'ISLAND' not in a.island_flag and 'Market' not in a.island_flag
+    assert 'Exchanges with' in a.island_flag

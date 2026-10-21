@@ -1,4 +1,5 @@
 """Manual, pre-start Pinnacle capture with immutable provenance and resumable requests."""
+from .live_api import operational_client, charged, accounting, failure_receipt
 import argparse
 from datetime import datetime, timezone
 import json
@@ -7,7 +8,7 @@ from pathlib import Path
 import uuid
 from zoneinfo import ZoneInfo
 import pandas as pd
-from .odds_api import APIError, Client, normalize, write_json, resolve_agent_key
+from .odds_api import APIError, normalize, write_json, resolve_agent_key
 from .pipeline import sha
 from .records import DATA, snapshots, artifact, record_lock, safe_id
 from .scan import aware
@@ -115,36 +116,40 @@ def capture(sport,scan_id=None,*,data_dir=DATA,window=10,key=None,session=None,c
             else:
                 job={'event':event,'run_id':'close-'+str(uuid.uuid4()),'window':window}
                 write_json(job_path,job)
-            c=Client(data_dir=data_dir,run_id=job['run_id'],run_cap=len(event['markets']),
-                     floor=config['account_floor'],project_cap=config['project_cap'],key=key,session=session,paid_deadline=event['start'])
+            c=operational_client(data_dir=data_dir,run_id=job['run_id'],run_cap=len(event['markets']),
+                     floor=config['account_floor'],project_cap=config['project_cap'],key=key,session=session,paid_deadline=event['start'],progress=progress,resume_only=bool(job.get('attempted_at')))
             remaining=(aware(event['start'])-aware(clock())).total_seconds()/60
             cache=c._cache_path(f"/v4/sports/{event['sport_key']}/events/{event['event_id']}/odds",
                                 {'markets':','.join(event['markets']),'bookmakers':'pinnacle','oddsFormat':'decimal'})
             if not cache.exists() and not 0<remaining<=job['window']:
                 progress('Event left the pre-start window; no new request sent for '+event['event_id']);continue
-            response=c.event_odds(event['sport_key'],event['event_id'],event['markets'],['pinnacle'])
-            # Use the raw response capture time, including when recovering a cached request.
-            import gzip
-            envelope=json.loads(gzip.decompress(Path(response.cache_path).read_bytes()))
-            fetched_at=envelope['captured_at']
-            rows=normalize(response.payload)
-            actual_start=aware(response.payload['commence_time'])
-            timing=assess_timing(event['start'],response.payload['commence_time'],fetched_at,job['window'])
-            valid=timing['timing_valid']
-            filename=event['event_id']+'_'+aware(fetched_at).tz_convert('UTC').strftime('%Y%m%dT%H%M%S%fZ')+'.parquet'
-            output=directory/filename
-            if output.exists():
-                pd.testing.assert_frame_equal(pd.read_parquet(output),rows)
-            else: rows.to_parquet(output,index=False)
-            meta=dict(sport=sport,event_id=event['event_id'],fetched_at=fetched_at,start=event['start'],
-                      markets=event['markets'],sport_key=event['sport_key'],window=job['window'],
-                      **timing,status='captured' if valid else 'invalid timing',
-                      parquet=filename,sha256=sha(output),request_id=response.request_id,
-                      raw_path=str(Path(response.cache_path).relative_to(data_dir)),raw_sha256=sha(response.cache_path),
-                      run_id=job['run_id'],bound=len(event['markets']),charged=c._load()['runs'].get(job['run_id'],0))
-            write_json(directory/(event['event_id']+'.json'),meta)
-            results.append(meta)
-            progress(f"{event['event_id']}: {meta['status']}; {meta['charged']} credits.")
+            with failure_receipt(c,job_path,job):
+                if not job.get('attempted_at'):
+                    c.preflight()
+                    job['attempted_at']=utcnow().isoformat();write_json(job_path,job)
+                response=c.event_odds(event['sport_key'],event['event_id'],event['markets'],['pinnacle'])
+                # Use the raw response capture time, including when recovering a cached request.
+                import gzip
+                envelope=json.loads(gzip.decompress(Path(response.cache_path).read_bytes()))
+                fetched_at=envelope['captured_at']
+                rows=normalize(response.payload)
+                actual_start=aware(response.payload['commence_time'])
+                timing=assess_timing(event['start'],response.payload['commence_time'],fetched_at,job['window'])
+                valid=timing['timing_valid']
+                filename=event['event_id']+'_'+aware(fetched_at).tz_convert('UTC').strftime('%Y%m%dT%H%M%S%fZ')+'.parquet'
+                output=directory/filename
+                if output.exists():
+                    pd.testing.assert_frame_equal(pd.read_parquet(output),rows)
+                else: rows.to_parquet(output,index=False)
+                meta=dict(sport=sport,event_id=event['event_id'],fetched_at=fetched_at,start=event['start'],
+                          markets=event['markets'],sport_key=event['sport_key'],window=job['window'],
+                          **timing,status='captured' if valid else 'invalid timing',
+                          parquet=filename,sha256=sha(output),request_id=response.request_id,
+                          raw_path=str(Path(response.cache_path).relative_to(data_dir)),raw_sha256=sha(response.cache_path),
+                          run_id=job['run_id'],bound=len(event['markets']),charged=charged(c),accounting=accounting(c))
+                write_json(directory/(event['event_id']+'.json'),meta)
+                results.append(meta)
+                progress(f"{event['event_id']}: {meta['status']}; {meta['charged']} credits.")
     from .clv import rebuild
     rebuild(data_dir=data_dir,sport=sport)
     return results

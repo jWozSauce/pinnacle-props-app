@@ -1,4 +1,5 @@
 """Acquisition, immutable snapshots and explicit cache replay around the pure scan."""
+from .live_api import operational_client, charged, accounting, failure_receipt
 from contextlib import contextmanager
 from dataclasses import asdict
 from datetime import date,datetime,timezone
@@ -13,7 +14,7 @@ import uuid
 import pandas as pd
 from .kelly import Profile
 from .kelly_sheet import fetch_profiles
-from .odds_api import APIError, BudgetStop, Client, coverage, normalize, write_json
+from .odds_api import APIError, BudgetStop, coverage, normalize, write_json
 from .scan import scan, INPUT_COLUMNS
 from .settings import ROOT, load_config
 from . import book_catalog, consensus
@@ -68,7 +69,7 @@ def scan_lock(data_dir):
 
 def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:datetime.now(timezone.utc)):
     """Free preparation for a user-reviewable cost estimate. Contains no credentials."""
-    c=Client(data_dir=data_dir,run_cap=0,session=session,key=key)
+    c=operational_client(data_dir=data_dir,run_cap=0,session=session,key=key)
     result=c.events(settings['sport_key'])
     if not isinstance(result.payload,list):
         raise APIError('Events endpoint did not return a list')
@@ -95,7 +96,7 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
 
 
 def _evaluate(frame,settings,profile,capture_time,exclusion_version=2):
-    if settings.get('advisory_version') not in (None,1,2):raise ValueError('Unsupported advisory version')
+    if settings.get('advisory_version') not in (None,1,2,3):raise ValueError('Unsupported advisory version')
     return scan(frame,profile,reference_book=settings['reference_book'],min_edge=settings['min_edge'],
                 max_reference_margin=settings['max_reference_margin'],include_live=settings['include_live'],
                 now=capture_time,exclusion_version=exclusion_version,
@@ -108,7 +109,7 @@ def _frame(results):
 
 
 def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,results,event_results,
-                   bound,charged,mode='live',display_rules=None):
+                   bound,charged,mode='live',display_rules=None,run_accounting=None):
     frame=_frame(results)
     flagged,excluded,counts=_evaluate(frame,settings,profile,capture_time)
     from . import rules
@@ -151,6 +152,7 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
               'candidate_pairs':len(flagged)+len(excluded),
               'rules':display_rules,'rule_version':rules.version(display_rules),
               'artifacts':{s:{'name':scan_id+s,'sha256':sha(str(base)+s)} for s in suffixes if s!='.json'}}
+    if run_accounting is not None:manifest['accounting']=run_accounting
     # Manifest is the completion marker; a partial output never qualifies for replay.
     write_json(str(base)+'.json',manifest)
     return manifest,flagged,excluded
@@ -169,8 +171,8 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
     from .request_pool import Pool,workers
     pool=Pool(workers(config,'scans',concurrency))
     with scan_lock(data_dir):
-        c=Client(data_dir=data_dir,run_id=scan_id,run_cap=preview['bound'],
-                 floor=config['account_floor'],project_cap=min(config['project_cap'],project_cap) if project_cap is not None else config['project_cap'],key=key,session=session,pool=pool)
+        c=operational_client(data_dir=data_dir,run_id=scan_id,run_cap=preview['bound'],
+                 floor=config['account_floor'],project_cap=min(config['project_cap'],project_cap) if project_cap is not None else config['project_cap'],key=key,session=session,pool=pool,progress=progress)
         results=[];statuses=[]
         progress(f"Preflight: {len(preview['events'])} events; upper bound {preview['bound']} credits.")
         if preview['bound']>20_000:
@@ -199,12 +201,12 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
                 if response is not None:results.append(response)
         if any(errors):
             write_json(Path(data_dir)/'incomplete_scans'/(scan_id+'.json'),
-                       {'preview':preview,'event_results':statuses,'state':'stopped','rate_limit':pool.rate_limit})
+                       {'preview':preview,'event_results':statuses,'state':'stopped','rate_limit':pool.rate_limit,'accounting':accounting(c)})
             raise next(e for e in errors if e is not None)
-        state=c._load()
-        charged=state['runs'].get(scan_id,0)
+        run_charge=charged(c)
         now=datetime.now(timezone.utc).isoformat()
-        result = _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],charged,display_rules=display_rules)
+        with failure_receipt(c,Path(data_dir)/'incomplete_scans'/(scan_id+'.json'),{'preview':preview,'event_results':statuses}):
+            result = _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],run_charge,display_rules=display_rules,run_accounting=accounting(c))
         from .bet_store import enabled
         if enabled() and paper_track:
             from .paper import track_scan
