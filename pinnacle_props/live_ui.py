@@ -1,4 +1,4 @@
-"""Today's real and paper live card, using bounded free feeds only."""
+"""Pending bets and the rolling last day of official grades; free feeds only."""
 from pathlib import Path
 import pandas as pd
 import streamlit as st
@@ -7,20 +7,31 @@ from .grade import live_table
 from .live_money import card_money,CAPTION
 from .settlement_sources import FreeFeed
 from .game_time import utcnow
+from .settle import OFFICIAL
+from .log_tables import LABELS,table
 
-EMPTY='No bets to track yet. Bets you log, and paper bets the scanner tracks, appear here from their start time and update live for NHL and NBA.'
+EMPTY='No bets to track yet. Pending bets and bets graded in the last 24 hours appear here; live scores cover NHL and NBA.'
+ORDER={'live':0,'waiting':0,'decided':1,'graded':2,'upcoming':3,'unmatched':4,'untracked':4}
 
 
 def cards(store,feed):
-    now=pd.Timestamp(utcnow());today=now.tz_convert('America/New_York').date()
+    now=pd.Timestamp(utcnow());cutoff=now-pd.Timedelta(days=1)
     output={};active=False
     for kind in ('real','paper'):
         frame=canonical(store.read(kind,reload=True),kind)
-        starts=pd.to_datetime(frame.start_time,utc=True,errors='coerce')
-        frame=frame[starts.le(now)&starts.dt.tz_convert('America/New_York').dt.date.eq(today)].copy()
+        graded=pd.to_datetime(frame.graded_at,utc=True,errors='coerce',format='mixed')
+        corrected=pd.to_datetime(frame.regraded_at,utc=True,errors='coerce',format='mixed')
+        recent=(graded.ge(cutoff)&graded.le(now))|(corrected.ge(cutoff)&corrected.le(now))
+        frame=frame[frame.status.eq('pending')|(frame.status.isin(OFFICIAL)&recent)].copy()
         card,official,projected=card_money(live_table(frame,feed))
-        stages=card.get('stage',pd.Series('',index=card.index))
-        active=active or bool(stages.isin(['live','waiting']).any())
+        # Card money consumes the live module's final stage before display relabeling.
+        if 'stage' not in card:card['stage']='unmatched'
+        if 'verdict' not in card:card['verdict']='— no live feed'
+        done=card.status.isin(OFFICIAL)
+        card.loc[done,'stage']='graded';card.loc[done,'verdict']=card.loc[done,'status'].map(LABELS)
+        card['stage']=card.stage.replace({'final':'decided'})
+        active=active or bool(card.stage.isin(['live','waiting']).any())
+        card=card.assign(_order=card.stage.map(ORDER).fillna(4),_start=pd.to_datetime(card.start_time,utc=True,errors='coerce',format='mixed')).sort_values(['_order','_start'],kind='stable').drop(columns=['_order','_start'])
         output[kind]=(card,official,projected)
     return output,active
 
@@ -32,21 +43,21 @@ def render_live(data_dir,*,store=None,feed=None):
     @st.fragment(run_every=60 if active else None)
     def panel():
         current,current_active=cards(store,feed)
-        # Re-register the timer when a tracked game enters/leaves live play.
         if current_active!=active:st.rerun(scope='app')
-        counts={k:int(v[0].status.eq('pending').sum()) for k,v in current.items()}
         st.subheader('Live')
         if store.warning:st.warning(store.warning)
-        kind=st.radio('Track bets',['real','paper'],index=1 if counts['real']==0 and counts['paper'] else 0,
-            format_func=lambda k:f'{k.title()} ({counts[k]})',horizontal=True,key='live_log')
+        kind=st.radio('Track bets',['real','paper'],index=0,format_func=lambda k:f'{k.title()} ({len(current[k][0])})',horizontal=True,key='live_log')
         card,official,projected=current[kind]
         a,b=st.columns(2);a.metric('Official P/L',f'${official:,.2f}');b.metric('Projected P/L',f'${projected:,.2f}')
         st.caption(CAPTION)
+        a,b,c=st.columns(3)
+        a.metric('In progress',int(card.stage.isin(['live','waiting']).sum()))
+        done=card[card.stage.isin(['decided','graded'])]
+        b.metric('Won / lost (incl. unofficial)',f"{int(done.verdict.str.startswith('✅').sum())}W / {int(done.verdict.str.startswith('❌').sum())}L")
+        c.metric('Upcoming',int(card.stage.eq('upcoming').sum()))
         st.button('Refresh now',key='refresh_live')
+        st.caption('All pending bets plus bets graded in the last 24 hours; times are Eastern.')
         if active:st.caption('Updates every 60 seconds while a tracked game is in progress.')
-        pending=card[card.status.eq('pending')].copy()
-        if pending.empty:st.info(EMPTY)
-        else:
-            pending['bet']=pending.apply(lambda r:f"{r.player} · {r.market} · {r.side} {r.line}",axis=1)
-            st.dataframe(pending[['verdict','score','detail','bet','book','stake','price_decimal','to_win']],hide_index=True,width='stretch')
+        if card.empty:st.info(EMPTY)
+        else:table(card,live=True)
     panel()

@@ -24,7 +24,7 @@ render(a,b,Path({str(tmp_path)!r}))
     app=AppTest.from_string(script).run()
     assert not app.exception
     metrics=[(m.label,m.value) for m in app.metric]
-    assert metrics.count(('Season P/L','$30.00'))==1
+    assert metrics.count(('Profit','$30.00'))==2
     assert not any('Projected' in label for label,value in metrics)
     assert len(app.dataframe)>=3
     app.radio(key='performance_log').set_value('paper').run()

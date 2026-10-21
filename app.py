@@ -453,6 +453,10 @@ if settlement_preview:
         clv_frame=rebuild(data_dir=data_dir)
     except (ValueError,OSError,KeyError):clv_frame=None
     render(tabs[3],tabs[4],data_dir,clv=clv_frame,paper_tab=tabs[5])
+    with tabs[3]:
+        from pinnacle_props.import_ui import render_import
+        from pinnacle_props.bet_store import session_store
+        render_import(data_dir,session_store(data_dir))
 elif clv_preview:
     try:
         report_text,clv_frame=clv_report(data_dir=data_dir,output=None)
