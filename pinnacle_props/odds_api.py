@@ -390,7 +390,7 @@ class Client:
                 return self._cached(cache_path)
             state = self._load()
             if cost and self.paid_deadline and datetime.fromisoformat(utcnow())>=self.paid_deadline:
-                raise BudgetStop('Close start reached while waiting; no paid request sent')
+                raise BudgetStop('Game start reached while waiting; no paid request sent')
             persisted_cap=state.get('project_cap',500_000)
             if type(persisted_cap) is not int or not 0<=persisted_cap<=PROJECT_CAP:
                 raise BudgetStop('Invalid persisted project cap')

@@ -173,7 +173,7 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
         if preview['bound']>20_000:
             raise BudgetStop('Run exceeds the 20,000-credit staging threshold')
         for event in preview['events']:
-            from .game_time import started
+            from .game_time import started,start_time
             # Discovery may precede execution by minutes; check again for every event.
             if not settings.get('include_live',False):
                 try:skip=started(event.get('commence_time'))
@@ -183,6 +183,7 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
                 if skip:
                     statuses.append({'event_id':event['id'],'status':'skipped: game started'})
                     continue
+            c.paid_deadline=None if settings.get('include_live',False) else start_time(event['commence_time'])
             try:
                 result=c.event_odds(settings['sport_key'],event['id'],settings['markets'],
                                     consensus.request_books(settings))
