@@ -116,10 +116,26 @@ if not profiles:
         if reload_profiles():st.rerun()
 
 with st.expander('Books, markets & scan settings',expanded=False):
+    from pinnacle_props import book_catalog
+    catalog=book_catalog.load() if book_catalog.enabled() else None
+    selectable=book_catalog.selectable_books(catalog,sport,config['books']) if catalog else config['books']
+    book_labels={k:b['label'] for k,b in selectable.items()} if catalog else config['books']
     query_books=st.query_params.get('books_'+sport,'').split(',')
-    selected_books=[b for b in query_books if b in config['books']] or list(config['books'])
-    books=st.multiselect('Books',list(config['books']),default=selected_books,
-                         format_func=lambda b:config['books'][b],key='books_'+sport)
+    selected_books=[b for b in query_books if b in selectable] or [b for b in config['books'] if b in selectable]
+    books=st.multiselect('Books',list(selectable),default=selected_books,
+                         format_func=lambda b:book_labels[b],key='books_'+sport)
+    if catalog:
+        st.checkbox('Pinnacle · required reference',value=True,disabled=True,key='catalog_reference')
+        st.caption(book_catalog.cost_caption(books,config['reference_book']))
+        st.caption('The original eleven books remain available by default; discovery is a dated sample, not guaranteed future coverage.')
+        st.caption('Exchange quotes use back prices only. DFS pick’em prices are provider-implied equivalents.')
+        unavailable={k:b for k,b in catalog['books'].items() if k!='pinnacle' and k not in selectable}
+        status=catalog['sports'].get(sport,{}).get('status','discovery not completed')
+        if status!='observed':st.caption(config['sports'][sport]['label']+' bookmaker discovery is deferred; the original eleven books remain available.')
+        reason='no props returned in the discovery sample' if status=='observed' else status
+        with st.expander('Unavailable books · '+reason):
+            for k,b in unavailable.items():
+                st.checkbox(b['label']+' · '+reason,value=False,disabled=True,key='unavailable_'+sport+'_'+k)
     available=config['sports'][sport]['markets']+config['sports'][sport].get('alternate_markets',[])
     query_markets=st.query_params.get('markets_'+sport,'').split(',')
     selected_markets=[m for m in query_markets if m in available] or config['sports'][sport]['markets']
@@ -287,7 +303,7 @@ with tab_prices:
                     st.markdown(f"### {flag.split(' ')[0]+' ' if flag else ''}{row.player_name}")
                     price=row.Target_over if row.side=='over' else row.Target_under
                     st.write(f"{row.side.title()} {row.Target_line:g} · {row.prop_type.removeprefix('player_').replace('_',' ')}")
-                    st.markdown(f"**{config['books'].get(row.book,row.book)} {price:+.0f}** · Edge {100*row.edge:.2f} pp · EV {row.ev_pct:.2f}%")
+                    st.markdown(f"**{book_labels.get(row.book,row.book)} {price:+.0f}** · Edge {100*row.edge:.2f} pp · EV {row.ev_pct:.2f}%")
                     st.caption(f"{row.game} · {label_time(row.date)}")
                     if age:
                         st.caption(f'◷ Older quote · Pinnacle age at capture: {row.pin_age_min:.1f} min')

@@ -1,0 +1,2465 @@
+{
+  "schema_version": 1,
+  "discovered_at": "2026-10-21T00:32:32.356921+00:00",
+  "documentation": "https://the-odds-api.com/sports-odds-data/bookmaker-apis.html",
+  "regions": [
+    "us",
+    "us2",
+    "us_ex",
+    "us_dfs",
+    "eu",
+    "uk",
+    "au",
+    "ca",
+    "fr",
+    "se",
+    "fi"
+  ],
+  "run_id": "catalog-20261021-approved",
+  "cap": 586,
+  "books": {
+    "betonlineag": {
+      "key": "betonlineag",
+      "label": "BetOnline.ag\n                  (opens new window)",
+      "regions": [
+        "us",
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_total_bases",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "betmgm": {
+      "key": "betmgm",
+      "label": "BetMGM\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_singles",
+            "batter_stolen_bases",
+            "batter_total_bases",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "betrivers": {
+      "key": "betrivers",
+      "label": "BetRivers\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_home_runs"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_goals"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "betus": {
+      "key": "betus",
+      "label": "BetUS\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "bovada": {
+      "key": "bovada",
+      "label": "Bovada\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits_runs_rbis",
+            "batter_total_bases",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts",
+            "pitcher_walks"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "williamhill_us": {
+      "key": "williamhill_us",
+      "label": "Caesars\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_total_bases",
+            "batter_walks",
+            "pitcher_outs"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "draftkings": {
+      "key": "draftkings",
+      "label": "DraftKings\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_singles",
+            "batter_total_bases",
+            "batter_walks",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts",
+            "pitcher_walks"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_blocked_shots",
+            "player_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "fanatics": {
+      "key": "fanatics",
+      "label": "Fanatics\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_rbis",
+            "batter_singles",
+            "batter_stolen_bases",
+            "batter_total_bases",
+            "batter_triples",
+            "batter_walks",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "fanduel": {
+      "key": "fanduel",
+      "label": "FanDuel\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_stolen_bases",
+            "pitcher_outs",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_goals",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "lowvig": {
+      "key": "lowvig",
+      "label": "LowVig.ag\n                  (opens new window)",
+      "regions": [
+        "us"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "mybookieag": {
+      "key": "mybookieag",
+      "label": "MyBookie.ag\n                  (opens new window)",
+      "regions": [
+        "us",
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "ballybet": {
+      "key": "ballybet",
+      "label": "Bally Bet\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_home_runs",
+            "batter_stolen_bases"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_goals",
+            "player_power_play_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "betanysports": {
+      "key": "betanysports",
+      "label": "BetAnything\n                  (opens new window)",
+      "regions": [
+        "us2",
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betparx": {
+      "key": "betparx",
+      "label": "betPARX\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_home_runs",
+            "batter_stolen_bases"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "courtside": {
+      "key": "courtside",
+      "label": "Courtside\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_blocked_shots",
+            "player_goals",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "espnbet": {
+      "key": "espnbet",
+      "label": "theScore Bet\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_singles",
+            "batter_total_bases",
+            "batter_walks",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts",
+            "pitcher_walks"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_goals",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "fliff": {
+      "key": "fliff",
+      "label": "Fliff\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_blocked_shots",
+            "player_goals",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_assists_q1",
+            "player_blocks",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "hardrockbet": {
+      "key": "hardrockbet",
+      "label": "Hard Rock Bet\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_singles",
+            "batter_stolen_bases",
+            "batter_total_bases",
+            "batter_triples",
+            "batter_walks",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts",
+            "pitcher_walks"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_goals",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_assists_q1",
+            "player_blocks",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_rebounds_q1",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "hardrockbet_az": {
+      "key": "hardrockbet_az",
+      "label": "Hard Rock Bet (AZ)\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "hardrockbet_fl": {
+      "key": "hardrockbet_fl",
+      "label": "Hard Rock Bet (FL)\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "hardrockbet_oh": {
+      "key": "hardrockbet_oh",
+      "label": "Hard Rock Bet (OH)\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "rebet": {
+      "key": "rebet",
+      "label": "ReBet\n                  (opens new window)",
+      "regions": [
+        "us2"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_total_bases",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "dabble_us_dfs": {
+      "key": "dabble_us_dfs",
+      "label": "Dabble\n                  (opens new window)",
+      "regions": [
+        "us_dfs"
+      ],
+      "kind": "dfs",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_singles",
+            "batter_stolen_bases",
+            "batter_total_bases",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        }
+      }
+    },
+    "pick6": {
+      "key": "pick6",
+      "label": "DraftKings Pick6\n                  (opens new window)",
+      "regions": [
+        "us_dfs"
+      ],
+      "kind": "dfs",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_singles",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_goals",
+            "player_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "prizepicks": {
+      "key": "prizepicks",
+      "label": "PrizePicks\n                  (opens new window)",
+      "regions": [
+        "us_dfs"
+      ],
+      "kind": "dfs",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_singles",
+            "batter_total_bases",
+            "pitcher_hits_allowed",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_blocked_shots",
+            "player_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_blocks_steals",
+            "player_field_goals",
+            "player_frees_attempts",
+            "player_frees_made",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes",
+            "player_turnovers"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "underdog": {
+      "key": "underdog",
+      "label": "Underdog Fantasy\n                  (opens new window)",
+      "regions": [
+        "us_dfs"
+      ],
+      "kind": "dfs",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_total_bases",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "betopenly": {
+      "key": "betopenly",
+      "label": "BetOpenly\n                  (opens new window)",
+      "regions": [
+        "us_ex"
+      ],
+      "kind": "exchange",
+      "sports": {
+        "nhl": {
+          "markets": [
+            "player_goals",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "kalshi": {
+      "key": "kalshi",
+      "label": "Kalshi\n                  (opens new window)",
+      "regions": [
+        "us_ex"
+      ],
+      "kind": "exchange",
+      "sports": {}
+    },
+    "limitless": {
+      "key": "limitless",
+      "label": "Limitless Exchange\n                  (opens new window)",
+      "regions": [
+        "us_ex"
+      ],
+      "kind": "exchange",
+      "sports": {}
+    },
+    "novig": {
+      "key": "novig",
+      "label": "Novig\n                  (opens new window)",
+      "regions": [
+        "us_ex"
+      ],
+      "kind": "exchange",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_stolen_bases",
+            "batter_strikeouts",
+            "batter_total_bases",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts",
+            "pitcher_walks"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_goals",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "polymarket": {
+      "key": "polymarket",
+      "label": "Polymarket\n                  (opens new window)",
+      "regions": [
+        "us_ex"
+      ],
+      "kind": "exchange",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "polymarket_us": {
+      "key": "polymarket_us",
+      "label": "Polymarket (US)\n                  (opens new window)",
+      "regions": [
+        "us_ex"
+      ],
+      "kind": "exchange",
+      "sports": {}
+    },
+    "prophetx": {
+      "key": "prophetx",
+      "label": "ProphetX\n                  (opens new window)",
+      "regions": [
+        "us_ex"
+      ],
+      "kind": "exchange",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_stolen_bases",
+            "batter_total_bases",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_blocked_shots",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "sport888": {
+      "key": "sport888",
+      "label": "888sport\n                  (opens new window)",
+      "regions": [
+        "uk",
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betano_uk": {
+      "key": "betano_uk",
+      "label": "Betano (UK)\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betfair_ex_uk": {
+      "key": "betfair_ex_uk",
+      "label": "Betfair Exchange\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "exchange",
+      "sports": {}
+    },
+    "betfair_sb_uk": {
+      "key": "betfair_sb_uk",
+      "label": "Betfair Sportsbook\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betfred_uk": {
+      "key": "betfred_uk",
+      "label": "Betfred (UK)\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betvictor": {
+      "key": "betvictor",
+      "label": "Bet Victor\n                  (opens new window)",
+      "regions": [
+        "uk",
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betway": {
+      "key": "betway",
+      "label": "Betway\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "boylesports": {
+      "key": "boylesports",
+      "label": "BoyleSports\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "casumo": {
+      "key": "casumo",
+      "label": "Casumo\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "coral": {
+      "key": "coral",
+      "label": "Coral\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "grosvenor": {
+      "key": "grosvenor",
+      "label": "Grosvenor\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "ladbrokes_uk": {
+      "key": "ladbrokes_uk",
+      "label": "Ladbrokes\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "leovegas": {
+      "key": "leovegas",
+      "label": "LeoVegas\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "livescorebet": {
+      "key": "livescorebet",
+      "label": "LiveScore Bet\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "matchbook": {
+      "key": "matchbook",
+      "label": "Matchbook\n                  (opens new window)",
+      "regions": [
+        "uk",
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "paddypower": {
+      "key": "paddypower",
+      "label": "Paddy Power\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "skybet": {
+      "key": "skybet",
+      "label": "Sky Bet\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "smarkets": {
+      "key": "smarkets",
+      "label": "Smarkets\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "unibet_uk": {
+      "key": "unibet_uk",
+      "label": "Unibet\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "virginbet": {
+      "key": "virginbet",
+      "label": "Virgin Bet\n                  (opens new window)",
+      "regions": [
+        "uk"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "williamhill": {
+      "key": "williamhill",
+      "label": "William Hill (UK)\n                  (opens new window)",
+      "regions": [
+        "uk",
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "onexbet": {
+      "key": "onexbet",
+      "label": "1xBet\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betclic_fr": {
+      "key": "betclic_fr",
+      "label": "Betclic (FR)\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "fr"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betfair_ex_eu": {
+      "key": "betfair_ex_eu",
+      "label": "Betfair Exchange\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "exchange",
+      "sports": {}
+    },
+    "betsson": {
+      "key": "betsson",
+      "label": "Betsson\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "codere_it": {
+      "key": "codere_it",
+      "label": "Codere (IT)\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "coolbet": {
+      "key": "coolbet",
+      "label": "Coolbet\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_goals",
+            "player_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        }
+      }
+    },
+    "everygame": {
+      "key": "everygame",
+      "label": "Everygame\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "gtbets": {
+      "key": "gtbets",
+      "label": "GTbets\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "leovegas_se": {
+      "key": "leovegas_se",
+      "label": "LeoVegas (SE)\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "marathonbet": {
+      "key": "marathonbet",
+      "label": "Marathon Bet\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "nordicbet": {
+      "key": "nordicbet",
+      "label": "NordicBet\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "pinnacle": {
+      "key": "pinnacle",
+      "label": "Pinnacle\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_home_runs",
+            "batter_runs_scored",
+            "batter_total_bases",
+            "pitcher_hits_allowed",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "pmu_fr": {
+      "key": "pmu_fr",
+      "label": "PMU (FR)\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "fr"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "tipico_de": {
+      "key": "tipico_de",
+      "label": "Tipico (DE)\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "unibet_fr": {
+      "key": "unibet_fr",
+      "label": "Unibet (FR)\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "fr"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "unibet_it": {
+      "key": "unibet_it",
+      "label": "Unibet (IT)\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "unibet_nl": {
+      "key": "unibet_nl",
+      "label": "Unibet (NL)\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "unibet_se": {
+      "key": "unibet_se",
+      "label": "Unibet (SE)\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "winamax_de": {
+      "key": "winamax_de",
+      "label": "Winamax (DE)\n                  (opens new window)",
+      "regions": [
+        "eu"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "winamax_fr": {
+      "key": "winamax_fr",
+      "label": "Winamax (FR)\n                  (opens new window)",
+      "regions": [
+        "eu",
+        "fr"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betfair_ex_au": {
+      "key": "betfair_ex_au",
+      "label": "Betfair Exchange\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "exchange",
+      "sports": {}
+    },
+    "betr_au": {
+      "key": "betr_au",
+      "label": "Betr\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betright": {
+      "key": "betright",
+      "label": "Bet Right\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_steals"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "bet365_au": {
+      "key": "bet365_au",
+      "label": "Bet365 AU\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "dabble_au": {
+      "key": "dabble_au",
+      "label": "Dabble AU\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_assists_q1",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_rebounds_q1",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "ladbrokes_au": {
+      "key": "ladbrokes_au",
+      "label": "Ladbrokes\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "neds": {
+      "key": "neds",
+      "label": "Neds\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "picklebet_au": {
+      "key": "picklebet_au",
+      "label": "Picklebet (AU)\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "playup": {
+      "key": "playup",
+      "label": "PlayUp\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "pointsbetau": {
+      "key": "pointsbetau",
+      "label": "PointsBet (AU)\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_singles",
+            "batter_triples"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "sportsbet": {
+      "key": "sportsbet",
+      "label": "SportsBet\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_goals"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_points",
+            "player_points_assists",
+            "player_points_q1",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "tab": {
+      "key": "tab",
+      "label": "TAB\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "pitcher_outs"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_assists_q1",
+            "player_blocks",
+            "player_points",
+            "player_points_q1",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_q1",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "tabtouch": {
+      "key": "tabtouch",
+      "label": "TABtouch\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_home_runs"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_goals",
+            "player_power_play_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        }
+      }
+    },
+    "unibet": {
+      "key": "unibet",
+      "label": "Unibet\n                  (opens new window)",
+      "regions": [
+        "au"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "wnba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "182e8483-a8a4-433e-9c37-1b53b9f5f376"
+        },
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_home_runs",
+            "batter_stolen_bases"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_goals",
+            "player_power_play_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_blocks",
+            "player_blocks_steals",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_steals",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "bet99_ca_on": {
+      "key": "bet99_ca_on",
+      "label": "BET99 (CA - ON)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_singles",
+            "batter_stolen_bases",
+            "batter_strikeouts",
+            "batter_total_bases",
+            "batter_triples",
+            "batter_walks",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts",
+            "pitcher_walks"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_blocked_shots",
+            "player_goals",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal",
+            "player_total_saves"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        }
+      }
+    },
+    "betano_ca_on": {
+      "key": "betano_ca_on",
+      "label": "Betano (CA - ON)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betmgm_ca_on": {
+      "key": "betmgm_ca_on",
+      "label": "BetMGM (CA - ON)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_hits",
+            "batter_rbis",
+            "batter_total_bases",
+            "pitcher_earned_runs",
+            "pitcher_strikeouts"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        }
+      }
+    },
+    "betrivers_ca_on": {
+      "key": "betrivers_ca_on",
+      "label": "BetRivers (CA - ON)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "playnow_ca": {
+      "key": "playnow_ca",
+      "label": "PlayNow (CA)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "pointsbetca": {
+      "key": "pointsbetca",
+      "label": "PointsBet (CA - ON)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_home_runs",
+            "batter_rbis",
+            "batter_singles",
+            "batter_triples"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_points_assists",
+            "player_points_rebounds",
+            "player_points_rebounds_assists",
+            "player_rebounds",
+            "player_rebounds_assists",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "proline_ca_on": {
+      "key": "proline_ca_on",
+      "label": "PROLINE (CA - ON)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "sportsinteraction_ca_on": {
+      "key": "sportsinteraction_ca_on",
+      "label": "Sports Interaction (CA - ON)\n                  (opens new window)",
+      "regions": [
+        "ca"
+      ],
+      "kind": "sportsbook",
+      "sports": {
+        "mlb": {
+          "markets": [
+            "batter_doubles",
+            "batter_hits",
+            "batter_hits_runs_rbis",
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_singles",
+            "batter_stolen_bases",
+            "batter_total_bases",
+            "batter_walks",
+            "pitcher_earned_runs",
+            "pitcher_hits_allowed",
+            "pitcher_outs",
+            "pitcher_strikeouts",
+            "pitcher_walks"
+          ],
+          "receipt": "2ef0a9cd-a85f-4311-aab3-34428a815632"
+        },
+        "nhl": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_power_play_points",
+            "player_shots_on_goal"
+          ],
+          "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nba": {
+          "markets": [
+            "player_assists",
+            "player_points",
+            "player_rebounds",
+            "player_threes"
+          ],
+          "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        }
+      }
+    },
+    "netbet_fr": {
+      "key": "netbet_fr",
+      "label": "NetBet (FR)\n                  (opens new window)",
+      "regions": [
+        "fr"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "atg_se": {
+      "key": "atg_se",
+      "label": "ATG (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betinia_se": {
+      "key": "betinia_se",
+      "label": "Betinia (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "betmgm_se": {
+      "key": "betmgm_se",
+      "label": "BetMGM (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "campobet_se": {
+      "key": "campobet_se",
+      "label": "CampoBet (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "expekt_se": {
+      "key": "expekt_se",
+      "label": "Nya Expekt (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "hajper_se": {
+      "key": "hajper_se",
+      "label": "Hajper (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "mrgreen_se": {
+      "key": "mrgreen_se",
+      "label": "Mr Green (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "sport888_se": {
+      "key": "sport888_se",
+      "label": "888sport (SE)\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "svenskaspel_se": {
+      "key": "svenskaspel_se",
+      "label": "Svenska Spel\n                  (opens new window)",
+      "regions": [
+        "se"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "leovegas_fi": {
+      "key": "leovegas_fi",
+      "label": "LeoVegas (FI)\n                  (opens new window)",
+      "regions": [
+        "fi"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "unibet_fi": {
+      "key": "unibet_fi",
+      "label": "Unibet (FI)\n                  (opens new window)",
+      "regions": [
+        "fi"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    },
+    "veikkaus_fi": {
+      "key": "veikkaus_fi",
+      "label": "Veikkaus (FI)\n                  (opens new window)",
+      "regions": [
+        "fi"
+      ],
+      "kind": "sportsbook",
+      "sports": {}
+    }
+  },
+  "sports": {
+    "wnba": {
+      "status": "observed",
+      "receipt": {
+        "request_id": "182e8483-a8a4-433e-9c37-1b53b9f5f376",
+        "raw_sha256": "8180987ae8e5f58ecc23289e91cb6de85f08e892c1c6da1cc173fd2616e341b2",
+        "captured_at": "2026-10-21T00:32:33.850247+00:00",
+        "event_sha256": "54fac854c698dfb330954a426be295520ac3d091506b3b96e3229c05db8313f9",
+        "regions": [
+          "us",
+          "us2",
+          "us_ex",
+          "us_dfs",
+          "eu",
+          "uk",
+          "au",
+          "ca",
+          "fr",
+          "se",
+          "fi"
+        ],
+        "requested_markets": [
+          "player_points",
+          "player_points_q1",
+          "player_rebounds",
+          "player_rebounds_q1",
+          "player_assists",
+          "player_assists_q1",
+          "player_threes",
+          "player_blocks",
+          "player_steals",
+          "player_blocks_steals",
+          "player_turnovers",
+          "player_points_rebounds_assists",
+          "player_points_rebounds",
+          "player_points_assists",
+          "player_rebounds_assists",
+          "player_field_goals",
+          "player_frees_made",
+          "player_frees_attempts"
+        ],
+        "credits": 99
+      }
+    },
+    "mlb": {
+      "status": "observed",
+      "receipt": {
+        "request_id": "2ef0a9cd-a85f-4311-aab3-34428a815632",
+        "raw_sha256": "0b2c6a18c3a2f80ac914c84703e071eb5f1a57aa46603fddd1ed1fbb07e48eb1",
+        "captured_at": "2026-10-21T00:32:34.893901+00:00",
+        "event_sha256": "87c2660fdc6e1603965e076561f99429fad49594a514b7b593a8f4f011c18ebe",
+        "regions": [
+          "us",
+          "us2",
+          "us_ex",
+          "us_dfs",
+          "eu",
+          "uk",
+          "au",
+          "ca",
+          "fr",
+          "se",
+          "fi"
+        ],
+        "requested_markets": [
+          "batter_home_runs",
+          "batter_hits",
+          "batter_total_bases",
+          "batter_rbis",
+          "batter_runs_scored",
+          "batter_hits_runs_rbis",
+          "batter_singles",
+          "batter_doubles",
+          "batter_triples",
+          "batter_walks",
+          "batter_strikeouts",
+          "batter_stolen_bases",
+          "pitcher_strikeouts",
+          "pitcher_hits_allowed",
+          "pitcher_walks",
+          "pitcher_earned_runs",
+          "pitcher_outs"
+        ],
+        "credits": 187
+      }
+    },
+    "nhl": {
+      "status": "observed",
+      "receipt": {
+        "request_id": "6fb6bf07-b138-4c67-9392-0919cc624111",
+        "raw_sha256": "504b024b452aae5917139a655dfe5b31abbe3f1849123fd8644d7eff6bb9c796",
+        "captured_at": "2026-10-21T00:32:35.928754+00:00",
+        "event_sha256": "08fa1976e95525160ae663cc5aa47b71698be772fbf90af3c5ed5f3f910dc8e7",
+        "regions": [
+          "us",
+          "us2",
+          "us_ex",
+          "us_dfs",
+          "eu",
+          "uk",
+          "au",
+          "ca",
+          "fr",
+          "se",
+          "fi"
+        ],
+        "requested_markets": [
+          "player_points",
+          "player_assists",
+          "player_power_play_points",
+          "player_blocked_shots",
+          "player_shots_on_goal",
+          "player_goals",
+          "player_total_saves"
+        ],
+        "credits": 77
+      }
+    },
+    "nba": {
+      "status": "observed",
+      "receipt": {
+        "request_id": "3166e362-bd35-4f7e-b37f-96c60d80be54",
+        "raw_sha256": "501c29a49f8ec262fe38064fb0db15b616efed56ee0bb977b1e7272c05b01b17",
+        "captured_at": "2026-10-21T00:32:37.067251+00:00",
+        "event_sha256": "a0278a379ec05e880be48d4472d813a81d1069c4ee4f042ba12d861ec7b45d31",
+        "regions": [
+          "us",
+          "us2",
+          "us_ex",
+          "us_dfs",
+          "eu",
+          "uk",
+          "au",
+          "ca",
+          "fr",
+          "se",
+          "fi"
+        ],
+        "requested_markets": [
+          "player_points",
+          "player_points_q1",
+          "player_rebounds",
+          "player_rebounds_q1",
+          "player_assists",
+          "player_assists_q1",
+          "player_threes",
+          "player_blocks",
+          "player_steals",
+          "player_blocks_steals",
+          "player_turnovers",
+          "player_points_rebounds_assists",
+          "player_points_rebounds",
+          "player_points_assists",
+          "player_rebounds_assists",
+          "player_field_goals",
+          "player_frees_made",
+          "player_frees_attempts"
+        ],
+        "credits": 198
+      }
+    },
+    "nfl": {
+      "status": "deferred: next request exceeds remaining budget or another budget guard"
+    }
+  },
+  "credits": 561,
+  "complete": false
+}

@@ -16,6 +16,7 @@ from .kelly_sheet import fetch_profiles
 from .odds_api import APIError, BudgetStop, Client, coverage, normalize, write_json
 from .scan import scan, INPUT_COLUMNS
 from .settings import ROOT, load_config
+from . import book_catalog
 
 
 def sha(path):
@@ -26,8 +27,12 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
     if sport not in config['sports']:
         raise ValueError('Unknown configured sport')
     settings=config['sports'][sport]
-    selected_books=list(dict.fromkeys(books if books is not None else config['books']))
-    if not selected_books or any(b not in config['books'] for b in selected_books):
+    allowed_books = (book_catalog.selectable_books(book_catalog.load(), sport, config['books'])
+                     if book_catalog.enabled() else config['books'])
+    defaults = [b for b in config['books'] if b in allowed_books]
+    selected_books=list(dict.fromkeys(books if books is not None else defaults))
+    selected_books=[b for b in selected_books if b != config['reference_book']]
+    if not selected_books or any(b not in allowed_books for b in selected_books):
         raise ValueError('Choose at least one configured soft book')
     selected_markets=list(dict.fromkeys(markets if markets is not None else settings['markets']))
     allowed=settings['markets']+settings.get('alternate_markets',[])
@@ -82,7 +87,7 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
     ids=[e['id'] for e in events]
     if len(ids)!=len(set(ids)):
         raise APIError('Events endpoint returned duplicate event IDs')
-    books=[settings['reference_book']]+settings['books']
+    books=book_catalog.canonical_books(settings['books'],settings['reference_book'])
     bound=len(events)*len(settings['markets'])*((len(books)+9)//10)
     return {'events':events,'bound':bound,'discovered_at':datetime.now(timezone.utc).isoformat(),
             'date':day.isoformat(),'event_cache':result.cache_path,'settings':settings}
