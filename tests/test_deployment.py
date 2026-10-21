@@ -2,6 +2,8 @@ from pathlib import Path
 import pytest
 from streamlit.testing.v1 import AppTest
 from pinnacle_props.deployment import deployment_settings
+# Resolve repository config paths before tests redirect runtime ROOT to tmp_path.
+from pinnacle_props import rules, book_catalog
 
 
 def test_cloud_enforces_approved_temporary_daily_policy():

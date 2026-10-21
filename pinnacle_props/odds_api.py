@@ -34,7 +34,7 @@ from .settings import accounting_dir
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = 'https://api.the-odds-api.com'
-PROJECT_CAP = 2_600_000
+PROJECT_CAP = 2_800_000
 ACCOUNT_FLOOR = 100_000
 CLOSE_DAILY_CAP = 2_500
 CLOUD_DAILY_CAP = 2_500

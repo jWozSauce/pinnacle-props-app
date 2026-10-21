@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "discovered_at": "2026-10-21T00:32:32.356921+00:00",
+  "discovered_at": "2026-10-21T01:03:37.933404+00:00",
   "documentation": "https://the-odds-api.com/sports-odds-data/bookmaker-apis.html",
   "regions": [
     "us",
@@ -16,7 +16,7 @@
     "fi"
   ],
   "run_id": "catalog-20261021-approved",
-  "cap": 586,
+  "cap": 726,
   "books": {
     "betonlineag": {
       "key": "betonlineag",
@@ -62,6 +62,20 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -107,6 +121,24 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_field_goals",
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -156,6 +188,22 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_kicking_points",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -208,6 +256,21 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -313,6 +376,25 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_field_goals",
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -352,6 +434,19 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -408,6 +503,16 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -469,6 +574,24 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -526,6 +649,24 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -624,6 +765,16 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -674,6 +825,24 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -744,6 +913,23 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_field_goals",
+            "player_kicking_points",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -763,7 +949,25 @@
         "us2"
       ],
       "kind": "sportsbook",
-      "sports": {}
+      "sports": {
+        "nfl": {
+          "markets": [
+            "player_field_goals",
+            "player_kicking_points",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
+        }
+      }
     },
     "hardrockbet_oh": {
       "key": "hardrockbet_oh",
@@ -878,6 +1082,16 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -940,6 +1154,24 @@
             "player_turnovers"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -990,6 +1222,23 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds",
+            "player_tackles_assists"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1100,6 +1349,24 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_field_goals",
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1200,6 +1467,23 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1555,6 +1839,19 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1706,6 +2003,16 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_longest_completion",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_rush_longest"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1729,6 +2036,18 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1813,6 +2132,16 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1865,6 +2194,20 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1896,6 +2239,17 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -1975,6 +2329,24 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -2019,6 +2391,25 @@
             "player_total_saves"
           ],
           "receipt": "6fb6bf07-b138-4c67-9392-0919cc624111"
+        },
+        "nfl": {
+          "markets": [
+            "player_field_goals",
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_longest",
+            "player_rush_yds",
+            "player_tackles_assists"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -2118,6 +2509,16 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -2174,6 +2575,24 @@
             "player_threes"
           ],
           "receipt": "3166e362-bd35-4f7e-b37f-96c60d80be54"
+        },
+        "nfl": {
+          "markets": [
+            "player_field_goals",
+            "player_kicking_points",
+            "player_pass_attempts",
+            "player_pass_completions",
+            "player_pass_interceptions",
+            "player_pass_longest_completion",
+            "player_pass_tds",
+            "player_pass_yds",
+            "player_reception_longest",
+            "player_reception_yds",
+            "player_receptions",
+            "player_rush_attempts",
+            "player_rush_yds"
+          ],
+          "receipt": "4fa5e301-9c5a-4459-bc07-8f79c49e2125"
         }
       }
     },
@@ -2457,9 +2876,51 @@
       }
     },
     "nfl": {
-      "status": "deferred: next request exceeds remaining budget or another budget guard"
+      "status": "observed",
+      "receipt": {
+        "request_id": "4fa5e301-9c5a-4459-bc07-8f79c49e2125",
+        "raw_sha256": "438f17e3f9773df4eec3b195a1d897ad22082b4bb2756dbe4105fb661e39f859",
+        "captured_at": "2026-10-21T01:03:37.642304+00:00",
+        "event_sha256": "a3afc635ac219bae97af4568bf3de443f7862fb112ba950cbaf81dd3caed7df6",
+        "regions": [
+          "us",
+          "us2",
+          "us_ex",
+          "us_dfs",
+          "eu",
+          "uk",
+          "au",
+          "ca",
+          "fr",
+          "se",
+          "fi"
+        ],
+        "requested_markets": [
+          "player_pass_tds",
+          "player_pass_yds",
+          "player_pass_completions",
+          "player_pass_attempts",
+          "player_pass_interceptions",
+          "player_pass_longest_completion",
+          "player_rush_yds",
+          "player_rush_attempts",
+          "player_rush_longest",
+          "player_receptions",
+          "player_reception_yds",
+          "player_reception_longest",
+          "player_kicking_points",
+          "player_field_goals",
+          "player_tackles_assists"
+        ],
+        "credits": 165
+      }
     }
   },
-  "credits": 561,
-  "complete": false
+  "credits": 726,
+  "complete": true,
+  "approved_task_cap": 740,
+  "banding_validation_credits": 14,
+  "supplemental_runs": [
+    "catalog-nfl-20261021-approved"
+  ]
 }
