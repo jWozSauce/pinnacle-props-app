@@ -8,7 +8,7 @@ def deployment_settings(values):
     if values.get('PP_STORE','local')!='local':raise ValueError('Shared storage is not configured yet')
     cloud=mode=='cloud'
     return dict(cloud=cloud,project_cap=100_000 if cloud else PROJECT_CAP,
-                paid_enabled=True,cloud_daily_cap=2500 if cloud else None)
+                paid_enabled=True)
 
 
 def reserve_cloud_budget(data_dir):
@@ -25,26 +25,26 @@ def reserve_cloud_budget(data_dir):
         client._save(state)
 
 
-def cloud_refresh_reason(data_dir,bound,daily_cap):
-    """Read-only UI explanation; Client still enforces the authoritative guards."""
+def cloud_refresh_reason(data_dir,bound):
+    """Read-only reserve/floor explanation; Client rechecks fresh quota before send."""
     import json
     from pathlib import Path
-    from datetime import datetime
-    from zoneinfo import ZoneInfo
     path=Path(data_dir)/'odds_budget.json'
-    if not path.exists():
-        return f'Estimated refresh exceeds the daily cloud cap ({daily_cap:,} credits). Limit game dates to scan fewer.' if bound>daily_cap else None
+    state={}
     try:
-        state=json.loads(path.read_text())
+        if path.exists():state=json.loads(path.read_text())
         if state.get('halt') or state.get('reservations'):
             return 'Live requests are paused for a request-accounting issue.'
-        cap=min(daily_cap,state.get('cloud_daily_cap',daily_cap))
-        day=datetime.fromisoformat(utcnow()).astimezone(ZoneInfo('America/New_York')).date()
-        spent=sum(r['actual'] if r['actual'] is not None else r['estimated']
-                  for r in state['records']
-                  if datetime.fromisoformat(r['timestamp'].replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date()==day)
-        if spent>=cap:return 'Daily cloud cap reached.'
-        if spent+bound>cap:return f'Estimated refresh exceeds the remaining daily cloud cap ({cap-spent:,} credits). Limit game dates to scan fewer.'
+        persisted=state.get('project_cap',100000);spent=state.get('spent',0)
+        if type(persisted) is not int or persisted<0 or type(spent) is not int or spent<0:
+            raise ValueError('Invalid ledger')
+        cap=min(100000,persisted)
+        if spent+bound>cap:
+            return f'Estimated refresh exceeds the remaining cloud reserve ({max(0,cap-spent):,} credits). Limit game dates to scan fewer.'
+        remaining=state.get('remaining')
+        if remaining is not None:
+            if type(remaining) is not int or remaining<0:raise ValueError('Invalid quota')
+            if remaining-bound<100000:return 'Estimated refresh would breach the 100,000-credit account floor.'
     except (ValueError,KeyError,TypeError,OSError):
         return 'Quota record is unavailable; live requests are paused.'
     return None

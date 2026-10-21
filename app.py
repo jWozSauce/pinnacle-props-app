@@ -194,7 +194,7 @@ if preview and preview['settings']==settings:
     if profile_name not in profiles:refresh_reasons.append('Load Kelly profiles first.')
     if deployment['cloud']:
         from pinnacle_props.deployment import cloud_refresh_reason
-        reason=cloud_refresh_reason(data_dir,preview['bound'],deployment['cloud_daily_cap'])
+        reason=cloud_refresh_reason(data_dir,preview['bound'])
         if reason:refresh_reasons.append(reason)
     if refresh_reasons:st.warning(' '.join(refresh_reasons))
     if st.button('Refresh live prices',type='primary',disabled=bool(refresh_reasons),
@@ -207,7 +207,7 @@ if preview and preview['settings']==settings:
                     raise ValueError('Selected Kelly profile is no longer available')
                 scan_messages=[]
                 result=run_live(preview,profile=current_profiles[profile_name],profile_name=profile_name,
-                                key=key_for_live(),progress=scan_messages.append,project_cap=deployment['project_cap'],data_dir=data_dir,cloud_daily_cap=deployment['cloud_daily_cap'],display_rules=active_rules,paper_track=paper_track)
+                                key=key_for_live(),progress=scan_messages.append,project_cap=deployment['project_cap'],data_dir=data_dir,display_rules=active_rules,paper_track=paper_track)
                 st.session_state.pop('pp_bet_store_'+str(data_dir),None)
                 if settlement_preview and paper_track:
                     st.session_state['bet_receipt']=scan_messages[-1] if scan_messages else 'Paper tracking finished; check shared logs.'
@@ -228,6 +228,7 @@ result=st.session_state.get('scan_'+sport)
 
 from pinnacle_props.settings import accounting_dir
 quota_file=accounting_dir(data_dir,cloud=deployment['cloud'])/'odds_budget.json'
+if deployment['cloud']:st.caption('Cloud reserve: 100,000 credits · Account floor: 100,000 credits.')
 if quota_file.exists():
     try:
         quota=json.loads(quota_file.read_text())

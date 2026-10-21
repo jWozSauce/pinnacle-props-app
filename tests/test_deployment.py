@@ -6,9 +6,9 @@ from pinnacle_props.deployment import deployment_settings
 from pinnacle_props import rules, book_catalog
 
 
-def test_cloud_enforces_approved_temporary_daily_policy():
+def test_cloud_preserves_reserve_without_daily_policy():
     cloud=deployment_settings({'PP_DEPLOYMENT':'cloud'})
-    assert cloud['project_cap']==100000 and cloud['paid_enabled'] and cloud['cloud_daily_cap']==2500
+    assert cloud['project_cap']==100000 and cloud['paid_enabled'] and 'cloud_daily_cap' not in cloud
     assert deployment_settings({})['paid_enabled']
     with pytest.raises(ValueError):deployment_settings({'PP_STORE':'s3'})
 
@@ -100,9 +100,8 @@ def test_cloud_auto_load_failure_is_explained_without_retry_loop(cloud_kelly):
     assert not app.error
 
 
-def test_refresh_no_games_and_daily_cap_reasons(cloud_kelly):
+def test_refresh_no_games_and_reserve_reasons(cloud_kelly):
     import json
-    from pinnacle_props.odds_api import utcnow
     app,calls,result,events,bound,root=cloud_kelly
     events.clear();bound[0]=0
     unlock(app);app.button(key='estimate').click().run()
@@ -110,29 +109,35 @@ def test_refresh_no_games_and_daily_cap_reasons(cloud_kelly):
     assert any('No upcoming games.' in x.value for x in app.warning)
     events.append(dict(id='one',commence_time='2099-01-08T18:00:00Z'));bound[0]=14
     data=root/'data';data.mkdir(exist_ok=True)
-    (data/'odds_budget.json').write_text(json.dumps(dict(spent=2500,cloud_daily_cap=2500,records=[dict(timestamp=utcnow(),actual=2500)],reservations={})))
+    (data/'odds_budget.json').write_text(json.dumps(dict(spent=99990,project_cap=100000,remaining=900000,reservations={})))
     app.button(key='estimate').click().run()
     assert not app.exception and app.button(key='refresh').disabled
-    assert any('Daily cloud cap reached.' in x.value for x in app.warning)
+    assert any('remaining cloud reserve (10 credits)' in x.value for x in app.warning)
+    assert any('Account floor: 100,000' in x.value for x in app.caption)
     assert not any('Tick Limit game dates' in x.value for x in app.caption)
 
 
-def test_estimate_over_daily_cap_explains_before_first_ledger(cloud_kelly):
+def test_estimate_above_old_daily_cap_is_enabled_even_with_legacy_ledger(cloud_kelly):
+    import json
     app,calls,result,events,bound,root=cloud_kelly
-    bound[0]=2501;unlock(app);app.button(key='estimate').click().run()
-    assert not app.exception and app.button(key='refresh').disabled
-    assert any('exceeds the daily cloud cap' in x.value for x in app.warning)
+    bound[0]=2501;unlock(app)
+    data=root/'data';data.mkdir(exist_ok=True)
+    (data/'odds_budget.json').write_text(json.dumps(dict(spent=5000,cloud_daily_cap=0,remaining=900000,reservations={})))
+    app.button(key='estimate').click().run()
+    assert not app.exception and not app.button(key='refresh').disabled
+    assert any('2501 credits' in x.value for x in app.info)
+    assert any('Tick Limit game dates' in x.value for x in app.caption)
+    assert not any('daily cloud cap' in x.value.lower() for x in app.warning)
 
 
-def test_daily_ui_uses_eastern_day_and_reports_unreadable_state(tmp_path,monkeypatch):
+def test_cloud_ui_retains_reserve_floor_and_unreadable_state_guards(tmp_path):
     import json
     from pinnacle_props.deployment import cloud_refresh_reason
-    monkeypatch.setattr('pinnacle_props.deployment.utcnow',lambda:'2026-10-21T02:00:00+00:00')
+    assert cloud_refresh_reason(tmp_path,2501) is None
+    assert 'reserve' in cloud_refresh_reason(tmp_path,100001)
     path=tmp_path/'odds_budget.json'
-    path.write_text(json.dumps(dict(cloud_daily_cap=2500,records=[dict(timestamp='2026-10-20T23:30:00+00:00',actual=2490)])))
-    assert 'remaining daily cloud cap (10 credits)' in cloud_refresh_reason(tmp_path,14,2500)
-    assert cloud_refresh_reason(tmp_path,10,2500) is None
-    monkeypatch.setattr('pinnacle_props.deployment.utcnow',lambda:'2026-10-21T05:00:00+00:00')
-    assert cloud_refresh_reason(tmp_path,2500,2500) is None
+    path.write_text(json.dumps(dict(spent=5000,cloud_daily_cap=0,remaining=103000)))
+    assert cloud_refresh_reason(tmp_path,3000) is None
+    assert 'floor' in cloud_refresh_reason(tmp_path,3001)
     path.write_text('{broken')
-    assert 'Quota record is unavailable' in cloud_refresh_reason(tmp_path,14,2500)
+    assert 'Quota record is unavailable' in cloud_refresh_reason(tmp_path,14)

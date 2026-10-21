@@ -37,7 +37,6 @@ HOST = 'https://api.the-odds-api.com'
 PROJECT_CAP = 2_800_000
 ACCOUNT_FLOOR = 100_000
 CLOSE_DAILY_CAP = 2_500
-CLOUD_DAILY_CAP = 2_500
 QUOTA_HEADERS = ('x-requests-remaining', 'x-requests-used', 'x-requests-last')
 
 
@@ -201,12 +200,15 @@ class Result:
 class Client:
     def __init__(self, *, data_dir=ROOT/'data', run_id=None, run_cap=0,
                  project_cap=PROJECT_CAP, floor=ACCOUNT_FLOOR, key=None, session=None,
-                 min_interval=1.0, paid_deadline=None, staged_run=False, lock_timeout=None, cloud_daily_cap=None, transient_retries=None):
+                 min_interval=1.0, paid_deadline=None, staged_run=False, lock_timeout=None, cloud=False, transient_retries=None):
         self._state_mutex = threading.RLock()
         self._lock_state = threading.local()
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        self.accounting_dir = accounting_dir(self.data_dir, cloud=cloud_daily_cap is not None)
+        from .settings import ACCOUNTING_CLOUD
+        cloud=cloud or ACCOUNTING_CLOUD.get()
+        if cloud:project_cap=min(project_cap,100_000)
+        self.accounting_dir = accounting_dir(self.data_dir, cloud=cloud)
         self.accounting_dir.mkdir(parents=True, exist_ok=True)
         self.transient_retries = (self.accounting_dir != self.data_dir) if transient_retries is None else transient_retries
         self.run_id = run_id or str(uuid.uuid4())
@@ -215,9 +217,6 @@ class Client:
         if not 0 <= run_cap <= (PROJECT_CAP if staged_run else 20_000) or not 0 <= project_cap <= PROJECT_CAP or floor < ACCOUNT_FLOOR:
             raise ValueError('Budget arguments exceed authorised bounds')
         self.run_cap, self.project_cap, self.floor = int(run_cap), int(project_cap), int(floor)
-        if cloud_daily_cap is not None and (type(cloud_daily_cap) is not int or not 0<=cloud_daily_cap<=CLOUD_DAILY_CAP):
-            raise ValueError('Cloud daily cap exceeds authorised bound')
-        self.cloud_daily_cap = cloud_daily_cap
         self._key = key
         self.session = session or requests.Session()
         self.min_interval = max(0.0, min_interval)
@@ -395,18 +394,6 @@ class Client:
             persisted_cap=state.get('project_cap',500_000)
             if type(persisted_cap) is not int or not 0<=persisted_cap<=PROJECT_CAP:
                 raise BudgetStop('Invalid persisted project cap')
-            if self.cloud_daily_cap is not None:
-                cap=state.setdefault('cloud_daily_cap',self.cloud_daily_cap)
-                if type(cap) is not int or not 0<=cap<=CLOUD_DAILY_CAP:
-                    raise BudgetStop('Invalid persisted cloud daily cap')
-                day=datetime.fromisoformat(utcnow()).astimezone(ZoneInfo('America/New_York')).date().isoformat()
-                spent=0
-                for record in state['records']:
-                    record_day=datetime.fromisoformat(record['timestamp'].replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date().isoformat()
-                    if record_day==day:
-                        spent+=record['actual'] if record['actual'] is not None else record['estimated']
-                if cost and spent+cost>min(cap,self.cloud_daily_cap):
-                    raise BudgetStop('Cloud daily credit cap would be exceeded; no paid request sent')
             if self.run_id.startswith('close-'):
                 cap=state.setdefault('close_daily_cap',CLOSE_DAILY_CAP)
                 if not isinstance(cap,int) or not 0<=cap<=CLOSE_DAILY_CAP:

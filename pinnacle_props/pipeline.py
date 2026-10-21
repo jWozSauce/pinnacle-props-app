@@ -149,7 +149,7 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     return manifest,flagged,excluded
 
 
-def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,cloud_daily_cap=None,display_rules=None,paper_track=True):
+def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,display_rules=None,paper_track=True):
     from . import rules
     from .settings import ACCOUNTING_CLOUD
     display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
@@ -161,7 +161,7 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
     profile=profile or fetch_profiles()[profile_name]
     with scan_lock(data_dir):
         c=Client(data_dir=data_dir,run_id=scan_id,run_cap=preview['bound'],
-                 floor=config['account_floor'],project_cap=min(config['project_cap'],project_cap) if project_cap is not None else config['project_cap'],key=key,session=session,cloud_daily_cap=cloud_daily_cap)
+                 floor=config['account_floor'],project_cap=min(config['project_cap'],project_cap) if project_cap is not None else config['project_cap'],key=key,session=session)
         results=[];statuses=[]
         progress(f"Preflight: {len(preview['events'])} events; upper bound {preview['bound']} credits.")
         if preview['bound']>20_000:
