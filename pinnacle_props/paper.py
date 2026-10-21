@@ -25,14 +25,18 @@ def frozen(manifest, r, row, *, stake=None, note='', paper=False, display_rules=
                   price_decimal=price,odds_american=decimal_to_american(price),stake=amount,edge=float(r['edge']),
                   fair_p=float(r['noVig'+side.title()]),scan_id=manifest['scan_id'],row=int(row),
                   rule_version=rules.version(active),status='pending',note=note)
+    from .consensus import FIELDS
+    record.update({k:r.get(k,'') for k in FIELDS})
     return record
 
 
-def track_scan(scan_id, *, data_dir=DATA, display_rules=None, store=None):
+def track_scan(scan_id, *, data_dir=DATA, display_rules=None, store=None, include_started=False):
     path,manifest=snapshots(data_dir,scan_id=scan_id)[0]
     frame=flags(path,manifest)
     active=display_rules if display_rules is not None else rules.active()
     annotated=rules.annotate(frame,active,manifest['settings']['sport'])
+    from .game_time import suggestions
+    annotated,_,_=suggestions(annotated,show_started=include_started)
     records=[frozen(manifest,r,i+1,paper=True,display_rules=active) for i,r in annotated.iterrows()
              if r['rule_pass'] and float(r['kellyAmount'])>0]
     return (store or BetStore(data_dir)).append('paper',records)

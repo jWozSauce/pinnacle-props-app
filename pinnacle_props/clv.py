@@ -16,6 +16,8 @@ COLUMNS=['sport','scan_id','row','scan_capture_time','event_id','book','player',
          'price_decimal','bet_implied_p','edge','close_over_decimal','close_under_decimal',
          'close_fair_p','clv_pp','closing_line','line_moved','market_pulled','status','close_fetched_at','rule_version','rule_pass']
 
+from .consensus import FIELDS
+COLUMNS+=FIELDS
 
 def evaluate(frame,closes):
     output=[]
@@ -28,6 +30,7 @@ def evaluate(frame,closes):
                    player=r.player_name,market=r.prop_type,line=r.Target_line,side=r.side,
                    price_decimal=price,bet_implied_p=1/price,edge=r.edge,line_moved=False,
                    market_pulled=False,status='awaiting close')
+        row.update({k:getattr(r,k,None) for k in FIELDS})
         meta,raw=closes.get(r.event_id,(None,None))
         if meta:
             row['close_fetched_at']=meta['fetched_at']

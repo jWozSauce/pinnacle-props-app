@@ -51,7 +51,7 @@ def _pair(group):
 
 def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
          max_reference_margin=None, require_line_match=True, include_live=False, now,
-         exclusion_version=2):
+         exclusion_version=2, observation_books=()):
     if exclusion_version not in (1, 2):
         raise ValueError('Unsupported exclusion classification version')
     if not isinstance(profile, Profile):
@@ -79,7 +79,7 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
     flagged, excluded = [], []
     is_reference = df.book.eq(reference_book).fillna(False)
     references = df[is_reference]
-    candidates = df[~is_reference]
+    candidates = df[~is_reference & ~df.book.isin(observation_books)]
     one_sided = set()
     if exclusion_version >= 2:
         for key, ladder in candidates.groupby(IDENTITY+['book'], sort=False, dropna=False):
@@ -168,7 +168,7 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
                 except ValueError:
                     pass
             row['price_' + book] = price
-            if price is not None and book != reference_book:
+            if price is not None and book != reference_book and book not in observation_books:
                 prices[book] = price
         row['best_book'] = max(prices, key=prices.get) if prices else None
         row['best_price'] = max(prices.values()) if prices else None

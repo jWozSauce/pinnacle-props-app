@@ -15,8 +15,11 @@ from .odds_api import atomic_write
 
 TABS = {'real': 'PP_Bet_Log', 'paper': 'PP_Paper_Log'}
 HEADER = 'round logged_at sport game_date start_time event_id away_team home_team player market line side book price_decimal odds_american stake edge fair_p scan_id row rule_version status profit stat graded_at regraded_at source note row_id'.split()
+BASE_HEADER=HEADER.copy()
+from .consensus import FIELDS
+HEADER=HEADER+FIELDS
 GRADING = HEADER[21:28]
-FROZEN = HEADER[:21] + ['row_id']
+FROZEN = HEADER[:21] + ['row_id'] + FIELDS
 SHEET_ID = '173vZBHQ31stOXKOuHzjIFH2BtMMWFbLjbzolZlqPNeo'
 
 class StoreUnavailable(ValueError):
@@ -118,11 +121,23 @@ class BetStore:
             # Never create on authentication, network, quota, or unknown failures.
             if type(exc).__name__ != 'WorksheetNotFound': raise
             ws = self.spreadsheet.add_worksheet(title=TABS[kind], rows=5000, cols=len(HEADER))
+        from .consensus import enabled as advisory_enabled
+        active_header=HEADER if advisory_enabled() else BASE_HEADER
         values = ws.get_all_values()
         if not any(any(str(cell) for cell in row) for row in values):
-            ws.update([HEADER], 'A1:AC1', value_input_option='RAW')
-            values = [HEADER]
-        if values[0] != HEADER: raise StoreUnavailable('Shared log header mismatch; no rows changed')
+            if getattr(ws,'col_count',len(active_header))<len(active_header):ws.add_cols(len(active_header)-ws.col_count)
+            ws.update([active_header], 'A1:AJ1' if advisory_enabled() else 'A1:AC1', value_input_option='RAW')
+            values = [active_header]
+        header=values[0].copy()
+        while header and header[-1]=='':header.pop()
+        if header == BASE_HEADER and advisory_enabled():
+            if any(any(str(c) for c in row[len(BASE_HEADER):]) for row in values[1:]):
+                raise StoreUnavailable('Unlabelled extra cells; no migration made')
+            # Append header cells only: no existing row or column is rewritten.
+            if getattr(ws,'col_count',len(HEADER))<len(HEADER):ws.add_cols(len(HEADER)-ws.col_count)
+            ws.update([FIELDS], 'AD1:AJ1', value_input_option='RAW')
+            values=ws.get_all_values();header=values[0]
+        if header not in (BASE_HEADER,HEADER): raise StoreUnavailable('Shared log header mismatch; no rows changed')
         return ws, values
 
     @staticmethod
@@ -210,7 +225,7 @@ class BetStore:
                     self.spreadsheet.batch_update({'requests':[{'appendCells':{
                         'sheetId':ws.id, 'fields':'userEnteredValue',
                         'rows':[{'values':[{'userEnteredValue':{'stringValue':str(r.get(h,''))}}
-                                           for h in HEADER]} for r in missing]}}]})
+                                           for h in values[0]]} for r in missing]}}]})
                     verified = self._records(ws.get_all_values())
                     have = {r['row_id'] for r in verified}
                     if any(r['row_id'] not in have for r in missing):

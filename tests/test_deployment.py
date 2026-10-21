@@ -22,7 +22,7 @@ def test_empty_cloud_views_open_without_key_or_odds_network(tmp_path,monkeypatch
     app.text_input(key='_access_input').set_value('fixture-pass')
     app.button(key='access_unlock').click().run()
     assert not app.exception
-    assert [t.label for t in app.tabs]==['Price comparison','Kelly calculator','Logged','Performance']
+    assert [t.label for t in app.tabs]==['Price comparison','Live','Kelly calculator','Logged','Performance']
     assert sum('not connected' in item.value for item in app.info)==3
     assert not any('Live refresh is not available' in item.value for item in app.info)
 

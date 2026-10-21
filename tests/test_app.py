@@ -13,7 +13,8 @@ def test_app_saved_scan_starts_without_credential_or_network(monkeypatch):
     assert app.title[0].value=='Find the better price.'
     assert app.selectbox(key='sport').value=='nhl'
     if list(Path('data/snapshots/nhl').glob('*.json')):
-        expected=rules.annotate(replay('nhl')[1],rules.active(),'nhl')
+        from pinnacle_props.game_time import suggestions
+        expected,_,_=suggestions(rules.annotate(replay('nhl')[1],rules.active(),'nhl'))
         assert app.metric[0].value==str(int(expected.rule_pass.sum()))
         app.text_input(key='search').set_value('no-such-player').run()
         assert not app.exception
@@ -37,7 +38,7 @@ def test_responsive_view_switch_persists_in_url(monkeypatch):
     app=AppTest.from_file(Path('app.py').resolve(),default_timeout=15)
     app.run()
     assert not app.exception and app.radio(key='view_mode').value=='Auto'
-    assert [t.label for t in app.tabs]==['Price comparison','Kelly calculator']
+    assert [t.label for t in app.tabs]==['Price comparison','Live','Kelly calculator']
     for mode in ['Table','Cards','Auto']:
         app.radio(key='view_mode').set_value(mode).run()
         assert not app.exception and app.query_params['view']==mode

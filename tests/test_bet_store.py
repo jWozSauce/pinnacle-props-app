@@ -3,7 +3,7 @@ import uuid
 from types import SimpleNamespace
 import pandas as pd
 import pytest
-from pinnacle_props.bet_store import BetStore, HEADER, StoreUnavailable
+from pinnacle_props.bet_store import BetStore, HEADER, BASE_HEADER, StoreUnavailable
 from pinnacle_props.settle import settle_row
 from tests.test_settle_forward import bet,game
 
@@ -54,7 +54,7 @@ def test_explicit_ranges_blank_leading_cells_dedupe_and_regrade(tmp_path):
     sheet=Spreadsheet();store=BetStore(tmp_path,spreadsheet=sheet)
     a=record();b=record(row=2)
     store.append('real',[a]);store.append('real',[b]);store.append('real',[a])
-    ws=sheet.tabs['PP_Bet_Log'];assert ws.writes==['A1:AC1','AppendCells','AppendCells']
+    ws=sheet.tabs['PP_Bet_Log'];assert ws.writes==['A1:AJ1','AppendCells','AppendCells']
     old=store.read('real',reload=True).to_dict('records')[0]
     new,_=settle_row(old,game(),[dict(player_id='p',player_name='A Player',points=22)],now='2026-10-10T05:00:00Z')
     store.grade('real',[(old,new)]);assert ws.writes[-1]=='V2:AB2'

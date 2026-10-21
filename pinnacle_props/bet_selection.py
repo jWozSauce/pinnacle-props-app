@@ -6,7 +6,7 @@ import math
 def editor_key(scan_id, table):
     # A filter, sort, new scan or changed duplicate flag must not move a tick to
     # another contract. Stake/tick edits are not part of the original table.
-    digest = hashlib.sha256((scan_id + table.to_json(date_format='iso')).encode()).hexdigest()
+    digest = hashlib.sha256((scan_id + table.drop(columns=['start_status'],errors='ignore').to_json(date_format='iso')).encode()).hexdigest()
     return 'bet_editor_' + digest[:20]
 
 

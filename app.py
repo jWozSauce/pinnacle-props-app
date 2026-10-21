@@ -11,7 +11,7 @@ from pinnacle_props.kelly_sheet import fetch_profiles, parse_profiles
 from pinnacle_props.odds_api import APIError, resolve_key
 from pinnacle_props.pipeline import discover, options, replay, run_live
 from pinnacle_props.scan import LEGACY_COLUMNS
-from pinnacle_props import rules
+from pinnacle_props import rules, game_time
 from pinnacle_props.rule_ui import initialize as initialize_rules, panel as rules_panel
 from pinnacle_props.settings import ROOT, load_config
 from pinnacle_props.deployment import deployment_settings
@@ -116,9 +116,10 @@ if not profiles:
         if reload_profiles():st.rerun()
 
 with st.expander('Books, markets & scan settings',expanded=False):
-    from pinnacle_props import book_catalog
+    from pinnacle_props import book_catalog, consensus
     catalog=book_catalog.load() if book_catalog.enabled() else None
     selectable=book_catalog.selectable_books(catalog,sport,config['books']) if catalog else config['books']
+    if consensus.enabled():selectable={k:v for k,v in selectable.items() if k not in consensus.EXCHANGES}
     book_labels={k:b['label'] for k,b in selectable.items()} if catalog else config['books']
     query_books=st.query_params.get('books_'+sport,'').split(',')
     selected_books=[b for b in query_books if b in selectable] or [b for b in config['books'] if b in selectable]
@@ -126,7 +127,8 @@ with st.expander('Books, markets & scan settings',expanded=False):
                          format_func=lambda b:book_labels[b],key='books_'+sport)
     if catalog:
         st.checkbox('Pinnacle · required reference',value=True,disabled=True,key='catalog_reference')
-        st.caption(book_catalog.cost_caption(books,config['reference_book']))
+        st.caption(book_catalog.cost_caption(books+(consensus.observation_books() if consensus.enabled() else []),config['reference_book']))
+        if consensus.enabled():st.caption('Novig, ProphetX and Polymarket are captured for comparison; they are not bettable. Cost includes these observation venues.')
         st.caption('The original eleven books remain available by default; discovery is a dated sample, not guaranteed future coverage.')
         st.caption('Exchange quotes use back prices only. DFS pick’em prices are provider-implied equivalents.')
         unavailable={k:b for k,b in catalog['books'].items() if k!='pinnacle' and k not in selectable}
@@ -135,7 +137,7 @@ with st.expander('Books, markets & scan settings',expanded=False):
         reason='no props returned in the discovery sample' if status=='observed' else status
         with st.expander('Unavailable books · '+reason):
             for k,b in unavailable.items():
-                st.checkbox(b['label']+' · '+reason,value=False,disabled=True,key='unavailable_'+sport+'_'+k)
+                st.checkbox(b['label']+' · '+('observation only' if consensus.enabled() and k in consensus.EXCHANGES else reason),value=False,disabled=True,key='unavailable_'+sport+'_'+k)
     available=config['sports'][sport]['markets']+config['sports'][sport].get('alternate_markets',[])
     query_markets=st.query_params.get('markets_'+sport,'').split(',')
     selected_markets=[m for m in query_markets if m in available] or config['sports'][sport]['markets']
@@ -240,8 +242,8 @@ if quota_file.exists():
             st.caption(f"Credits reserved for unconfirmed responses: {sum(r['estimated'] for r in quota['reservations'].values()):,}")
     except (ValueError,KeyError):st.warning('Quota record is unavailable; live requests will fail closed.')
 
-tabs=st.tabs(['Price comparison','Kelly calculator']+((['Logged','Performance','Paper'] if settlement_preview else ['Logged','Performance']) if clv_preview else []))
-tab_prices,tab_calc=tabs[:2]
+tabs=st.tabs(['Price comparison','Live','Kelly calculator']+((['Logged','Performance','Paper'] if settlement_preview else ['Logged','Performance']) if clv_preview else []))
+tab_prices,tab_live,tab_calc=tabs[:3]
 if clv_preview:
     if not deployment['cloud']:st.caption('Local bet records and pre-start CLV')
     logged=read_bets(data_dir)
@@ -258,11 +260,17 @@ with tab_prices:
         st.caption('SAVED SCAN · '+label_time(manifest['capture_time'])+' · '+manifest['profile_name'])
         st.caption('Saved prices load without an API key. Only an explicit live refresh requests new prices.')
         st.write(rules.summary(active_rules,sport))
+        from pinnacle_props import consensus
+        flagged=consensus.defaults(flagged)
         annotated=rules.annotate(flagged,active_rules,sport)
+        if manifest.get('settings',{}).get('advisory_version'):st.caption(consensus.LEGEND)
         hidden=int((~annotated.rule_pass).sum())
         st.caption(f'{hidden} bets hidden by the rule · {len(annotated)} saved opportunities')
         show_all=st.checkbox('Show all saved opportunities',value=False,key='show_all_rules_'+sport)
-        visible=(annotated if show_all else annotated[annotated.rule_pass]).copy()
+        show_started=st.checkbox('Show started games',value=False,key='show_started_games')
+        visible,started_count,unknown_count=game_time.suggestions(annotated if show_all else annotated[annotated.rule_pass],show_started=show_started)
+        st.caption(f'{started_count} hidden: game started')
+        if unknown_count:st.caption(f'{unknown_count} hidden: start time unavailable')
         if settlement_preview:
             visible['⚠']=pd.Series(bd.flags(visible,real_keys),index=visible.index,dtype='string').fillna('')
             exact=int(visible['⚠'].str.startswith('🔴',na=False).sum());same=int(visible['⚠'].str.startswith('🟡',na=False).sum())
@@ -282,7 +290,8 @@ with tab_prices:
         if query and not view.empty:
             mask=view[['player_name','book','prop_type']].astype(str).agg(' '.join,axis=1).str.contains(query,case=False,regex=False)
             view=view[mask]
-        table_columns=LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct']
+        advisory_columns=['island_flag','books_q','cons_edge','sharp_books_q','sharp_gap_pp'] if manifest.get('settings',{}).get('advisory_version') else []
+        table_columns=['start_status']+advisory_columns+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct']
         with st.expander('Filter individual columns'):
             columns=st.multiselect('Columns to filter',table_columns,key='column_filters_'+sport)
             for column in columns:
@@ -300,12 +309,15 @@ with tab_prices:
                 tone='red' if flag.startswith('🔴') else 'amber' if flag.startswith('🟡') else 'plain'
                 with st.container(border=True,key=f'pp_card_{tone}_{row.Index}'):
                     if flag:st.write(flag)
+                    if row.island_flag:
+                        st.write(row.island_flag)
+                        st.caption(f'Pinnacle age at capture: {row.pin_age_min:.1f} min · other books: {row.books_q:g}')
                     age=stale_minutes<row.pin_age_min
                     st.markdown(f"### {flag.split(' ')[0]+' ' if flag else ''}{row.player_name}")
                     price=row.Target_over if row.side=='over' else row.Target_under
                     st.write(f"{row.side.title()} {row.Target_line:g} · {row.prop_type.removeprefix('player_').replace('_',' ')}")
                     st.markdown(f"**{book_labels.get(row.book,row.book)} {price:+.0f}** · Edge {100*row.edge:.2f} pp · EV {row.ev_pct:.2f}%")
-                    st.caption(f"{row.game} · {label_time(row.date)}")
+                    st.caption(f"{row.game} · {label_time(row.date)} · {row.start_status}")
                     if age:
                         st.caption(f'◷ Older quote · Pinnacle age at capture: {row.pin_age_min:.1f} min')
                     st.caption(f"Suggested stake ${row.kellyAmount:,.2f} · Pinnacle margin {100*row.pin_margin:.2f}%")
@@ -317,9 +329,12 @@ with tab_prices:
                             st.caption(f"Saved row {row_number}. This records your action; it does not place a bet.")
                             actual=st.number_input('Actual stake ($)',min_value=0.01,value=max(.01,float(row.kellyAmount)),key='actual_'+record_key)
                             note=st.text_input('Note',key='note_'+record_key,max_chars=2000)
+                            confirm_started=False
+                            if game_time.started(row.date):
+                                confirm_started=st.checkbox('Confirm logging a bet on a started game',value=False,key='confirm_started_'+record_key)
                             if st.button('Log bet',key='log_'+record_key,disabled=exists or (settlement_preview and (real_keys is None or (flag.startswith('🔴') and not allow_duplicates)))):
                                 try:
-                                    receipt=log_bet(manifest['scan_id'],row_number,actual,note,data_dir=data_dir,display_rules=active_rules,allow_duplicates=allow_duplicates)
+                                    receipt=log_bet(manifest['scan_id'],row_number,actual,note,data_dir=data_dir,display_rules=active_rules,allow_duplicates=allow_duplicates,confirm_started=confirm_started)
                                     st.session_state.pop('pp_bet_store_'+str(data_dir),None)
                                     st.session_state['bet_receipt']=receipt.get('storage',{}).get('message','Bet recorded')
                                     st.rerun()
@@ -350,8 +365,19 @@ with tab_prices:
         if settlement_preview:
             allow_duplicates=st.checkbox('Allow re-logging bets marked 🔴 ALREADY BET',value=False,key='allow_real_duplicates')
             action_real,action_paper,action_download=st.columns(3)
+            selected_confirmation=False
+            try:
+                chosen=selected_rows(view,table,edited)
+                started_picks=[r for r,amount in chosen if game_time.started(flagged.iloc[r-1]['date'])]
+            except ValueError:
+                started_picks=[]
+            if started_picks:
+                import hashlib
+                confirmation_key=hashlib.sha256(json.dumps([manifest['scan_id'],chosen]).encode()).hexdigest()[:20]
+                selected_confirmation=st.checkbox(f'Confirm logging {len(started_picks)} selected bets on started games',value=False,key='confirm_started_selected_'+confirmation_key)
             selected_action=action_real.button('Log selected bets',type='primary',key='log_selected',disabled=real_keys is None)
-            qualifying=int((annotated.rule_pass & (annotated.kellyAmount>0)).sum())
+            paper_candidates,_,_=game_time.suggestions(annotated)
+            qualifying=int((paper_candidates.rule_pass & (paper_candidates.kellyAmount>0)).sum())
             paper_action=action_paper.button(f'Bet ALL {qualifying} qualifying (paper round)',key='paper_all',disabled=qualifying==0)
             action_download.download_button('Download bet card',view.to_csv(index=False),'pinnacle_props.csv','text/csv',key='download')
             if selected_action:
@@ -360,10 +386,12 @@ with tab_prices:
                     picks=selected_rows(view,table,edited)
                     if not picks:
                         st.warning('Tick the log box on the bets you placed')
+                    elif started_picks and not selected_confirmation:
+                        st.warning('Confirm logging the selected bets on started games first')
                     else:
                         for row_number,amount in picks:
                             receipt=log_bet(manifest['scan_id'],row_number,amount,data_dir=data_dir,
-                                            display_rules=active_rules,allow_duplicates=allow_duplicates)['storage']
+                                            display_rules=active_rules,allow_duplicates=allow_duplicates,confirm_started=selected_confirmation and row_number in started_picks)['storage']
                             written+=receipt['written'];queued+=receipt['queued'];skipped+=receipt.get('skipped',0)
                         st.session_state.pop('pp_bet_store_'+str(data_dir),None)
                         st.session_state['bet_receipt']=f'Real bets: {written} logged; {queued} queued; {skipped} exact duplicates skipped.'
@@ -379,7 +407,7 @@ with tab_prices:
         with st.expander('Compare all books & full details'):
             if not view.empty:
                 price_columns=[c for c in view if c.startswith('price_')]
-                display_columns=LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']+price_columns
+                display_columns=['start_status']+advisory_columns+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']+price_columns
                 display=view[display_columns].copy()
                 def style_row(row):
                     styles=pd.Series('',index=row.index)
@@ -394,6 +422,11 @@ with tab_prices:
             st.dataframe(pd.DataFrame([{'Reason':k,'Pairs':v} for k,v in manifest['exclusions'].items() if v]),hide_index=True,width='stretch')
             st.caption('Missing or mismatched lines remain in the saved snapshot. Only complete same-line pairs can qualify.')
         if not settlement_preview:st.download_button('Download results CSV',view.to_csv(index=False),'pinnacle_props.csv','text/csv',key='download')
+
+with tab_live:
+    from pinnacle_props.live_ui import render_live, EMPTY
+    if settlement_preview:render_live(data_dir)
+    else:st.info(EMPTY)
 
 with tab_calc:
     if not profiles:
@@ -419,11 +452,11 @@ if settlement_preview:
         from pinnacle_props.clv import rebuild
         clv_frame=rebuild(data_dir=data_dir)
     except (ValueError,OSError,KeyError):clv_frame=None
-    render(tabs[2],tabs[3],data_dir,clv=clv_frame,paper_tab=tabs[4])
+    render(tabs[3],tabs[4],data_dir,clv=clv_frame,paper_tab=tabs[5])
 elif clv_preview:
     try:
         report_text,clv_frame=clv_report(data_dir=data_dir,output=None)
-        with tabs[2]:
+        with tabs[3]:
             st.subheader('Your recorded bets')
             recorded=logged_view(clv_frame,data_dir=data_dir)
             if recorded.empty:st.info('No bets recorded on this deployment. Your Mac’s bet history is not connected.' if deployment['cloud'] else 'No bets recorded. Log only bets you already placed.')
@@ -433,7 +466,7 @@ elif clv_preview:
                 recorded['logged_at']=recorded.logged_at.map(label_time)
                 st.dataframe(recorded,hide_index=True,width='stretch')
                 st.caption('Recorded bets remain visible even when they no longer fit the current rule. CLV is a probability difference; blank means no valid same-line close is available.')
-        with tabs[3]:
+        with tabs[4]:
             if deployment['cloud'] and clv_frame.empty:st.info('No performance history on this deployment. Your Mac’s closing prices and bet history are not connected.')
             else:st.markdown(report_text)
     except (ValueError,OSError,KeyError) as e:st.error('Local CLV records could not be verified: '+str(e))

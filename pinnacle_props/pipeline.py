@@ -16,7 +16,7 @@ from .kelly_sheet import fetch_profiles
 from .odds_api import APIError, BudgetStop, Client, coverage, normalize, write_json
 from .scan import scan, INPUT_COLUMNS
 from .settings import ROOT, load_config
-from . import book_catalog
+from . import book_catalog, consensus
 
 
 def sha(path):
@@ -31,7 +31,7 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
                      if book_catalog.enabled() else config['books'])
     defaults = [b for b in config['books'] if b in allowed_books]
     selected_books=list(dict.fromkeys(books if books is not None else defaults))
-    selected_books=[b for b in selected_books if b != config['reference_book']]
+    selected_books=[b for b in selected_books if b != config['reference_book'] and (not consensus.enabled() or b not in consensus.EXCHANGES)]
     if not selected_books or any(b not in allowed_books for b in selected_books):
         raise ValueError('Choose at least one configured soft book')
     selected_markets=list(dict.fromkeys(markets if markets is not None else settings['markets']))
@@ -46,7 +46,8 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
     return dict(horizon={'mode':'date_range' if selected_dates else 'all_listed','dates':selected_dates},sport=sport,sport_key=settings['key'],league=settings['label'],
                 reference_book=config['reference_book'],books=selected_books,markets=selected_markets,
                 min_edge=config['min_edge'] if min_edge is None else min_edge,
-                max_reference_margin=max_reference_margin,include_live=include_live)
+                max_reference_margin=max_reference_margin,include_live=include_live,
+                **({'advisory_version':1,'observation_books':consensus.observation_books()} if consensus.enabled() else {}))
 
 
 @contextmanager
@@ -87,16 +88,18 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
     ids=[e['id'] for e in events]
     if len(ids)!=len(set(ids)):
         raise APIError('Events endpoint returned duplicate event IDs')
-    books=book_catalog.canonical_books(settings['books'],settings['reference_book'])
+    books=consensus.request_books(settings)
     bound=len(events)*len(settings['markets'])*((len(books)+9)//10)
     return {'events':events,'bound':bound,'discovered_at':datetime.now(timezone.utc).isoformat(),
             'date':day.isoformat(),'event_cache':result.cache_path,'settings':settings}
 
 
 def _evaluate(frame,settings,profile,capture_time,exclusion_version=2):
+    if settings.get('advisory_version') not in (None,1):raise ValueError('Unsupported advisory version')
     return scan(frame,profile,reference_book=settings['reference_book'],min_edge=settings['min_edge'],
                 max_reference_margin=settings['max_reference_margin'],include_live=settings['include_live'],
-                now=capture_time,exclusion_version=exclusion_version)
+                now=capture_time,exclusion_version=exclusion_version,
+                observation_books=consensus.EXCHANGES if settings.get('advisory_version') else ())
 
 
 def _frame(results):
@@ -112,7 +115,10 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     from .settings import ACCOUNTING_CLOUD
     display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
     flagged=rules.annotate(flagged,display_rules,settings['sport'])
+    if settings.get('advisory_version'):
+        flagged=consensus.annotate(flagged,frame,reference=settings['reference_book'],capture_time=capture_time)
     raw=frame.copy()
+    if settings.get('advisory_version'):raw['kind']=raw.book.map(lambda b:'exchange' if b in consensus.EXCHANGES else 'sportsbook')
     raw['scan_id']=scan_id
     raw['exclusion_reason']=pd.Series([None]*len(raw),dtype='string')
     for row in excluded.itertuples():
@@ -124,7 +130,7 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     if any(Path(str(base)+s).exists() for s in suffixes):
         raise FileExistsError('Snapshot id already exists; no artifacts overwritten')
     cov=[]
-    allbooks=[settings['reference_book']]+settings['books']
+    allbooks=consensus.request_books(settings)
     for result in results:
         cov.extend(dict(event_id=result.payload['id'],**row) for row in coverage(result.payload,settings['markets'],allbooks))
     # Failed responses still have one coverage row per requested book/market.
@@ -167,9 +173,19 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
         if preview['bound']>20_000:
             raise BudgetStop('Run exceeds the 20,000-credit staging threshold')
         for event in preview['events']:
+            from .game_time import started
+            # Discovery may precede execution by minutes; check again for every event.
+            if not settings.get('include_live',False):
+                try:skip=started(event.get('commence_time'))
+                except ValueError:
+                    statuses.append({'event_id':event['id'],'status':'skipped: start time unavailable'})
+                    continue
+                if skip:
+                    statuses.append({'event_id':event['id'],'status':'skipped: game started'})
+                    continue
             try:
                 result=c.event_odds(settings['sport_key'],event['id'],settings['markets'],
-                                    [settings['reference_book']]+settings['books'])
+                                    consensus.request_books(settings))
                 results.append(result)
                 statuses.append({'event_id':event['id'],'status':result.status,'request_id':result.request_id})
             except BudgetStop:
@@ -187,7 +203,7 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
         from .bet_store import enabled
         if enabled() and paper_track:
             from .paper import track_scan
-            receipt=track_scan(scan_id,data_dir=data_dir,display_rules=display_rules)
+            receipt=track_scan(scan_id,data_dir=data_dir,display_rules=display_rules,include_started=settings.get('include_live',False))
             if progress: progress(receipt['message'])
         return result
 
@@ -227,6 +243,8 @@ def replay(sport,scan_id=None,*,data_dir=ROOT/'data'):
         from . import rules
         if rules.version(manifest['rules'])!=manifest.get('rule_version'):raise ValueError('Saved rule version mismatch')
         flagged=rules.annotate(flagged,manifest['rules'],manifest['settings']['sport'])
+    if manifest['settings'].get('advisory_version'):
+        flagged=consensus.annotate(flagged,frame,reference=manifest['settings']['reference_book'],capture_time=manifest['capture_time'])
     for suffix,df in [('_flagged.csv',flagged),('_excluded.csv',excluded)]:
         if hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()!=manifest['artifacts'][suffix]['sha256']:
             raise ValueError('Replay differs from the saved '+suffix+' artifact')

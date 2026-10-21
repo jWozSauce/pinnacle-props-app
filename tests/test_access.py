@@ -31,7 +31,7 @@ def test_correct_passphrase_unlock_and_lock_clear_session(monkeypatch,tmp_path):
     monkeypatch.setattr('pinnacle_props.settings.ROOT',tmp_path)
     app=cloud(monkeypatch).run()
     app.text_input(key='_access_input').set_value('fixture-pass');app.button(key='access_unlock').click().run()
-    assert not app.exception and len(app.tabs)==4
+    assert not app.exception and len(app.tabs)==5
     assert 'fixture-pass' not in str(app.query_params)
     assert app.session_state['_access_input']==''
     app.button(key='access_lock').click().run()
@@ -48,4 +48,4 @@ def test_five_failures_lock_for_sixty_seconds(monkeypatch,tmp_path):
     now[0]=159.9;app.run();assert app.button(key='access_unlock').disabled
     now[0]=160.1;app.run();assert not app.button(key='access_unlock').disabled
     app.text_input(key='_access_input').set_value('fixture-pass');app.button(key='access_unlock').click().run()
-    assert not app.exception and len(app.tabs)==4
+    assert not app.exception and len(app.tabs)==5

@@ -24,9 +24,8 @@ render(a,b,Path({str(tmp_path)!r}))
     app=AppTest.from_string(script).run()
     assert not app.exception
     metrics=[(m.label,m.value) for m in app.metric]
-    assert metrics.count(('Official P/L','$30.00'))==1
-    assert metrics.count(('Projected P/L','$30.00'))==1
-    assert metrics.count(('Projected P/L','$-20.00'))==1
+    assert metrics.count(('Season P/L','$30.00'))==1
+    assert not any('Projected' in label for label,value in metrics)
     assert len(app.dataframe)>=3
     app.radio(key='performance_log').set_value('paper').run()
     assert not app.exception and len(app.dataframe)>=8
@@ -68,12 +67,13 @@ def test_full_app_enabled_uses_new_panels(tmp_path,monkeypatch):
     app.secrets['gcp_service_account']={'project_id':'fixture'}
     app.run(timeout=20)
     assert not app.exception
-    assert len(app.tabs)==5
+    assert len(app.tabs)==6
     assert app.checkbox(key='paper_track').value is True
     assert app.button(key='paper_all').label=='Bet ALL 4 qualifying (paper round)'
-    assert app.tabs[4].label=='Paper'
+    assert app.tabs[5].label=='Paper'
     assert any(b.label=='Grade pending bets (real + paper)' for b in app.button)
-    assert sum(m.label=='Official P/L' for m in app.metric)==2
+    assert sum(m.label=='Official P/L' for m in app.metric)==1
+    assert app.tabs[1].label=='Live'
 
 
 def test_flags_cards_frozen_table_and_guard_controls(tmp_path,monkeypatch):

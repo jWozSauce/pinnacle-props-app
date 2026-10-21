@@ -72,27 +72,18 @@ def render(logged_tab, performance_tab, data_dir, *, store=None, feed=None, clv=
                 st.success('Updated '+str(sum(v['updated'] for v in result['logs'].values()))+' rows.')
                 st.rerun()
             except (ValueError,OSError):st.error('Grading could not finish. Reload shared logs before retrying; saved records are retained.')
-        st.button('Refresh live status',key='refresh_live')
-        st.caption(CAPTION)
-        tables={}
         for column,kind in zip(st.columns(2),('real','paper')):
-            card,actual,projected=card_money(live_table(frames[kind],feed))
-            tables[kind]=card
             metrics=performance(frames[kind])
             with column:
                 st.subheader(kind.title())
-                st.metric('Official P/L',f'${actual:,.2f}')
-                st.metric('Projected P/L',f'${projected:,.2f}')
+                st.metric('Season P/L',f"${metrics['profit']:,.2f}")
                 st.metric('W–L–P',f"{metrics['won']}–{metrics['lost']}–{metrics['push']}")
                 st.metric('Pending',metrics['pending'])
                 st.metric('ROI',f"{100*metrics['roi']:.2f}%" if metrics['roi'] is not None else '—')
                 st.caption(f"{metrics['void']} voids · ROI excludes push and void stakes")
         kind=st.radio('Performance log',['real','paper'],format_func=str.title,horizontal=True,key='performance_log')
-        card=tables[kind];frame=frames[kind]
-        if card.empty:st.info('No '+kind+' bets recorded yet.');return
-        pending=card[card.status=='pending'].copy()
-        pending['bet']=pending.apply(lambda r:f"{r.player} · {r.market} · {r.side} {r.line}",axis=1)
-        st.dataframe(pending[['verdict','score','detail','bet','book','stake','price_decimal','to_win','proj_contrib']],hide_index=True,width='stretch')
+        frame=frames[kind]
+        if frame.empty:st.info('No '+kind+' bets recorded yet.');return
         for field in ['sport','market','side','book','rule_version','edge_bucket']:
             with st.expander('By '+field.replace('_',' ')):
                 st.dataframe(breakdown(frame,field),hide_index=True,width='stretch')

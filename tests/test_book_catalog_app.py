@@ -28,10 +28,10 @@ def test_catalog_picker_defaults_caption_disabled_books_and_reference(monkeypatc
     assert 'Absent Book' not in selector.options
     assert app.checkbox(key='catalog_reference').disabled and app.checkbox(key='catalog_reference').value
     assert app.checkbox(key='unavailable_nhl_absent').disabled
-    assert any('12 books selected ≈ 2× region cost per pull'==x.value for x in app.caption)
+    assert any('15 books selected ≈ 2× region cost per pull'==x.value for x in app.caption)
     selector.set_value(['extra']).run()
     assert not app.exception
-    assert any('2 books selected ≈ 1× region cost per pull'==x.value for x in app.caption)
+    assert any('5 books selected ≈ 1× region cost per pull'==x.value for x in app.caption)
     result=options(load_config(),'nhl',books=['extra','pinnacle','extra'])
     assert result['books']==['extra'] and result['reference_book']=='pinnacle'
     with pytest.raises(ValueError):options(load_config(),'nhl',books=['absent'])
