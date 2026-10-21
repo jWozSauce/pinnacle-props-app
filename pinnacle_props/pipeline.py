@@ -120,9 +120,10 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     raw=frame.copy()
     if settings.get('advisory_version'):raw['kind']=raw.book.map(lambda b:'exchange' if b in consensus.EXCHANGES else 'sportsbook')
     raw['scan_id']=scan_id
-    raw['exclusion_reason']=pd.Series([None]*len(raw),dtype='string')
+    reasons=[None]*len(raw)
     for row in excluded.itertuples():
-        raw.loc[row.source_rows,'exclusion_reason']=row.exclusion_reason
+        for index in row.source_rows:reasons[index]=row.exclusion_reason
+    raw['exclusion_reason']=pd.Series(reasons,dtype='string')
     raw.loc[raw.book==settings['reference_book'],'exclusion_reason']='reference input'
     directory=Path(data_dir)/'snapshots'/settings['sport'];directory.mkdir(parents=True,exist_ok=True)
     base=directory/scan_id

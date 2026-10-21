@@ -34,19 +34,27 @@ def aware(value):
     return stamp.tz_convert('America/New_York')
 
 
-def _pair(group):
-    sides = group['side'].str.lower()
-    if sides.duplicated().any():
+def _pair_rows(group):
+    sides = [None if pd.isna(r['side']) else r['side'].lower() for r in group]
+    if len(set(sides)) != len(sides):
         return None, 'duplicate line'
     if len(group) != 2 or set(sides) != {'over', 'under'}:
         return None, 'incomplete pair'
-    prices = []
-    for side in ('over', 'under'):
-        try:
-            prices.append(decimal(group.loc[sides == side, 'price'].iloc[0]))
-        except ValueError:
-            return None, 'invalid price'
-    return prices, None
+    try:
+        return [decimal(group[sides.index(side)]['price']) for side in ('over','under')], None
+    except ValueError:
+        return None, 'invalid price'
+
+
+def _key(row, columns):
+    return tuple(None if pd.isna(row[c]) else row[c] for c in columns)
+
+
+def _groups(rows, columns):
+    groups = {}
+    for row in rows:
+        groups.setdefault(_key(row, columns), []).append(row)
+    return groups
 
 
 def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
@@ -80,42 +88,57 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
     is_reference = df.book.eq(reference_book).fillna(False)
     references = df[is_reference]
     candidates = df[~is_reference & ~df.book.isin(observation_books)]
+    reference_rows = references.to_dict('records')
+    candidate_rows = candidates.to_dict('records')
+    all_rows = df.to_dict('records')
+    reference_identities = set(_key(r, IDENTITY) for r in reference_rows)
+    reference_pairs = _groups(reference_rows, IDENTITY+['point'])
+    reference_prices = {k:_pair_rows(g) for k,g in reference_pairs.items()}
+    candidate_groups = _groups(candidate_rows, PAIR_KEY)
     one_sided = set()
     if exclusion_version >= 2:
-        for key, ladder in candidates.groupby(IDENTITY+['book'], sort=False, dropna=False):
-            sides = set(ladder.side.str.lower().dropna())
-            if sides in ({'over'}, {'under'}) and ladder.side.notna().all():
-                one_sided.add(key)
+        for key, ladder in _groups(candidate_rows, IDENTITY+['book']).items():
+            sides = {None if pd.isna(r['side']) else r['side'].lower() for r in ladder}
+            if sides in ({'over'}, {'under'}):one_sided.add(key)
     books = sorted(df.book.dropna().unique())
-    for _, group in candidates.groupby(PAIR_KEY, sort=False, dropna=False):
-        first = group.iloc[0]
-        source = group.source_row.tolist()
+    offers_by_contract = {}
+    for r in all_rows:
+        side=None if pd.isna(r['side']) else r['side'].lower()
+        offers_by_contract.setdefault((*_key(r, IDENTITY+['point']),side),{}).setdefault(r['book'],[]).append(r)
+    time_cache = {}
+    def timestamp(value):
+        # Valid feeds repeat event and book timestamps across thousands of outcomes.
+        if isinstance(value,str):
+            if value not in time_cache:time_cache[value]=aware(value)
+            return time_cache[value]
+        return aware(value)
+    for group in candidate_groups.values():
+        first = group[0]
+        source = [r['source_row'] for r in group]
         base = {c: first[c] for c in PAIR_KEY}
         base.update(source_rows=source, raw_row_count=len(group))
         reason = None
         for key in IDENTITY + ['book', 'league', 'home_team', 'away_team']:
-            if pd.isna(first[key]) or str(first[key]).strip() == '' or group[key].nunique(dropna=False) != 1:
+            if pd.isna(first[key]) or str(first[key]).strip() == '' or len({_key(r,[key]) for r in group}) != 1:
                 reason = 'invalid identity'
-        if not math.isfinite(first.point):
+        if not math.isfinite(first['point']):
             reason = 'invalid identity'
-        target, target_error = _pair(group)
-        if target_error == 'incomplete pair' and tuple(first[k] for k in IDENTITY+['book']) in one_sided:
+        target, target_error = _pair_rows(group)
+        if target_error == 'incomplete pair' and _key(first,IDENTITY+['book']) in one_sided:
             target_error = 'one-sided market'
         reason = reason or target_error
-        ref = references
-        for key in IDENTITY:
-            ref = ref[ref[key] == first[key]]
-        if ref.empty:
-            reason = reason or 'no reference price'
-        same_ref = ref[ref.point == first.point]
-        if not ref.empty and same_ref.empty:
-            reason = reason or 'line mismatch'
-        ref_prices, ref_error = _pair(same_ref)
+        identity = _key(first,IDENTITY)
+        contract = _key(first,IDENTITY+['point'])
+        has_reference = identity in reference_identities
+        if not has_reference:reason = reason or 'no reference price'
+        same_ref = reference_pairs.get(contract,[])
+        if has_reference and not same_ref:reason = reason or 'line mismatch'
+        ref_prices, ref_error = reference_prices.get(contract,(None,'incomplete pair'))
         reason = reason or ref_error
         if reason is None:
             try:
-                starts = [aware(t) for t in group.commence_time] + [aware(t) for t in same_ref.commence_time]
-                updates = [aware(t) for t in same_ref.last_update]
+                starts = [timestamp(r['commence_time']) for r in group+same_ref]
+                updates = [timestamp(r['last_update']) for r in same_ref]
                 if any(t != starts[0] for t in starts):
                     raise ValueError('Conflicting start times')
                 if any(t > clock for t in updates):
@@ -141,30 +164,28 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
             counts[reason] += 1
             excluded.append(dict(base, exclusion_reason=reason))
             continue
-        row = dict(book=first.book, player_name=first.player, prop_type=first.market,
-                   Target_line=first.point, side=side,
+        row = dict(book=first['book'], player_name=first['player'], prop_type=first['market'],
+                   Target_line=first['point'], side=side,
                    kellyAmount=stake(profile.bankroll, profile.fraction, target[index], fair[index], profile.edge_cap),
                    edge=edges[index], bet=f'{side}/{format_american(target[index])}/{fair[index]:.4f}',
-                   league=first.league, game=f'{first.away_team} at {first.home_team}',
-                   date=start.isoformat(), away_team=first.away_team, home_team=first.home_team,
-                   PIN_line=first.point, Target_over=decimal_to_american(target[0]),
+                   league=first['league'], game=f"{first['away_team']} at {first['home_team']}",
+                   date=start.isoformat(), away_team=first['away_team'], home_team=first['home_team'],
+                   PIN_line=first['point'], Target_over=decimal_to_american(target[0]),
                    PIN_over=decimal_to_american(ref_prices[0]), Target_under=decimal_to_american(target[1]),
                    PIN_under=decimal_to_american(ref_prices[1]), noVigOver=fair[0], noVigUnder=fair[1],
                    Target_over_p=1/target[0], Target_under_p=1/target[1], over_diffTRUE=edges[0],
-                   under_diffTRUE=edges[1], sport_key=first.sport_key, event_id=first.event_id,
+                   under_diffTRUE=edges[1], sport_key=first['sport_key'], event_id=first['event_id'],
                    pin_margin=pin_margin, pin_age_min=age, ev_pct=ev_pct(fair[index], target[index]),
                    pricing_method='same_line', target_over_decimal=target[0], target_under_decimal=target[1],
                    pin_over_decimal=ref_prices[0], pin_under_decimal=ref_prices[1], source_rows=source)
-        comparison = df[(df.point == first.point) & (df.side.str.lower() == side)]
-        for key in IDENTITY:
-            comparison = comparison[comparison[key] == first[key]]
+        comparison = offers_by_contract.get((*contract,side),{})
         prices = {}
         for book in books:
-            offers = comparison[comparison.book == book]
+            offers = comparison.get(book,[])
             price = None
             if len(offers) == 1:
                 try:
-                    price = decimal(offers.iloc[0].price)
+                    price = decimal(offers[0]['price'])
                 except ValueError:
                     pass
             row['price_' + book] = price
@@ -177,7 +198,7 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
     if not flagged_df.empty:
         flagged_df = flagged_df.sort_values('kellyAmount', ascending=False, kind='stable').reset_index(drop=True)
     excluded_df = pd.DataFrame(excluded, columns=PAIR_KEY+['source_rows','raw_row_count','exclusion_reason'])
-    assert len(flagged_df) + sum(counts.values()) == len(candidates.groupby(PAIR_KEY, dropna=False))
+    assert len(flagged_df) + sum(counts.values()) == len(candidate_groups)
     return flagged_df, excluded_df, counts
 
 

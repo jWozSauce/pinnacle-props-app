@@ -113,7 +113,7 @@ def resolve_agent_key(root=ROOT):
 
 def close_day_spend(state, day):
     """Committed and unresolved close spend on one Eastern calendar date."""
-    total=0
+    total=sum(segment.get('close_days',{}).get(day,0) for segment in state.get('history',[]))
     for record in state['records']:
         if record['run_id'].startswith('close-'):
             date=datetime.fromisoformat(record['timestamp'].replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date().isoformat()
@@ -226,6 +226,7 @@ class Client:
         self.min_interval = max(0.0, min_interval)
         self.last_send = 0.0
         self.records = []
+        self._history_validation = {}
         self.quota_checked = False
         self.quota_time = 0.0
         self._quota_nonce = str(uuid.uuid4())
@@ -321,12 +322,17 @@ class Client:
                 time.sleep(min(0.1, max(0, deadline-time.monotonic())))
         try:
             state = json.loads(content)
-            assert state['version']==1 and state['spent']>=0
+            assert state['version'] in (1,2) and state['spent']>=0
+            if state['version']==1:
+                assert not state.get('history') and state.get('archived_spent',0)==0
+            if state['version']==2:
+                from .ledger_history import validate
+                validate(self.accounting_dir,state,self._history_validation)
             assert isinstance(state['records'],list) and isinstance(state['reservations'],dict)
-            assert state['spent'] == sum(r['actual'] or 0 for r in state['records'])
+            assert state['spent'] == state.get('archived_spent',0)+sum(r['actual'] or 0 for r in state['records'])
             assert set(state['reservations']) == {r['request_id'] for r in state['records'] if r['actual'] is None}
             return state
-        except (ValueError, KeyError, AssertionError, TypeError):
+        except (ValueError, KeyError, AssertionError, TypeError, OSError):
             raise BudgetStop('Budget state invalid; no request sent') from None
 
     def _save(self, state):
@@ -334,6 +340,13 @@ class Client:
             self._save_unlocked(state)
 
     def _save_unlocked(self, state):
+        path=self.accounting_dir/'odds_budget.json'
+        if state['version']==1 and path.exists() and json.loads(path.read_text()).get('version')==2:
+            raise BudgetStop('Refusing to overwrite migrated accounting with legacy state')
+        if state['version']==2:
+            from .ledger_history import compact,validate
+            compact(self.accounting_dir,state)
+            validate(self.accounting_dir,state,self._history_validation)
         write_json(self.accounting_dir/'odds_budget.json', state)
         fields = ['request_id','run_id','timestamp','endpoint','estimated','actual','remaining',
                   'status','cache_path','outcome']
@@ -385,6 +398,9 @@ class Client:
         envelope = json.loads(gzip.decompress(cache_path.read_bytes()))
         state = self._load();records = state['records']
         matching = [r for r in records if r['request_id']==envelope['request_id']]
+        if not matching and state.get('history'):
+            from .ledger_history import find_record
+            matching=find_record(self.accounting_dir,state,envelope['request_id'])
         if self.transient_retries and len(matching)==1 and matching[0]['outcome'].startswith('transient'):
             if state['halt']:raise BudgetStop('API client halted: '+state['halt'])
             error=TransientError('Transient provider response; see status ledger',envelope['status'])

@@ -1,0 +1,282 @@
+{
+  "0": {
+    "flagged": "515cfd9c6672a984099a4d6931c002def3788c400085cb2a51e925e7cd10a95b",
+    "excluded": "09f29690cc94513b7805a4186135656c2d8faa0eca623370984ad573a07b50d0",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 1,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 2,
+      "incomplete pair": 3,
+      "invalid price": 4,
+      "invalid identity": 1,
+      "invalid timestamp": 0
+    }
+  },
+  "1": {
+    "flagged": "8e48397befd82c169b0a767a672da1e814c98e3dce7cf82a5bf4c0f185ece64e",
+    "excluded": "305c0ae8b99586fb2f03e83fd0626a1dbadcfdcce94dd432f5ac07e7e390722e",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 1,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 4,
+      "incomplete pair": 0,
+      "invalid price": 3,
+      "invalid identity": 1,
+      "invalid timestamp": 2,
+      "one-sided market": 0
+    }
+  },
+  "2": {
+    "flagged": "8d58fcb6f528d68748ea69ccf5778e8d776b0fd311afd9989d41c06411056fca",
+    "excluded": "7b4b478b9073a842bbba5c199f06637a8b61d9dcf9f6e4bdde7037357593354b",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 2,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 2,
+      "incomplete pair": 2,
+      "invalid price": 0,
+      "invalid identity": 5,
+      "invalid timestamp": 0
+    }
+  },
+  "3": {
+    "flagged": "6208bcb632f6ffe3e60f4ac8b683d076c35cecc25154ba03027b27c132e6eefb",
+    "excluded": "1fb3f5cb024d9d2716d5b2996a3887c7a3fbb5b3eeaf64c72631e1e0bad6296b",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 1,
+      "below min edge": 0,
+      "margin too wide": 3,
+      "live": 0,
+      "duplicate line": 4,
+      "incomplete pair": 3,
+      "invalid price": 1,
+      "invalid identity": 1,
+      "invalid timestamp": 1,
+      "one-sided market": 0
+    }
+  },
+  "4": {
+    "flagged": "944f00b978fed32964b58c86b7f81f06aaa845359227869df9977ac30e6b1e53",
+    "excluded": "80ca40e4e2f8569337bb1cdcd2ddd97a0a185fd26e659392fd7dbc38e8ce85a2",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 3,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 3,
+      "incomplete pair": 6,
+      "invalid price": 0,
+      "invalid identity": 4,
+      "invalid timestamp": 0
+    }
+  },
+  "5": {
+    "flagged": "9539ce3415511ff59a246f9cfd8890e73d807ed5dbe196269c92e405f8dea7de",
+    "excluded": "27e366d676dedac356e0a1c6841dfb590f455ef9f1fe9173b6e657f24a82e383",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 6,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 3,
+      "incomplete pair": 4,
+      "invalid price": 1,
+      "invalid identity": 3,
+      "invalid timestamp": 0,
+      "one-sided market": 1
+    }
+  },
+  "6": {
+    "flagged": "01aec5f8001fefcbb94ce5fafbc03e451b9cc75c1ab7e514116e032eb6a9cc07",
+    "excluded": "e7c6121d92d04790aa534b5c054104df7f0d1eb07d1b61bdae068b356ddc9975",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 1,
+      "below min edge": 0,
+      "margin too wide": 3,
+      "live": 0,
+      "duplicate line": 3,
+      "incomplete pair": 7,
+      "invalid price": 0,
+      "invalid identity": 0,
+      "invalid timestamp": 0
+    }
+  },
+  "7": {
+    "flagged": "f28b074dbbeff76c181aaf4fc74c81b6eebe203effaeb19e2c8d356d90a8ba6d",
+    "excluded": "d1828e0d58fcaa20b36f8f762b7582401191fb0fe2d142c743050a271cb78605",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 0,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 3,
+      "incomplete pair": 3,
+      "invalid price": 3,
+      "invalid identity": 2,
+      "invalid timestamp": 0,
+      "one-sided market": 0
+    }
+  },
+  "8": {
+    "flagged": "85378c4d0c4a661c2b9f04f5b4d6544296e5543ddf74a416aad257f43cb08a21",
+    "excluded": "be398f6238b5a6ace47c795ebba51540ae5542041342291004bf657d2caa975b",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 2,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 4,
+      "incomplete pair": 8,
+      "invalid price": 3,
+      "invalid identity": 1,
+      "invalid timestamp": 0
+    }
+  },
+  "9": {
+    "flagged": "ee85cb6c4e54c89630e569c4933451d64b2c96d78dfa3fd3c842029da8ce273c",
+    "excluded": "921e58367adbfea0897879f832c36c1e26a8d83f0a177dd771ce483cfd1c84e8",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 1,
+      "below min edge": 0,
+      "margin too wide": 9,
+      "live": 0,
+      "duplicate line": 4,
+      "incomplete pair": 4,
+      "invalid price": 1,
+      "invalid identity": 0,
+      "invalid timestamp": 0,
+      "one-sided market": 0
+    }
+  },
+  "10": {
+    "flagged": "9c7f0a64a3e90e5e0921cd5c99e6dafe1d4097c4eef0ccb5bd09bd29f289dbdd",
+    "excluded": "b03e729487b3d502d71d62bb187e6696813d7ba28be517474a848a69f25b7467",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 2,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 3,
+      "incomplete pair": 4,
+      "invalid price": 2,
+      "invalid identity": 2,
+      "invalid timestamp": 1
+    }
+  },
+  "11": {
+    "flagged": "9e0e63d72877f5165ca33afd16afa2cbbfebf2bf7833da62013087aedafb7d7f",
+    "excluded": "70dc4d2c10fc2cb910e04e75c9dbf257fe1486fb16963435b4094c50391e7028",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 4,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 5,
+      "incomplete pair": 6,
+      "invalid price": 0,
+      "invalid identity": 0,
+      "invalid timestamp": 0,
+      "one-sided market": 0
+    }
+  },
+  "12": {
+    "flagged": "52898ccc458b64a40a1f2f91d470127d5e266795de9c535d31802fe05370b4e6",
+    "excluded": "df7d4fd68c9902de6e7951bc05d36decc870687baa7e035f85cc21d5e099113d",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 1,
+      "below min edge": 0,
+      "margin too wide": 3,
+      "live": 0,
+      "duplicate line": 1,
+      "incomplete pair": 2,
+      "invalid price": 1,
+      "invalid identity": 1,
+      "invalid timestamp": 4
+    }
+  },
+  "13": {
+    "flagged": "84426d8d0b65f7d716ea38321bf4ecb29ae4e869a11ecdf00440464f023c65b9",
+    "excluded": "45f2008b9303a573b8fa8998db7e1325a0877bf4526213cdb21b492c5bfa8dd6",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 2,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 4,
+      "incomplete pair": 9,
+      "invalid price": 1,
+      "invalid identity": 2,
+      "invalid timestamp": 0,
+      "one-sided market": 0
+    }
+  },
+  "14": {
+    "flagged": "16a737af3c6020eb2a74f80c167581a29a62056305789b82c544148fcc752ccf",
+    "excluded": "0eaef1a04f15fd196dcbc83551c03e6b95fc178da609076b8fdb86d589f973f4",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 3,
+      "below min edge": 0,
+      "margin too wide": 0,
+      "live": 0,
+      "duplicate line": 5,
+      "incomplete pair": 6,
+      "invalid price": 0,
+      "invalid identity": 1,
+      "invalid timestamp": 0
+    }
+  },
+  "15": {
+    "flagged": "b38a0c90df62129e6f03398da2f262e109ae32dab84332e92fa64768a5abeae6",
+    "excluded": "046d09510eba6f93e9ed73e2c14dbde1931adfc7f0a82874e8018e81c1088225",
+    "counts": {
+      "no reference price": 0,
+      "line mismatch": 0,
+      "no positive side": 2,
+      "below min edge": 0,
+      "margin too wide": 2,
+      "live": 0,
+      "duplicate line": 2,
+      "incomplete pair": 5,
+      "invalid price": 2,
+      "invalid identity": 1,
+      "invalid timestamp": 0,
+      "one-sided market": 0
+    }
+  }
+}
