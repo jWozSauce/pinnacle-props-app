@@ -50,3 +50,13 @@ def close_manifest_dir(data_dir):
             raise ValueError('Close manifest migration required; no requests sent')
         return target
     return data_dir/'closes/manifests'
+
+
+def alternate_pairing_enabled():
+    """Q71 accepted: main and alternate quotes pair by exact canonical contract."""
+    import os
+    return os.environ.get('PP_SAME_LINE_ALTERNATES_ENABLED', '1') == '1'
+
+
+def scan_markets(spec):
+    return spec['markets'] + (spec.get('alternate_markets', []) if alternate_pairing_enabled() else [])

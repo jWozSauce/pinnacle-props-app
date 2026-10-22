@@ -13,7 +13,7 @@ from pinnacle_props.pipeline import discover, options, replay, run_live
 from pinnacle_props.scan import LEGACY_COLUMNS
 from pinnacle_props import rules, game_time
 from pinnacle_props.rule_ui import initialize as initialize_rules, panel as rules_panel
-from pinnacle_props.settings import ROOT, load_config
+from pinnacle_props.settings import ROOT, load_config, scan_markets
 from pinnacle_props.deployment import deployment_settings
 from pinnacle_props.access import cloud_access
 from pinnacle_props.bet import log_bet, read_bets
@@ -138,9 +138,9 @@ with st.expander('Books, markets & scan settings',expanded=False):
         with st.expander('Unavailable books · '+reason):
             for k,b in unavailable.items():
                 st.checkbox(b['label']+' · '+('observation only' if consensus.enabled() and k in consensus.EXCHANGES else reason),value=False,disabled=True,key='unavailable_'+sport+'_'+k)
-    available=config['sports'][sport]['markets']+config['sports'][sport].get('alternate_markets',[])
+    available=scan_markets(config['sports'][sport])
     query_markets=st.query_params.get('markets_'+sport,'').split(',')
-    selected_markets=[m for m in query_markets if m in available] or config['sports'][sport]['markets']
+    selected_markets=[m for m in query_markets if m in available] or available
     markets=st.multiselect('Markets',available,default=selected_markets,key='markets_'+sport)
     st.query_params['books_'+sport]=','.join(books)
     st.query_params['markets_'+sport]=','.join(markets)
@@ -297,7 +297,7 @@ with tab_prices:
             view=view[mask]
         advisory_columns=['island_flag','books_q','market_books_q','sharp_books_q'] if manifest.get('settings',{}).get('advisory_version') else []
         advisory_details=advisory_columns+['cons_edge','market_gap_pp','market_edge_pp','sharp_gap_pp','sharp_edge_pp','advisory_version'] if advisory_columns else []
-        table_columns=['start_status']+advisory_columns+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct']
+        table_columns=['start_status']+advisory_columns+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']
         with st.expander('Filter individual columns'):
             columns=st.multiselect('Columns to filter',table_columns,key='column_filters_'+sport)
             for column in columns:
@@ -327,6 +327,7 @@ with tab_prices:
                     if age:
                         st.caption(f'◷ Older quote · Pinnacle age at capture: {row.pin_age_min:.1f} min')
                     st.caption(f"Suggested stake ${row.kellyAmount:,.2f} · Pinnacle margin {100*row.pin_margin:.2f}%")
+                    if row.pricing_method=='same_line_alt':st.caption('Same line · alternate market')
                     if clv_preview and (settlement_preview or not deployment['cloud']):
                         row_number=row.Index+1
                         record_key=manifest['scan_id']+'_'+str(row_number)

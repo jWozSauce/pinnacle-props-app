@@ -40,7 +40,22 @@ sports:
     - player_kicking_points
     - player_field_goals
     - player_tackles_assists
-    alternate_markets: []
+    alternate_markets:
+    - player_field_goals_alternate
+    - player_kicking_points_alternate
+    - player_pass_attempts_alternate
+    - player_pass_completions_alternate
+    - player_pass_interceptions_alternate
+    - player_pass_longest_completion_alternate
+    - player_pass_tds_alternate
+    - player_pass_yds_alternate
+    - player_reception_longest_alternate
+    - player_reception_yds_alternate
+    - player_receptions_alternate
+    - player_rush_attempts_alternate
+    - player_rush_longest_alternate
+    - player_rush_yds_alternate
+    - player_tackles_assists_alternate
   nba:
     label: NBA
     key: basketball_nba
@@ -63,7 +78,18 @@ sports:
     - player_field_goals
     - player_frees_made
     - player_frees_attempts
-    alternate_markets: []
+    alternate_markets:
+    - player_assists_alternate
+    - player_blocks_alternate
+    - player_points_alternate
+    - player_points_assists_alternate
+    - player_points_rebounds_alternate
+    - player_points_rebounds_assists_alternate
+    - player_rebounds_alternate
+    - player_rebounds_assists_alternate
+    - player_steals_alternate
+    - player_threes_alternate
+    - player_turnovers_alternate
   nhl:
     label: NHL
     key: icehockey_nhl
@@ -75,7 +101,14 @@ sports:
     - player_shots_on_goal
     - player_goals
     - player_total_saves
-    alternate_markets: []
+    alternate_markets:
+    - player_assists_alternate
+    - player_blocked_shots_alternate
+    - player_goals_alternate
+    - player_points_alternate
+    - player_power_play_points_alternate
+    - player_shots_on_goal_alternate
+    - player_total_saves_alternate
   mlb:
     label: MLB
     key: baseball_mlb
@@ -97,7 +130,23 @@ sports:
     - pitcher_walks
     - pitcher_earned_runs
     - pitcher_outs
-    alternate_markets: []
+    alternate_markets:
+    - batter_doubles_alternate
+    - batter_hits_alternate
+    - batter_hits_runs_rbis_alternate
+    - batter_home_runs_alternate
+    - batter_rbis_alternate
+    - batter_runs_scored_alternate
+    - batter_singles_alternate
+    - batter_strikeouts_alternate
+    - batter_total_bases_alternate
+    - batter_triples_alternate
+    - batter_walks_alternate
+    - pitcher_earned_runs_alternate
+    - pitcher_hits_allowed_alternate
+    - pitcher_outs_alternate
+    - pitcher_strikeouts_alternate
+    - pitcher_walks_alternate
   wnba:
     label: WNBA
     key: basketball_wnba
@@ -120,4 +169,15 @@ sports:
     - player_field_goals
     - player_frees_made
     - player_frees_attempts
-    alternate_markets: []
+    alternate_markets:
+    - player_assists_alternate
+    - player_blocks_alternate
+    - player_points_alternate
+    - player_points_assists_alternate
+    - player_points_rebounds_alternate
+    - player_points_rebounds_assists_alternate
+    - player_rebounds_alternate
+    - player_rebounds_assists_alternate
+    - player_steals_alternate
+    - player_threes_alternate
+    - player_turnovers_alternate

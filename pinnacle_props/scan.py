@@ -34,7 +34,27 @@ def aware(value):
     return stamp.tz_convert('America/New_York')
 
 
-def _pair_rows(group):
+def _unique_quotes(group):
+    """Collapse identical main/alternate copies; conflicting or within-key duplicates fail."""
+    selected = {}
+    seen = set()
+    for row in group:
+        side = None if pd.isna(row['side']) else row['side'].lower()
+        identity = (row.get('original_market', row['market']), side)
+        if identity in seen:
+            return group
+        seen.add(identity)
+        if side in selected:
+            try:
+                if decimal(selected[side]['price']) != decimal(row['price']):return group
+            except ValueError:
+                return group
+        else:selected[side] = row
+    return list(selected.values())
+
+
+def _pair_rows(group, alternate=False):
+    if alternate:group = _unique_quotes(group)
     sides = [None if pd.isna(r['side']) else r['side'].lower() for r in group]
     if len(set(sides)) != len(sides):
         return None, 'duplicate line'
@@ -59,7 +79,8 @@ def _groups(rows, columns):
 
 def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
          max_reference_margin=None, require_line_match=True, include_live=False, now,
-         exclusion_version=2, observation_books=()):
+         exclusion_version=2, observation_books=(), alternate_version=None):
+    if alternate_version not in (None, 1):raise ValueError("Unsupported alternate pairing version")
     if exclusion_version not in (1, 2):
         raise ValueError('Unsupported exclusion classification version')
     if not isinstance(profile, Profile):
@@ -79,6 +100,9 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
         raise ValueError('Missing scan columns: ' + ', '.join(sorted(missing)))
     df = long_df.copy().reset_index(drop=True)
     df['source_row'] = df.index
+    if alternate_version:
+        df['original_market'] = df['market']
+        df['market'] = df['market'].astype('string').str.removesuffix('_alternate')
     df['side'] = df['side'].astype('string')
     df['point'] = pd.to_numeric(df['point'], errors='coerce')
     counts = dict.fromkeys(REASONS, 0)
@@ -93,7 +117,7 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
     all_rows = df.to_dict('records')
     reference_identities = set(_key(r, IDENTITY) for r in reference_rows)
     reference_pairs = _groups(reference_rows, IDENTITY+['point'])
-    reference_prices = {k:_pair_rows(g) for k,g in reference_pairs.items()}
+    reference_prices = {k:_pair_rows(g, bool(alternate_version)) for k,g in reference_pairs.items()}
     candidate_groups = _groups(candidate_rows, PAIR_KEY)
     one_sided = set()
     if exclusion_version >= 2:
@@ -123,7 +147,7 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
                 reason = 'invalid identity'
         if not math.isfinite(first['point']):
             reason = 'invalid identity'
-        target, target_error = _pair_rows(group)
+        target, target_error = _pair_rows(group, bool(alternate_version))
         if target_error == 'incomplete pair' and _key(first,IDENTITY+['book']) in one_sided:
             target_error = 'one-sided market'
         reason = reason or target_error
@@ -178,10 +202,17 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
                    pin_margin=pin_margin, pin_age_min=age, ev_pct=ev_pct(fair[index], target[index]),
                    pricing_method='same_line', target_over_decimal=target[0], target_under_decimal=target[1],
                    pin_over_decimal=ref_prices[0], pin_under_decimal=ref_prices[1], source_rows=source)
+        if alternate_version:
+            row.update(target_market_keys=sorted({r['original_market'] for r in group}),
+                       pin_market_keys=sorted({r['original_market'] for r in same_ref}),
+                       pin_source_rows=[r['source_row'] for r in same_ref])
+            if any(r['original_market'].endswith('_alternate') for r in group+same_ref):
+                row['pricing_method']='same_line_alt'
         comparison = offers_by_contract.get((*contract,side),{})
         prices = {}
         for book in books:
             offers = comparison.get(book,[])
+            if alternate_version:offers = _unique_quotes(offers)
             price = None
             if len(offers) == 1:
                 try:
@@ -194,7 +225,7 @@ def scan(long_df, profile, *, reference_book='pinnacle', min_edge=0.0,
         row['best_book'] = max(prices, key=prices.get) if prices else None
         row['best_price'] = max(prices.values()) if prices else None
         flagged.append(row)
-    flagged_df = pd.DataFrame(flagged, columns=LEGACY_COLUMNS + EXTRA_COLUMNS + ['price_'+b for b in books])
+    flagged_df = pd.DataFrame(flagged, columns=LEGACY_COLUMNS + EXTRA_COLUMNS + (['target_market_keys','pin_market_keys','pin_source_rows'] if alternate_version else []) + ['price_'+b for b in books])
     if not flagged_df.empty:
         flagged_df = flagged_df.sort_values('kellyAmount', ascending=False, kind='stable').reset_index(drop=True)
     excluded_df = pd.DataFrame(excluded, columns=PAIR_KEY+['source_rows','raw_row_count','exclusion_reason'])

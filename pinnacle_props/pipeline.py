@@ -16,7 +16,7 @@ from .kelly import Profile
 from .kelly_sheet import fetch_profiles
 from .odds_api import APIError, BudgetStop, coverage, normalize, write_json
 from .scan import scan, INPUT_COLUMNS
-from .settings import ROOT, load_config
+from .settings import ROOT, load_config, alternate_pairing_enabled, scan_markets
 from . import book_catalog, consensus
 
 
@@ -35,8 +35,8 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
     selected_books=[b for b in selected_books if b != config['reference_book'] and (not consensus.enabled() or b not in consensus.EXCHANGES)]
     if not selected_books or any(b not in allowed_books for b in selected_books):
         raise ValueError('Choose at least one configured soft book')
-    selected_markets=list(dict.fromkeys(markets if markets is not None else settings['markets']))
-    allowed=settings['markets']+settings.get('alternate_markets',[])
+    selected_markets=list(dict.fromkeys(markets if markets is not None else scan_markets(settings)))
+    allowed=scan_markets(settings)
     if not selected_markets or any(m not in allowed for m in selected_markets):
         raise ValueError('Choose at least one configured market')
     selected_dates=None
@@ -46,6 +46,7 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
         if selected_dates[0]>selected_dates[1]:raise ValueError('From date must not follow To date')
     return dict(horizon={'mode':'date_range' if selected_dates else 'all_listed','dates':selected_dates},sport=sport,sport_key=settings['key'],league=settings['label'],
                 reference_book=config['reference_book'],books=selected_books,markets=selected_markets,
+                **({'alternate_version':1} if alternate_pairing_enabled() else {}),
                 min_edge=config['min_edge'] if min_edge is None else min_edge,
                 max_reference_margin=max_reference_margin,include_live=include_live,
                 **({'advisory_version':consensus.VERSION,'observation_books':consensus.observation_books()} if consensus.enabled() else {}))
@@ -99,7 +100,7 @@ def _evaluate(frame,settings,profile,capture_time,exclusion_version=2):
     if settings.get('advisory_version') not in (None,1,2,3):raise ValueError('Unsupported advisory version')
     return scan(frame,profile,reference_book=settings['reference_book'],min_edge=settings['min_edge'],
                 max_reference_margin=settings['max_reference_margin'],include_live=settings['include_live'],
-                now=capture_time,exclusion_version=exclusion_version,
+                now=capture_time,exclusion_version=exclusion_version,alternate_version=settings.get('alternate_version'),
                 observation_books=consensus.EXCHANGES if settings.get('advisory_version') else ())
 
 

@@ -35,7 +35,7 @@ def panel(config, cloud):
             with st.expander(spec['label']+' rule',expanded=False):
                 default=st.slider('Default minimum edge (percentage points)',0.0,100.0,
                     current['sports'][sport]['default']['min_edge'],.1,key=f'rule_min_{sport}_{epoch}')
-                frame=rules.editor_rows(current,sport,spec['markets']+spec.get('alternate_markets',[]))
+                frame=rules.editor_rows(current,sport,spec['markets'])
                 edited=st.data_editor(frame.iloc[1:].reset_index(drop=True),key=f'rule_table_{sport}_{epoch}',
                     hide_index=True,disabled=['market'],width='stretch',height=180,
                     column_config={'market':st.column_config.TextColumn('Market'),
