@@ -91,7 +91,7 @@ render(a,b,Path({str(tmp_path)!r}))
 with c:render_live(Path({str(tmp_path)!r}))""").run()
     assert not app.exception
     for tab in app.tabs[:2]:
-        table=tab.dataframe[0].value
+        table=next(d.value for d in tab.dataframe if 'status' in d.value)
         assert list(table.status)==['lost','won','pending']
         assert len(table)==3 and table.iloc[1].island_flag=='ISLAND'
         assert any(m.label=='Record' and m.value=='1–1–0' for m in tab.metric)

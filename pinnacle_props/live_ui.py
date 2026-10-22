@@ -9,16 +9,18 @@ from .settlement_sources import FreeFeed
 from .game_time import utcnow
 from .settle import OFFICIAL
 from .log_tables import LABELS,table
+from .sport_filter import select_sports, filter_rows
 
 EMPTY='No bets to track yet. Pending bets and bets graded in the last 24 hours appear here; live scores cover NHL and NBA.'
 ORDER={'live':0,'waiting':0,'decided':1,'graded':2,'upcoming':3,'unmatched':4,'untracked':4}
 
 
-def cards(store,feed):
+def cards(store,feed,sports=None):
     now=pd.Timestamp(utcnow());cutoff=now-pd.Timedelta(days=1)
     output={};active=False
     for kind in ('real','paper'):
         frame=canonical(store.read(kind,reload=True),kind)
+        if sports is not None:frame=filter_rows(frame,sports)
         graded=pd.to_datetime(frame.graded_at,utc=True,errors='coerce',format='mixed')
         corrected=pd.to_datetime(frame.regraded_at,utc=True,errors='coerce',format='mixed')
         recent=(graded.ge(cutoff)&graded.le(now))|(corrected.ge(cutoff)&corrected.le(now))
@@ -39,10 +41,11 @@ def cards(store,feed):
 def render_live(data_dir,*,store=None,feed=None):
     store=store if store is not None else session_store(data_dir)
     feed=feed if feed is not None else FreeFeed(Path(data_dir)/'settlement_cache')
-    initial,active=cards(store,feed)
+    sports=select_sports('live')
+    initial,active=cards(store,feed,sports)
     @st.fragment(run_every=60 if active else None)
     def panel():
-        current,current_active=cards(store,feed)
+        current,current_active=cards(store,feed,sports)
         if current_active!=active:st.rerun(scope='app')
         st.subheader('Live')
         if store.warning:st.warning(store.warning)
