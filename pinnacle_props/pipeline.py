@@ -2,7 +2,7 @@
 from .live_api import operational_client, charged, accounting, failure_receipt
 from contextlib import contextmanager
 from dataclasses import asdict
-from datetime import date,datetime,timezone
+from datetime import date,datetime,timezone,timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import fcntl
@@ -24,7 +24,7 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def options(config,sport,books=None,markets=None,min_edge=None,max_reference_margin=None,include_live=False,dates=None):
+def options(config,sport,books=None,markets=None,min_edge=None,max_reference_margin=None,include_live=False,dates=None,include_beyond_window=False):
     if sport not in config['sports']:
         raise ValueError('Unknown configured sport')
     settings=config['sports'][sport]
@@ -44,7 +44,11 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
         if len(dates)!=2:raise ValueError('Choose both From and To dates')
         selected_dates=[date.fromisoformat(str(d)).isoformat() for d in dates]
         if selected_dates[0]>selected_dates[1]:raise ValueError('From date must not follow To date')
-    return dict(horizon={'mode':'date_range' if selected_dates else 'all_listed','dates':selected_dates},sport=sport,sport_key=settings['key'],league=settings['label'],
+    hours=settings.get('scan_window_hours',config.get('scan_window_hours',72))
+    if isinstance(hours,bool) or not isinstance(hours,(int,float)) or not 0<hours<float('inf'):
+        raise ValueError('scan_window_hours must be a positive finite number')
+    return dict(horizon={'mode':'all_listed' if include_beyond_window else 'rolling','dates':selected_dates,
+                         'hours':hours,'include_beyond_window':bool(include_beyond_window)},sport=sport,sport_key=settings['key'],league=settings['label'],
                 reference_book=config['reference_book'],books=selected_books,markets=selected_markets,
                 **({'alternate_version':1} if alternate_pairing_enabled() else {}),
                 min_edge=config['min_edge'] if min_edge is None else min_edge,
@@ -75,14 +79,21 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
     if not isinstance(result.payload,list):
         raise APIError('Events endpoint did not return a list')
     now=clock();day=now.astimezone(ZoneInfo('America/New_York')).date()
-    dates=settings.get('horizon',{}).get('dates')
+    horizon=settings.get('horizon',{})
+    dates=horizon.get('dates')
+    hours=horizon.get('hours',72)
+    cutoff=now.astimezone(timezone.utc)+timedelta(hours=hours)
+    include_beyond=horizon.get('include_beyond_window',False)
     try:
-        events=[]
+        events=[];later=[]
         for e in result.payload:
             start=datetime.fromisoformat(e['commence_time'].replace('Z','+00:00'))
             if start.tzinfo is None:raise ValueError('Naive event start')
             event_day=start.astimezone(ZoneInfo('America/New_York')).date().isoformat()
             if not settings['include_live'] and start<=now:continue
+            if start>cutoff:
+                later.append(e)
+                if not include_beyond:continue
             if dates and not dates[0]<=event_day<=dates[1]:continue
             events.append(e)
     except (KeyError,TypeError,ValueError):
@@ -93,6 +104,7 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
     books=consensus.request_books(settings)
     bound=len(events)*len(settings['markets'])*((len(books)+9)//10)
     return {'events':events,'bound':bound,'discovered_at':datetime.now(timezone.utc).isoformat(),
+            'window_hours':hours,'window_end':cutoff.isoformat(),'later_events':later,
             'date':day.isoformat(),'event_cache':result.cache_path,'settings':settings}
 
 

@@ -49,7 +49,7 @@ def test_responsive_view_switch_persists_in_url(monkeypatch):
         assert any('No opportunities' in x.value for x in app.info)
 
 
-def test_all_game_dates_default_and_optional_range(monkeypatch):
+def test_rolling_default_and_optional_range(monkeypatch):
     from datetime import date
     monkeypatch.setattr('requests.sessions.Session.request',lambda *a,**k:(_ for _ in ()).throw(AssertionError('Network')))
     monkeypatch.setattr('pinnacle_props.odds_api.resolve_key',lambda **k:'fixture')
@@ -62,7 +62,7 @@ def test_all_game_dates_default_and_optional_range(monkeypatch):
     assert not app.checkbox(key='limit_dates').value
     app.button(key='estimate').click().run()
     assert not app.exception and seen[-1]['horizon']['dates'] is None
-    assert any('2 games, 2099-01-07 to 2099-01-11' in x.value for x in app.info)
+    assert any('2 games in the next 72 h' in x.value for x in app.info)
     app.checkbox(key='limit_dates').check().run()
     app.date_input(key='scan_dates').set_value((date(2026,10,8),date(2026,10,11))).run()
     app.button(key='estimate').click().run()

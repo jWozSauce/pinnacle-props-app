@@ -2,6 +2,8 @@ request_workers:
   scans: 6
   closes: 4
   historical: 3
+scan_window_hours: 72
+# Optional per-sport scan_window_hours override under sports (e.g. nfl: 168).
 reference_book: pinnacle
 kelly_profile: Player_Props
 min_edge: 0.0
@@ -22,6 +24,7 @@ books:
   fanatics: Fanatics
 sports:
   nfl:
+    scan_window_hours: 168
     label: NFL
     key: americanfootball_nfl
     markets:

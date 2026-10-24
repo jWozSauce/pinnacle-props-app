@@ -104,7 +104,7 @@ def test_account_floor_blocks_paid_request_before_send(tmp_path):
     assert not (tmp_path/'odds_budget.json').exists()
 
 
-def test_discovery_all_upcoming_and_optional_eastern_dates(tmp_path):
+def test_discovery_rolling_default_and_optional_eastern_dates(tmp_path):
     from datetime import datetime,timezone
     from pinnacle_props.pipeline import discover
     now=lambda:datetime(2026,10,8,3,tzinfo=timezone.utc) # Wednesday 11 PM Eastern
@@ -115,11 +115,14 @@ def test_discovery_all_upcoming_and_optional_eastern_dates(tmp_path):
         return discover(selected,data_dir=tmp_path,session=Session(Response(events)),key='test-key',clock=now)
     setting=options(load_config(),'nfl',books=['draftkings'],markets=['player_pass_yds'])
     all_games=get(setting)
-    assert [e['id'] for e in all_games['events']]==['thursday','sunday','far']
-    assert all_games['bound']==3 and setting['horizon']=={'mode':'all_listed','dates':None}
+    assert [e['id'] for e in all_games['events']]==['thursday','sunday']
+    assert all_games['bound']==2 and setting['horizon']['hours']==168
+    assert [e['id'] for e in all_games['later_events']]==['far']
     setting=options(load_config(),'nfl',books=['draftkings'],markets=['player_pass_yds'],dates=['2026-10-08','2026-10-08'])
     assert [e['id'] for e in get(setting)['events']]==['thursday']
     setting['include_live']=True;setting['horizon']['dates']=None
+    assert len(get(setting)['events'])==3
+    setting['horizon']['include_beyond_window']=True
     assert len(get(setting)['events'])==4
     with pytest.raises(ValueError):options(load_config(),'nfl',dates=['2026-10-11','2026-10-08'])
     with pytest.raises(ValueError):options(load_config(),'nfl',dates=['2026-10-11'])

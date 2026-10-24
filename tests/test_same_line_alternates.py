@@ -85,7 +85,8 @@ def test_market_selection_is_opt_in_and_costs_all_keys(monkeypatch,tmp_path):
         assert s['alternate_version']==1 and s['markets']==spec['markets']+spec['alternate_markets']
         assert all(m.removesuffix('_alternate') in spec['markets'] for m in spec['alternate_markets'])
     s=options(cfg,'nba')
-    preview=discover(s,data_dir=tmp_path,key='test-key',session=Session(Response([{'id':'game-1','commence_time':'2099-01-01T00:00:00Z'}])))
+    from datetime import datetime,timezone
+    preview=discover(s,data_dir=tmp_path,key='test-key',session=Session(Response([{'id':'game-1','commence_time':'2099-01-01T00:00:00Z'}])),clock=lambda:datetime(2098,12,31,tzinfo=timezone.utc))
     from pinnacle_props.consensus import request_books
     assert preview['bound']==len(s['markets'])*((len(request_books(s))+9)//10)
 

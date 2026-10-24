@@ -149,6 +149,11 @@ with st.expander('Books, markets & scan settings',expanded=False):
     maximum=st.slider('Maximum Pinnacle margin (%)',0.0,50.0,10.0,.5,key='maximum')/100 if guard else None
     paper_track=st.checkbox('Paper-track rule-passing bets on every refresh',value=True,key='paper_track') if settlement_preview else False
     include_live=st.checkbox('Include live games',value=False,key='include_live')
+    window_hours=config['sports'][sport].get('scan_window_hours',config.get('scan_window_hours',72))
+    if st.session_state.pop('_reset_scan_window',False) or st.session_state.get('_scan_window_sport')!=sport:
+        st.session_state['include_beyond_window']=False
+    st.session_state['_scan_window_sport']=sport
+    include_beyond_window=st.checkbox(f'Include games beyond {window_hours:g} hours',value=False,key='include_beyond_window')
     limit_dates=st.checkbox('Limit game dates',value=False,key='limit_dates')
     scan_dates=None
     if limit_dates:
@@ -164,7 +169,7 @@ with st.expander('Books, markets & scan settings',expanded=False):
         if reload_profiles():st.rerun()
 
 try:
-    settings=options(config,sport,books,markets,0.0,maximum,include_live,dates=scan_dates)
+    settings=options(config,sport,books,markets,0.0,maximum,include_live,dates=scan_dates,include_beyond_window=include_beyond_window)
 except ValueError as e:
     settings=None;st.warning(str(e))
 
@@ -183,12 +188,17 @@ if preview and preview['settings']==settings:
         day=datetime.fromisoformat(event['commence_time'].replace('Z','+00:00')).astimezone(ZoneInfo('America/New_York')).date().isoformat()
         date_counts[day]=date_counts.get(day,0)+1
     dates=sorted(date_counts)
-    span=f", {dates[0]} to {dates[-1]}" if dates else ''
-    st.info(f"{len(preview['events'])} games{span} · refresh uses at most {preview['bound']} credits.")
+    later=len(preview.get('later_events',[]))
+    window=f'in the next {window_hours:g} h ({later} more listed later, not scanned)' if not include_beyond_window else f'(including games beyond {window_hours:g} h)'
+    st.info(f"{len(preview['events'])} games {window} · refresh uses at most {preview['bound']} credits.")
     if dates and (datetime.fromisoformat(dates[-1])-datetime.fromisoformat(dates[0])).days>=3:
         st.caption('Tick Limit game dates to scan fewer.')
     with st.expander('Games by date'):
         for day in dates:st.write(f"{day}: {date_counts[day]} games")
+    if preview.get('later_events'):
+        with st.expander('Later listings · outside the default window'):
+            for event in preview['later_events']:
+                st.write(f"{label_time(event['commence_time'])} · {event.get('away_team','')} @ {event.get('home_team','')}")
     if st.session_state.get('kelly_error'):st.error(st.session_state.kelly_error)
     refresh_reasons=[]
     if not deployment['paid_enabled']:refresh_reasons.append('Live refresh is unavailable on this deployment.')
@@ -224,6 +234,7 @@ if preview and preview['settings']==settings:
                 st.session_state.profiles=current_profiles
                 st.session_state['scan_'+sport]=result
                 st.session_state.pop('preview',None)
+                st.session_state['_reset_scan_window']=True
                 st.rerun()
         except (APIError,ValueError,KeyError) as e:st.error(str(e))
 
