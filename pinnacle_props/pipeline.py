@@ -32,9 +32,9 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
                      if book_catalog.enabled() else config['books'])
     defaults = [b for b in config['books'] if b in allowed_books]
     selected_books=list(dict.fromkeys(books if books is not None else defaults))
-    selected_books=[b for b in selected_books if b != config['reference_book'] and (not consensus.enabled() or b not in consensus.EXCHANGES)]
+    selected_books=[b for b in selected_books if b != config['reference_book']]
     if not selected_books or any(b not in allowed_books for b in selected_books):
-        raise ValueError('Choose at least one configured soft book')
+        raise ValueError('Choose at least one configured bookmaker')
     selected_markets=list(dict.fromkeys(markets if markets is not None else scan_markets(settings)))
     allowed=scan_markets(settings)
     if not selected_markets or any(m not in allowed for m in selected_markets):

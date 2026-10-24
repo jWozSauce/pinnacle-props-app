@@ -20,7 +20,7 @@ def test_flags_legend_and_observation_cost_visible(app_setup,monkeypatch):
     assert any('ISLAND:' in c.value and 'SHARP-OFF:' in c.value for c in app.caption)
     assert any('earlier ISLAND definition' in c.value for c in app.caption)
     assert any('15 books selected ≈ 2×' in c.value for c in app.caption)
-    assert 'Novig' not in app.multiselect(key='books_nhl').options
+    assert 'Novig' in app.multiselect(key='books_nhl').options
     assert any('island_flag' in d.value.columns for d in app.dataframe)
     assert any('🏝 ISLAND · ⚠️ SHARP-OFF' in m.value for m in app.markdown)
 

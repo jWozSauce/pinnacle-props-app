@@ -119,25 +119,22 @@ with st.expander('Books, markets & scan settings',expanded=False):
     from pinnacle_props import book_catalog, consensus
     catalog=book_catalog.load() if book_catalog.enabled() else None
     selectable=book_catalog.selectable_books(catalog,sport,config['books']) if catalog else config['books']
-    if consensus.enabled():selectable={k:v for k,v in selectable.items() if k not in consensus.EXCHANGES}
-    book_labels={k:b['label'] for k,b in selectable.items()} if catalog else config['books']
-    query_books=st.query_params.get('books_'+sport,'').split(',')
-    selected_books=[b for b in query_books if b in selectable] or [b for b in config['books'] if b in selectable]
-    books=st.multiselect('Books',list(selectable),default=selected_books,
-                         format_func=lambda b:book_labels[b],key='books_'+sport)
+    book_labels={k:book_catalog.clean_label(b['label']) for k,b in selectable.items()} if catalog else config['books']
+    query_name='books_'+sport
+    query_books=st.query_params[query_name].split(',') if query_name in st.query_params else list(config['books'])
+    selected_books=[b for b in query_books if b in selectable]
+    books=(book_catalog.render_picker(catalog,sport,config['books'],selected_books) if catalog else
+           st.multiselect('Books',list(selectable),default=selected_books,
+                          format_func=lambda b:config['books'][b],key=query_name))
     if catalog:
         st.checkbox('Pinnacle · required reference',value=True,disabled=True,key='catalog_reference')
         st.caption(book_catalog.cost_caption(books+(consensus.observation_books() if consensus.enabled() else []),config['reference_book']))
-        if consensus.enabled():st.caption('Novig, ProphetX and Polymarket are captured for comparison; they are not bettable. Cost includes these observation venues.')
-        st.caption('The original eleven books remain available by default; discovery is a dated sample, not guaranteed future coverage.')
+        st.caption('Billing uses unique markets returned × bookmaker bands (10 books per band). Empty books still count toward bands but add no new returned markets; they can increase the charge for markets returned by other books. An entirely empty response costs zero.')
+        if consensus.enabled():st.caption('Novig, ProphetX and Polymarket are captured for comparison; they are not bettable. Cost includes these observation venues, even when not selected.')
+        st.caption('All catalog books are selectable for every sport. Grey notes describe the dated discovery sample, not guaranteed coverage. US sportsbooks also includes DFS pick’em providers.')
         st.caption('Exchange quotes use back prices only. DFS pick’em prices are provider-implied equivalents.')
-        unavailable={k:b for k,b in catalog['books'].items() if k!='pinnacle' and k not in selectable}
         status=catalog['sports'].get(sport,{}).get('status','discovery not completed')
-        if status!='observed':st.caption(config['sports'][sport]['label']+' bookmaker discovery is deferred; the original eleven books remain available.')
-        reason='no props returned in the discovery sample' if status=='observed' else status
-        with st.expander('Unavailable books · '+reason):
-            for k,b in unavailable.items():
-                st.checkbox(b['label']+' · '+('observation only' if consensus.enabled() and k in consensus.EXCHANGES else reason),value=False,disabled=True,key='unavailable_'+sport+'_'+k)
+        if status!='observed':st.caption(config['sports'][sport]['label']+' bookmaker discovery is deferred; every catalog book remains selectable.')
     available=scan_markets(config['sports'][sport])
     query_markets=st.query_params.get('markets_'+sport,'').split(',')
     selected_markets=[m for m in query_markets if m in available] or available

@@ -3,24 +3,24 @@
   "discovered_at": "2026-10-21T01:03:37.933404+00:00",
   "documentation": "https://the-odds-api.com/sports-odds-data/bookmaker-apis.html",
   "regions": [
-    "us",
-    "us2",
-    "us_ex",
-    "us_dfs",
-    "eu",
-    "uk",
     "au",
     "ca",
+    "eu",
+    "fi",
     "fr",
     "se",
-    "fi"
+    "uk",
+    "us",
+    "us2",
+    "us_dfs",
+    "us_ex"
   ],
   "run_id": "catalog-20261021-approved",
   "cap": 726,
   "books": {
     "betonlineag": {
       "key": "betonlineag",
-      "label": "BetOnline.ag\n                  (opens new window)",
+      "label": "BetOnline.ag",
       "regions": [
         "us",
         "eu"
@@ -81,7 +81,7 @@
     },
     "betmgm": {
       "key": "betmgm",
-      "label": "BetMGM\n                  (opens new window)",
+      "label": "BetMGM",
       "regions": [
         "us"
       ],
@@ -144,7 +144,7 @@
     },
     "betrivers": {
       "key": "betrivers",
-      "label": "BetRivers\n                  (opens new window)",
+      "label": "BetRivers",
       "regions": [
         "us"
       ],
@@ -209,7 +209,7 @@
     },
     "betus": {
       "key": "betus",
-      "label": "BetUS\n                  (opens new window)",
+      "label": "BetUS",
       "regions": [
         "us"
       ],
@@ -218,7 +218,7 @@
     },
     "bovada": {
       "key": "bovada",
-      "label": "Bovada\n                  (opens new window)",
+      "label": "Bovada",
       "regions": [
         "us"
       ],
@@ -276,7 +276,7 @@
     },
     "williamhill_us": {
       "key": "williamhill_us",
-      "label": "Caesars\n                  (opens new window)",
+      "label": "Caesars",
       "regions": [
         "us"
       ],
@@ -314,7 +314,7 @@
     },
     "draftkings": {
       "key": "draftkings",
-      "label": "DraftKings\n                  (opens new window)",
+      "label": "DraftKings",
       "regions": [
         "us"
       ],
@@ -400,7 +400,7 @@
     },
     "fanatics": {
       "key": "fanatics",
-      "label": "Fanatics\n                  (opens new window)",
+      "label": "Fanatics",
       "regions": [
         "us"
       ],
@@ -452,7 +452,7 @@
     },
     "fanduel": {
       "key": "fanduel",
-      "label": "FanDuel\n                  (opens new window)",
+      "label": "FanDuel",
       "regions": [
         "us"
       ],
@@ -518,7 +518,7 @@
     },
     "lowvig": {
       "key": "lowvig",
-      "label": "LowVig.ag\n                  (opens new window)",
+      "label": "LowVig.ag",
       "regions": [
         "us"
       ],
@@ -527,7 +527,7 @@
     },
     "mybookieag": {
       "key": "mybookieag",
-      "label": "MyBookie.ag\n                  (opens new window)",
+      "label": "MyBookie.ag",
       "regions": [
         "us",
         "eu"
@@ -537,7 +537,7 @@
     },
     "ballybet": {
       "key": "ballybet",
-      "label": "Bally Bet\n                  (opens new window)",
+      "label": "Bally Bet",
       "regions": [
         "us2"
       ],
@@ -597,7 +597,7 @@
     },
     "betanysports": {
       "key": "betanysports",
-      "label": "BetAnything\n                  (opens new window)",
+      "label": "BetAnything",
       "regions": [
         "us2",
         "eu"
@@ -607,7 +607,7 @@
     },
     "betparx": {
       "key": "betparx",
-      "label": "betPARX\n                  (opens new window)",
+      "label": "betPARX",
       "regions": [
         "us2"
       ],
@@ -672,7 +672,7 @@
     },
     "courtside": {
       "key": "courtside",
-      "label": "Courtside\n                  (opens new window)",
+      "label": "Courtside",
       "regions": [
         "us2"
       ],
@@ -707,7 +707,7 @@
     },
     "espnbet": {
       "key": "espnbet",
-      "label": "theScore Bet\n                  (opens new window)",
+      "label": "theScore Bet",
       "regions": [
         "us2"
       ],
@@ -780,7 +780,7 @@
     },
     "fliff": {
       "key": "fliff",
-      "label": "Fliff\n                  (opens new window)",
+      "label": "Fliff",
       "regions": [
         "us2"
       ],
@@ -848,7 +848,7 @@
     },
     "hardrockbet": {
       "key": "hardrockbet",
-      "label": "Hard Rock Bet\n                  (opens new window)",
+      "label": "Hard Rock Bet",
       "regions": [
         "us2"
       ],
@@ -935,7 +935,7 @@
     },
     "hardrockbet_az": {
       "key": "hardrockbet_az",
-      "label": "Hard Rock Bet (AZ)\n                  (opens new window)",
+      "label": "Hard Rock Bet (AZ)",
       "regions": [
         "us2"
       ],
@@ -944,7 +944,7 @@
     },
     "hardrockbet_fl": {
       "key": "hardrockbet_fl",
-      "label": "Hard Rock Bet (FL)\n                  (opens new window)",
+      "label": "Hard Rock Bet (FL)",
       "regions": [
         "us2"
       ],
@@ -971,7 +971,7 @@
     },
     "hardrockbet_oh": {
       "key": "hardrockbet_oh",
-      "label": "Hard Rock Bet (OH)\n                  (opens new window)",
+      "label": "Hard Rock Bet (OH)",
       "regions": [
         "us2"
       ],
@@ -980,7 +980,7 @@
     },
     "rebet": {
       "key": "rebet",
-      "label": "ReBet\n                  (opens new window)",
+      "label": "ReBet",
       "regions": [
         "us2"
       ],
@@ -1015,7 +1015,7 @@
     },
     "dabble_us_dfs": {
       "key": "dabble_us_dfs",
-      "label": "Dabble\n                  (opens new window)",
+      "label": "Dabble",
       "regions": [
         "us_dfs"
       ],
@@ -1041,7 +1041,7 @@
     },
     "pick6": {
       "key": "pick6",
-      "label": "DraftKings Pick6\n                  (opens new window)",
+      "label": "DraftKings Pick6",
       "regions": [
         "us_dfs"
       ],
@@ -1097,7 +1097,7 @@
     },
     "prizepicks": {
       "key": "prizepicks",
-      "label": "PrizePicks\n                  (opens new window)",
+      "label": "PrizePicks",
       "regions": [
         "us_dfs"
       ],
@@ -1177,7 +1177,7 @@
     },
     "underdog": {
       "key": "underdog",
-      "label": "Underdog Fantasy\n                  (opens new window)",
+      "label": "Underdog Fantasy",
       "regions": [
         "us_dfs"
       ],
@@ -1244,7 +1244,7 @@
     },
     "betopenly": {
       "key": "betopenly",
-      "label": "BetOpenly\n                  (opens new window)",
+      "label": "BetOpenly",
       "regions": [
         "us_ex"
       ],
@@ -1272,7 +1272,7 @@
     },
     "kalshi": {
       "key": "kalshi",
-      "label": "Kalshi\n                  (opens new window)",
+      "label": "Kalshi",
       "regions": [
         "us_ex"
       ],
@@ -1281,7 +1281,7 @@
     },
     "limitless": {
       "key": "limitless",
-      "label": "Limitless Exchange\n                  (opens new window)",
+      "label": "Limitless Exchange",
       "regions": [
         "us_ex"
       ],
@@ -1290,7 +1290,7 @@
     },
     "novig": {
       "key": "novig",
-      "label": "Novig\n                  (opens new window)",
+      "label": "Novig",
       "regions": [
         "us_ex"
       ],
@@ -1372,7 +1372,7 @@
     },
     "polymarket": {
       "key": "polymarket",
-      "label": "Polymarket\n                  (opens new window)",
+      "label": "Polymarket",
       "regions": [
         "us_ex"
       ],
@@ -1398,7 +1398,7 @@
     },
     "polymarket_us": {
       "key": "polymarket_us",
-      "label": "Polymarket (US)\n                  (opens new window)",
+      "label": "Polymarket (US)",
       "regions": [
         "us_ex"
       ],
@@ -1407,7 +1407,7 @@
     },
     "prophetx": {
       "key": "prophetx",
-      "label": "ProphetX\n                  (opens new window)",
+      "label": "ProphetX",
       "regions": [
         "us_ex"
       ],
@@ -1489,7 +1489,7 @@
     },
     "sport888": {
       "key": "sport888",
-      "label": "888sport\n                  (opens new window)",
+      "label": "888sport",
       "regions": [
         "uk",
         "eu"
@@ -1499,7 +1499,7 @@
     },
     "betano_uk": {
       "key": "betano_uk",
-      "label": "Betano (UK)\n                  (opens new window)",
+      "label": "Betano (UK)",
       "regions": [
         "uk"
       ],
@@ -1508,7 +1508,7 @@
     },
     "betfair_ex_uk": {
       "key": "betfair_ex_uk",
-      "label": "Betfair Exchange\n                  (opens new window)",
+      "label": "Betfair Exchange",
       "regions": [
         "uk"
       ],
@@ -1517,7 +1517,7 @@
     },
     "betfair_sb_uk": {
       "key": "betfair_sb_uk",
-      "label": "Betfair Sportsbook\n                  (opens new window)",
+      "label": "Betfair Sportsbook",
       "regions": [
         "uk"
       ],
@@ -1526,7 +1526,7 @@
     },
     "betfred_uk": {
       "key": "betfred_uk",
-      "label": "Betfred (UK)\n                  (opens new window)",
+      "label": "Betfred (UK)",
       "regions": [
         "uk"
       ],
@@ -1535,7 +1535,7 @@
     },
     "betvictor": {
       "key": "betvictor",
-      "label": "Bet Victor\n                  (opens new window)",
+      "label": "Bet Victor",
       "regions": [
         "uk",
         "eu"
@@ -1545,7 +1545,7 @@
     },
     "betway": {
       "key": "betway",
-      "label": "Betway\n                  (opens new window)",
+      "label": "Betway",
       "regions": [
         "uk"
       ],
@@ -1554,7 +1554,7 @@
     },
     "boylesports": {
       "key": "boylesports",
-      "label": "BoyleSports\n                  (opens new window)",
+      "label": "BoyleSports",
       "regions": [
         "uk"
       ],
@@ -1563,7 +1563,7 @@
     },
     "casumo": {
       "key": "casumo",
-      "label": "Casumo\n                  (opens new window)",
+      "label": "Casumo",
       "regions": [
         "uk"
       ],
@@ -1572,7 +1572,7 @@
     },
     "coral": {
       "key": "coral",
-      "label": "Coral\n                  (opens new window)",
+      "label": "Coral",
       "regions": [
         "uk"
       ],
@@ -1581,7 +1581,7 @@
     },
     "grosvenor": {
       "key": "grosvenor",
-      "label": "Grosvenor\n                  (opens new window)",
+      "label": "Grosvenor",
       "regions": [
         "uk"
       ],
@@ -1590,7 +1590,7 @@
     },
     "ladbrokes_uk": {
       "key": "ladbrokes_uk",
-      "label": "Ladbrokes\n                  (opens new window)",
+      "label": "Ladbrokes",
       "regions": [
         "uk"
       ],
@@ -1599,7 +1599,7 @@
     },
     "leovegas": {
       "key": "leovegas",
-      "label": "LeoVegas\n                  (opens new window)",
+      "label": "LeoVegas",
       "regions": [
         "uk"
       ],
@@ -1608,7 +1608,7 @@
     },
     "livescorebet": {
       "key": "livescorebet",
-      "label": "LiveScore Bet\n                  (opens new window)",
+      "label": "LiveScore Bet",
       "regions": [
         "uk"
       ],
@@ -1617,7 +1617,7 @@
     },
     "matchbook": {
       "key": "matchbook",
-      "label": "Matchbook\n                  (opens new window)",
+      "label": "Matchbook",
       "regions": [
         "uk",
         "eu"
@@ -1627,7 +1627,7 @@
     },
     "paddypower": {
       "key": "paddypower",
-      "label": "Paddy Power\n                  (opens new window)",
+      "label": "Paddy Power",
       "regions": [
         "uk"
       ],
@@ -1636,7 +1636,7 @@
     },
     "skybet": {
       "key": "skybet",
-      "label": "Sky Bet\n                  (opens new window)",
+      "label": "Sky Bet",
       "regions": [
         "uk"
       ],
@@ -1645,7 +1645,7 @@
     },
     "smarkets": {
       "key": "smarkets",
-      "label": "Smarkets\n                  (opens new window)",
+      "label": "Smarkets",
       "regions": [
         "uk"
       ],
@@ -1654,7 +1654,7 @@
     },
     "unibet_uk": {
       "key": "unibet_uk",
-      "label": "Unibet\n                  (opens new window)",
+      "label": "Unibet",
       "regions": [
         "uk"
       ],
@@ -1663,7 +1663,7 @@
     },
     "virginbet": {
       "key": "virginbet",
-      "label": "Virgin Bet\n                  (opens new window)",
+      "label": "Virgin Bet",
       "regions": [
         "uk"
       ],
@@ -1672,7 +1672,7 @@
     },
     "williamhill": {
       "key": "williamhill",
-      "label": "William Hill (UK)\n                  (opens new window)",
+      "label": "William Hill (UK)",
       "regions": [
         "uk",
         "eu"
@@ -1682,7 +1682,7 @@
     },
     "onexbet": {
       "key": "onexbet",
-      "label": "1xBet\n                  (opens new window)",
+      "label": "1xBet",
       "regions": [
         "eu"
       ],
@@ -1691,7 +1691,7 @@
     },
     "betclic_fr": {
       "key": "betclic_fr",
-      "label": "Betclic (FR)\n                  (opens new window)",
+      "label": "Betclic (FR)",
       "regions": [
         "eu",
         "fr"
@@ -1701,7 +1701,7 @@
     },
     "betfair_ex_eu": {
       "key": "betfair_ex_eu",
-      "label": "Betfair Exchange\n                  (opens new window)",
+      "label": "Betfair Exchange",
       "regions": [
         "eu"
       ],
@@ -1710,7 +1710,7 @@
     },
     "betsson": {
       "key": "betsson",
-      "label": "Betsson\n                  (opens new window)",
+      "label": "Betsson",
       "regions": [
         "eu",
         "se"
@@ -1720,7 +1720,7 @@
     },
     "codere_it": {
       "key": "codere_it",
-      "label": "Codere (IT)\n                  (opens new window)",
+      "label": "Codere (IT)",
       "regions": [
         "eu"
       ],
@@ -1729,7 +1729,7 @@
     },
     "coolbet": {
       "key": "coolbet",
-      "label": "Coolbet\n                  (opens new window)",
+      "label": "Coolbet",
       "regions": [
         "eu"
       ],
@@ -1748,7 +1748,7 @@
     },
     "everygame": {
       "key": "everygame",
-      "label": "Everygame\n                  (opens new window)",
+      "label": "Everygame",
       "regions": [
         "eu"
       ],
@@ -1757,7 +1757,7 @@
     },
     "gtbets": {
       "key": "gtbets",
-      "label": "GTbets\n                  (opens new window)",
+      "label": "GTbets",
       "regions": [
         "eu"
       ],
@@ -1766,7 +1766,7 @@
     },
     "leovegas_se": {
       "key": "leovegas_se",
-      "label": "LeoVegas (SE)\n                  (opens new window)",
+      "label": "LeoVegas (SE)",
       "regions": [
         "eu",
         "se"
@@ -1776,7 +1776,7 @@
     },
     "marathonbet": {
       "key": "marathonbet",
-      "label": "Marathon Bet\n                  (opens new window)",
+      "label": "Marathon Bet",
       "regions": [
         "eu"
       ],
@@ -1785,7 +1785,7 @@
     },
     "nordicbet": {
       "key": "nordicbet",
-      "label": "NordicBet\n                  (opens new window)",
+      "label": "NordicBet",
       "regions": [
         "eu",
         "se"
@@ -1795,7 +1795,7 @@
     },
     "pinnacle": {
       "key": "pinnacle",
-      "label": "Pinnacle\n                  (opens new window)",
+      "label": "Pinnacle",
       "regions": [
         "eu"
       ],
@@ -1857,7 +1857,7 @@
     },
     "pmu_fr": {
       "key": "pmu_fr",
-      "label": "PMU (FR)\n                  (opens new window)",
+      "label": "PMU (FR)",
       "regions": [
         "eu",
         "fr"
@@ -1867,7 +1867,7 @@
     },
     "tipico_de": {
       "key": "tipico_de",
-      "label": "Tipico (DE)\n                  (opens new window)",
+      "label": "Tipico (DE)",
       "regions": [
         "eu"
       ],
@@ -1876,7 +1876,7 @@
     },
     "unibet_fr": {
       "key": "unibet_fr",
-      "label": "Unibet (FR)\n                  (opens new window)",
+      "label": "Unibet (FR)",
       "regions": [
         "eu",
         "fr"
@@ -1886,7 +1886,7 @@
     },
     "unibet_it": {
       "key": "unibet_it",
-      "label": "Unibet (IT)\n                  (opens new window)",
+      "label": "Unibet (IT)",
       "regions": [
         "eu"
       ],
@@ -1895,7 +1895,7 @@
     },
     "unibet_nl": {
       "key": "unibet_nl",
-      "label": "Unibet (NL)\n                  (opens new window)",
+      "label": "Unibet (NL)",
       "regions": [
         "eu"
       ],
@@ -1904,7 +1904,7 @@
     },
     "unibet_se": {
       "key": "unibet_se",
-      "label": "Unibet (SE)\n                  (opens new window)",
+      "label": "Unibet (SE)",
       "regions": [
         "eu",
         "se"
@@ -1914,7 +1914,7 @@
     },
     "winamax_de": {
       "key": "winamax_de",
-      "label": "Winamax (DE)\n                  (opens new window)",
+      "label": "Winamax (DE)",
       "regions": [
         "eu"
       ],
@@ -1923,7 +1923,7 @@
     },
     "winamax_fr": {
       "key": "winamax_fr",
-      "label": "Winamax (FR)\n                  (opens new window)",
+      "label": "Winamax (FR)",
       "regions": [
         "eu",
         "fr"
@@ -1933,7 +1933,7 @@
     },
     "betfair_ex_au": {
       "key": "betfair_ex_au",
-      "label": "Betfair Exchange\n                  (opens new window)",
+      "label": "Betfair Exchange",
       "regions": [
         "au"
       ],
@@ -1942,7 +1942,7 @@
     },
     "betr_au": {
       "key": "betr_au",
-      "label": "Betr\n                  (opens new window)",
+      "label": "Betr",
       "regions": [
         "au"
       ],
@@ -1951,7 +1951,7 @@
     },
     "betright": {
       "key": "betright",
-      "label": "Bet Right\n                  (opens new window)",
+      "label": "Bet Right",
       "regions": [
         "au"
       ],
@@ -1973,7 +1973,7 @@
     },
     "bet365_au": {
       "key": "bet365_au",
-      "label": "Bet365 AU\n                  (opens new window)",
+      "label": "Bet365 AU",
       "regions": [
         "au"
       ],
@@ -1982,7 +1982,7 @@
     },
     "dabble_au": {
       "key": "dabble_au",
-      "label": "Dabble AU\n                  (opens new window)",
+      "label": "Dabble AU",
       "regions": [
         "au"
       ],
@@ -2018,7 +2018,7 @@
     },
     "ladbrokes_au": {
       "key": "ladbrokes_au",
-      "label": "Ladbrokes\n                  (opens new window)",
+      "label": "Ladbrokes",
       "regions": [
         "au"
       ],
@@ -2053,7 +2053,7 @@
     },
     "neds": {
       "key": "neds",
-      "label": "Neds\n                  (opens new window)",
+      "label": "Neds",
       "regions": [
         "au"
       ],
@@ -2076,7 +2076,7 @@
     },
     "picklebet_au": {
       "key": "picklebet_au",
-      "label": "Picklebet (AU)\n                  (opens new window)",
+      "label": "Picklebet (AU)",
       "regions": [
         "au"
       ],
@@ -2085,7 +2085,7 @@
     },
     "playup": {
       "key": "playup",
-      "label": "PlayUp\n                  (opens new window)",
+      "label": "PlayUp",
       "regions": [
         "au"
       ],
@@ -2094,7 +2094,7 @@
     },
     "pointsbetau": {
       "key": "pointsbetau",
-      "label": "PointsBet (AU)\n                  (opens new window)",
+      "label": "PointsBet (AU)",
       "regions": [
         "au"
       ],
@@ -2147,7 +2147,7 @@
     },
     "sportsbet": {
       "key": "sportsbet",
-      "label": "SportsBet\n                  (opens new window)",
+      "label": "SportsBet",
       "regions": [
         "au"
       ],
@@ -2213,7 +2213,7 @@
     },
     "tab": {
       "key": "tab",
-      "label": "TAB\n                  (opens new window)",
+      "label": "TAB",
       "regions": [
         "au"
       ],
@@ -2255,7 +2255,7 @@
     },
     "tabtouch": {
       "key": "tabtouch",
-      "label": "TABtouch\n                  (opens new window)",
+      "label": "TABtouch",
       "regions": [
         "au"
       ],
@@ -2279,7 +2279,7 @@
     },
     "unibet": {
       "key": "unibet",
-      "label": "Unibet\n                  (opens new window)",
+      "label": "Unibet",
       "regions": [
         "au"
       ],
@@ -2352,7 +2352,7 @@
     },
     "bet99_ca_on": {
       "key": "bet99_ca_on",
-      "label": "BET99 (CA - ON)\n                  (opens new window)",
+      "label": "BET99 (CA - ON)",
       "regions": [
         "ca"
       ],
@@ -2415,7 +2415,7 @@
     },
     "betano_ca_on": {
       "key": "betano_ca_on",
-      "label": "Betano (CA - ON)\n                  (opens new window)",
+      "label": "Betano (CA - ON)",
       "regions": [
         "ca"
       ],
@@ -2424,7 +2424,7 @@
     },
     "betmgm_ca_on": {
       "key": "betmgm_ca_on",
-      "label": "BetMGM (CA - ON)\n                  (opens new window)",
+      "label": "BetMGM (CA - ON)",
       "regions": [
         "ca"
       ],
@@ -2453,7 +2453,7 @@
     },
     "betrivers_ca_on": {
       "key": "betrivers_ca_on",
-      "label": "BetRivers (CA - ON)\n                  (opens new window)",
+      "label": "BetRivers (CA - ON)",
       "regions": [
         "ca"
       ],
@@ -2462,7 +2462,7 @@
     },
     "playnow_ca": {
       "key": "playnow_ca",
-      "label": "PlayNow (CA)\n                  (opens new window)",
+      "label": "PlayNow (CA)",
       "regions": [
         "ca"
       ],
@@ -2471,7 +2471,7 @@
     },
     "pointsbetca": {
       "key": "pointsbetca",
-      "label": "PointsBet (CA - ON)\n                  (opens new window)",
+      "label": "PointsBet (CA - ON)",
       "regions": [
         "ca"
       ],
@@ -2524,7 +2524,7 @@
     },
     "proline_ca_on": {
       "key": "proline_ca_on",
-      "label": "PROLINE (CA - ON)\n                  (opens new window)",
+      "label": "PROLINE (CA - ON)",
       "regions": [
         "ca"
       ],
@@ -2533,7 +2533,7 @@
     },
     "sportsinteraction_ca_on": {
       "key": "sportsinteraction_ca_on",
-      "label": "Sports Interaction (CA - ON)\n                  (opens new window)",
+      "label": "Sports Interaction (CA - ON)",
       "regions": [
         "ca"
       ],
@@ -2598,7 +2598,7 @@
     },
     "netbet_fr": {
       "key": "netbet_fr",
-      "label": "NetBet (FR)\n                  (opens new window)",
+      "label": "NetBet (FR)",
       "regions": [
         "fr"
       ],
@@ -2607,7 +2607,7 @@
     },
     "atg_se": {
       "key": "atg_se",
-      "label": "ATG (SE)\n                  (opens new window)",
+      "label": "ATG (SE)",
       "regions": [
         "se"
       ],
@@ -2616,7 +2616,7 @@
     },
     "betinia_se": {
       "key": "betinia_se",
-      "label": "Betinia (SE)\n                  (opens new window)",
+      "label": "Betinia (SE)",
       "regions": [
         "se"
       ],
@@ -2625,7 +2625,7 @@
     },
     "betmgm_se": {
       "key": "betmgm_se",
-      "label": "BetMGM (SE)\n                  (opens new window)",
+      "label": "BetMGM (SE)",
       "regions": [
         "se"
       ],
@@ -2634,7 +2634,7 @@
     },
     "campobet_se": {
       "key": "campobet_se",
-      "label": "CampoBet (SE)\n                  (opens new window)",
+      "label": "CampoBet (SE)",
       "regions": [
         "se"
       ],
@@ -2643,7 +2643,7 @@
     },
     "expekt_se": {
       "key": "expekt_se",
-      "label": "Nya Expekt (SE)\n                  (opens new window)",
+      "label": "Nya Expekt (SE)",
       "regions": [
         "se"
       ],
@@ -2652,7 +2652,7 @@
     },
     "hajper_se": {
       "key": "hajper_se",
-      "label": "Hajper (SE)\n                  (opens new window)",
+      "label": "Hajper (SE)",
       "regions": [
         "se"
       ],
@@ -2661,7 +2661,7 @@
     },
     "mrgreen_se": {
       "key": "mrgreen_se",
-      "label": "Mr Green (SE)\n                  (opens new window)",
+      "label": "Mr Green (SE)",
       "regions": [
         "se"
       ],
@@ -2670,7 +2670,7 @@
     },
     "sport888_se": {
       "key": "sport888_se",
-      "label": "888sport (SE)\n                  (opens new window)",
+      "label": "888sport (SE)",
       "regions": [
         "se"
       ],
@@ -2679,7 +2679,7 @@
     },
     "svenskaspel_se": {
       "key": "svenskaspel_se",
-      "label": "Svenska Spel\n                  (opens new window)",
+      "label": "Svenska Spel",
       "regions": [
         "se"
       ],
@@ -2688,7 +2688,7 @@
     },
     "leovegas_fi": {
       "key": "leovegas_fi",
-      "label": "LeoVegas (FI)\n                  (opens new window)",
+      "label": "LeoVegas (FI)",
       "regions": [
         "fi"
       ],
@@ -2697,7 +2697,7 @@
     },
     "unibet_fi": {
       "key": "unibet_fi",
-      "label": "Unibet (FI)\n                  (opens new window)",
+      "label": "Unibet (FI)",
       "regions": [
         "fi"
       ],
@@ -2706,7 +2706,7 @@
     },
     "veikkaus_fi": {
       "key": "veikkaus_fi",
-      "label": "Veikkaus (FI)\n                  (opens new window)",
+      "label": "Veikkaus (FI)",
       "regions": [
         "fi"
       ],
@@ -2922,5 +2922,7 @@
   "banding_validation_credits": 14,
   "supplemental_runs": [
     "catalog-nfl-20261021-approved"
-  ]
+  ],
+  "definitions_refreshed_at": "2026-10-24T00:36:52.699955+00:00",
+  "definitions_sha256": "09514bcf9f0f7ea8c468800b001f715506135a041cb9e390ac0d5a9f5d28ad1b"
 }
