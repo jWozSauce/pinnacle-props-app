@@ -134,3 +134,22 @@ def test_profit_difference_retains_owner_value(tmp_path):
     m=metadata(r);m['import']['owner_profit']='-9.99';r['source']=json.dumps(m)
     g=grade_preview([r],Feed())[0]
     assert g['comparison']=='agrees' and g['profit_difference']==-.01 and g['owner_profit']=='-9.99'
+
+
+def test_future_close_skipped_and_future_placement_rejected(tmp_path):
+    from types import SimpleNamespace
+    from pinnacle_props.bet_import import prepare,parse
+    from tests.test_bet_import import Client,upload
+    class Future(Client):
+        def request(self,path,params):
+            assert not path.endswith('/odds')
+            self.calls.append((path,params))
+            event=dict(id='future-game',away_team='Example Away',home_team='Example Home',commence_time='2099-10-17T23:00:00Z')
+            return SimpleNamespace(payload={'data':[event]},request_id='listing')
+    items=parse(upload('time unknown').replace(b'2026-10-17',b'2099-10-17'),'bets.csv')
+    c=Future();report=prepare(items,c,data_dir=tmp_path)
+    assert len(c.calls)==1 and report['records'][0]['status']=='pending'
+    assert metadata(report['records'][0])['import']['close']['status']=='close not yet available'
+    c=Future();items[0]['placed_at']='2099-10-17T12:00:00Z'
+    with pytest.raises(ValueError,match='future'):prepare(items,c,data_dir=tmp_path)
+    assert not c.calls

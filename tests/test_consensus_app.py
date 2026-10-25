@@ -46,5 +46,10 @@ def test_signed_flags_edges_and_legend_visible(app_setup,monkeypatch):
     assert any('Never combined with Market against Pinnacle' in c.value for c in app.caption)
     assert not any('🏝 ISLAND ·' in m.value for m in app.markdown)
     tables=[d.value for d in app.dataframe if 'island_flag' in d.value]
-    assert 'sharp_gap_pp' not in tables[0] and 'market_gap_pp' not in tables[0]
+    # Detailed columns are inside the full-data expander; row summaries stay compact.
+    assert {'sharp_gap_pp','market_gap_pp'}.issubset(tables[0].columns)
+    html=app.get('html')[0].proto.body
+    import re
+    summaries=re.findall(r'<summary>(.*?)</summary>',html)
+    assert summaries and all('sharp_gap_pp' not in t and 'market_gap_pp' not in t for t in summaries)
     assert not any('+4.0 pp' in m.value or '-6.0 pp' in m.value for m in app.markdown)

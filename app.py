@@ -254,6 +254,10 @@ if quota_file.exists():
     except (ValueError,KeyError,TypeError):st.caption('Account remaining unavailable; the next run will check before spending.')
 else:st.caption('Account remaining: not yet checked. The next run checks it for free.')
 
+if settlement_preview:
+    from pinnacle_props.recommendation_ui import linked_panel
+    linked_panel(session_store(data_dir))
+
 tabs=st.tabs(['Price comparison','Live','Kelly calculator']+((['Logged','Performance','Paper'] if settlement_preview else ['Logged','Performance']) if clv_preview else []))
 tab_prices,tab_live,tab_calc=tabs[:3]
 if clv_preview:
@@ -264,6 +268,15 @@ with tab_prices:
         st.info('No scans saved on this deployment yet. Your Mac’s saved history is not connected.' if deployment['cloud'] else 'No saved scan for this sport yet. Estimate a live refresh to begin.')
     else:
         manifest,flagged,excluded=result
+        from pinnacle_props.venue_ui import expand as venue_expand, second_line
+        if 'venue_quotes' not in flagged and manifest.get('profile'):
+            from pinnacle_props.records import snapshots,artifact
+            from pinnacle_props.venue_details import enrich
+            from pinnacle_props.kelly import Profile
+            try:
+                saved_path=snapshots(data_dir,scan_id=manifest['scan_id'])[0][0]
+                flagged=enrich(flagged,artifact(saved_path,manifest,'.parquet'),Profile(**manifest['profile']),manifest['capture_time'])
+            except (ValueError,OSError,KeyError,IndexError):pass
         real_keys=None;allow_duplicates=bool(st.session_state.get('allow_real_duplicates',False))
         if settlement_preview:
             bet_store=session_store(data_dir)
@@ -305,7 +318,7 @@ with tab_prices:
             view=view[mask]
         advisory_columns=['island_flag','books_q','market_books_q','sharp_books_q'] if manifest.get('settings',{}).get('advisory_version') else []
         advisory_details=advisory_columns+['cons_edge','market_gap_pp','market_edge_pp','sharp_gap_pp','sharp_edge_pp','advisory_version'] if advisory_columns else []
-        table_columns=['start_status']+advisory_columns+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']
+        table_columns=['start_status']+advisory_details+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']
         with st.expander('Filter individual columns'):
             columns=st.multiselect('Columns to filter',table_columns,key='column_filters_'+sport)
             for column in columns:
@@ -335,6 +348,8 @@ with tab_prices:
                     if age:
                         st.caption(f'◷ Older quote · Pinnacle age at capture: {row.pin_age_min:.1f} min')
                     st.caption(f"Suggested stake ${row.kellyAmount:,.2f} · Pinnacle margin {100*row.pin_margin:.2f}%")
+                    second_line(getattr(row,'blend_edge_pp',None),getattr(row,'blend_stake',None))
+                    venue_expand(view.loc[row.Index])
                     if row.pricing_method=='same_line_alt':st.caption('Same line · alternate market')
                     if clv_preview and (settlement_preview or not deployment['cloud']):
                         row_number=row.Index+1
@@ -355,28 +370,31 @@ with tab_prices:
                                     st.rerun()
                                 except (ValueError,OSError) as e:st.error(str(e))
         with st.container(key='pp_table'):
-            table=view[(['⚠'] if settlement_preview else [])+table_columns].copy()
-            if settlement_preview:
-                table.index=bd.index_labels(view)
-                table.insert(0,'log',False)
-            column_config={
-                '_index':st.column_config.TextColumn('Saved row',disabled=True),
-                'log':st.column_config.CheckboxColumn('log',default=False),
-                'kellyAmount':st.column_config.NumberColumn('Stake ($)',format='$%.2f',min_value=0.01,step=0.01,help='Starts at the Kelly suggestion; enter the amount you actually bet.'),
-                **{c:st.column_config.NumberColumn(format='%.1f') for c in ['Target_line','PIN_line','pin_age_min']},
-                **{c:st.column_config.NumberColumn(format='%.0f') for c in ['Target_over','Target_under','PIN_over','PIN_under']},
-                **{c:st.column_config.NumberColumn(format='%.4f') for c in ['edge','pin_margin','noVigOver','noVigUnder','Target_over_p','Target_under_p','over_diffTRUE','under_diffTRUE']},
-                **{c:st.column_config.NumberColumn(format='%.2f') for c in ['best_price','ev_pct']}}
-            styled=table.style.apply(
-                lambda row:bd.row_style(row) if settlement_preview and row.get('⚠','') else ['color: #87929d' if row.pin_age_min>stale_minutes else '' for _ in row],axis=1)
-            if settlement_preview:
-                from pinnacle_props.bet_selection import editor_key, selected_rows
-                edited=st.data_editor(styled,key=editor_key(manifest['scan_id'],table),
-                    disabled=[c for c in table.columns if c not in ('log','kellyAmount')],
-                    hide_index=False,width='stretch',height=480,column_config=column_config)
-            else:
-                st.dataframe(styled,hide_index=True,width='stretch',height=480,column_config=column_config)
-            st.caption('Best price is decimal odds; legacy price columns are American. Pinnacle age is measured at capture. All columns remain available by scrolling across the table.')
+            from pinnacle_props.venue_ui import table_rows
+            table_rows(view)
+            with st.expander('Select bets and full data table'):
+                table=view[(['⚠'] if settlement_preview else [])+table_columns].copy()
+                if settlement_preview:
+                    table.index=bd.index_labels(view)
+                    table.insert(0,'log',False)
+                column_config={
+                    '_index':st.column_config.TextColumn('Saved row',disabled=True),
+                    'log':st.column_config.CheckboxColumn('log',default=False),
+                    'kellyAmount':st.column_config.NumberColumn('Stake ($)',format='$%.2f',min_value=0.01,step=0.01,help='Starts at the Kelly suggestion; enter the amount you actually bet.'),
+                    **{c:st.column_config.NumberColumn(format='%.1f') for c in ['Target_line','PIN_line','pin_age_min']},
+                    **{c:st.column_config.NumberColumn(format='%.0f') for c in ['Target_over','Target_under','PIN_over','PIN_under']},
+                    **{c:st.column_config.NumberColumn(format='%.4f') for c in ['edge','pin_margin','noVigOver','noVigUnder','Target_over_p','Target_under_p','over_diffTRUE','under_diffTRUE']},
+                    **{c:st.column_config.NumberColumn(format='%.2f') for c in ['best_price','ev_pct']}}
+                styled=table.style.apply(
+                    lambda row:bd.row_style(row) if settlement_preview and row.get('⚠','') else ['color: #87929d' if row.pin_age_min>stale_minutes else '' for _ in row],axis=1)
+                if settlement_preview:
+                    from pinnacle_props.bet_selection import editor_key, selected_rows
+                    edited=st.data_editor(styled,key=editor_key(manifest['scan_id'],table),
+                        disabled=[c for c in table.columns if c not in ('log','kellyAmount')],
+                        hide_index=False,width='stretch',height=480,column_config=column_config)
+                else:
+                    st.dataframe(styled,hide_index=True,width='stretch',height=480,column_config=column_config)
+                st.caption('Best price is decimal odds; legacy price columns are American. Pinnacle age is measured at capture. All columns remain available by scrolling across the table.')
         if settlement_preview:
             allow_duplicates=st.checkbox('Allow re-logging bets marked 🔴 ALREADY BET',value=False,key='allow_real_duplicates')
             action_real,action_paper,action_download=st.columns(3)
@@ -419,19 +437,6 @@ with tab_prices:
                 receipt=track_scan(manifest['scan_id'],data_dir=data_dir,display_rules=active_rules)
                 st.session_state.pop('pp_bet_store_'+str(data_dir),None)
                 (st.warning if receipt['queued'] else st.success)(receipt['message'])
-        with st.expander('Compare all books & full details'):
-            if not view.empty:
-                price_columns=[c for c in view if c.startswith('price_')]
-                display_columns=['start_status']+advisory_details+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']+price_columns
-                display=view[display_columns].copy()
-                def style_row(row):
-                    styles=pd.Series('',index=row.index)
-                    if row.pin_age_min>stale_minutes:styles[:]='color: #87929d'
-                    best='price_'+str(row.best_book)
-                    if best in styles.index:styles[best]='background-color: #d5f1e5; color: #12523e; font-weight: bold'
-                    return styles
-                st.dataframe(display.style.apply(style_row,axis=1),hide_index=True,width='stretch')
-                st.caption('All-book price columns and best price are decimal odds. Legacy price columns are American odds. Highlight marks the best soft-book price at this exact line.')
         with st.expander('Coverage & exclusions'):
             st.write(f"{manifest['raw_rows']:,} raw outcomes · {manifest['candidate_pairs']:,} soft-book line pairs")
             st.dataframe(pd.DataFrame([{'Reason':k,'Pairs':v} for k,v in manifest['exclusions'].items() if v]),hide_index=True,width='stretch')
@@ -472,6 +477,8 @@ if settlement_preview:
         from pinnacle_props.import_ui import render_import
         from pinnacle_props.bet_store import session_store
         render_import(data_dir,session_store(data_dir))
+        from pinnacle_props.receipt_ui import render_receipt
+        render_receipt(data_dir,session_store(data_dir))
 elif clv_preview:
     try:
         report_text,clv_frame=clv_report(data_dir=data_dir,output=None)
