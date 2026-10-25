@@ -112,7 +112,7 @@ def parse(body,name):
             clock=re.search(r'placed .*? at (\d{1,2}:\d{2}(?::\d{2})?\s*[AP]M)',notes,re.I)
             t=pd.Timestamp(day+' '+clock[1]).tz_localize('America/New_York') if clock else None
         placed=t.tz_convert('UTC').isoformat() if t is not None else ''
-        if t is not None and t.tz_convert('America/New_York').date().isoformat()!=day:raise ValueError('Placement date differs; provide explicit correct Event Date and Placed At')
+        if t is not None and (t>pd.Timestamp.now(tz='UTC') or t.tz_convert('America/New_York').date().isoformat()>day):raise ValueError('Placement must be in the past and no later than the event date')
         slip=re.search(r'Bet ID:\s*([^\s)]+)',notes)
         item=dict(number=n,game_date=day,sport=sport,away_team=away,home_team=home,player=player,market=market,
             line=float(selection[2]),side=selection[1].lower(),book=book,price_decimal=price,
@@ -184,6 +184,8 @@ def prepare(items,client,*,data_dir=DATA,store=None):
 
 def _prepare(items,client,*,data_dir=DATA,store=None):
     if client.run_cap<=0:raise ValueError('Import requires a positive estimate')
+    if any(r.get('placed_at') and pd.Timestamp(r['placed_at'])>pd.Timestamp.now(tz='UTC') for r in items):
+        raise ValueError('Placement cannot be in the future')
     if store is not None:
         seen=preview(items,store);items=seen[~seen.duplicate].drop(columns='duplicate').to_dict('records')
     if not items:return {'records':[],'credits':0,'message':'All rows already imported'}
@@ -199,7 +201,7 @@ def _prepare(items,client,*,data_dir=DATA,store=None):
         sport=config['sports'][r['sport']]['key'];base='/v4/historical/sports/'+sport+'/events'
         daykey=(sport,r['game_date'])
         if daykey not in listings:
-            at=pd.Timestamp(r['game_date'],tz='America/New_York')
+            at=min(pd.Timestamp(r['game_date'],tz='America/New_York'),pd.Timestamp.now(tz='UTC'))
             listings[daykey]=client.request(base,{'date':iso(at)})
         listing=listings[daykey]
         matches=[e for e in listing.payload['data'] if name_key(e['away_team'])==name_key(r['away_team']) and name_key(e['home_team'])==name_key(r['home_team']) and pd.Timestamp(e['commence_time']).tz_convert('America/New_York').date().isoformat()==r['game_date']]
@@ -212,7 +214,7 @@ def _prepare(items,client,*,data_dir=DATA,store=None):
         if len(books)>10:raise ValueError('Import is limited to ten bookmakers per sport/date')
         got={}
         for label,at in [('entry',iso(r['placed_at']) if r['placed_at'] else ''),('close',close_at)]:
-            if not at:got[label]=None;continue
+            if not at or pd.Timestamp(at)>pd.Timestamp.now(tz='UTC'):got[label]=None;continue
             key=(event['id'],r['market'],at,tuple(books))
             if key not in results:
                 res=client.request(base+'/'+event['id']+'/odds',dict(date=at,markets=r['market'],bookmakers=','.join(books),oddsFormat='decimal'))
@@ -223,6 +225,7 @@ def _prepare(items,client,*,data_dir=DATA,store=None):
                 results[key]=res
             got[label]=results[key]
         pin=quote(got['entry'],r,'pinnacle');book=quote(got['entry'],r,r['book'],require_pair=False);close=quote(got['close'],r,'pinnacle')
+        if got['close'] is None:close={'status':'close not yet available'}
         provenance=dict(r,entry=pin,book_snapshot=book,close=close,
             clv_pp=(close['fair_p']-1/r['price_decimal']) if close['status']=='matched' else None,
             historical_sources={label:dict(timestamp=res.payload['timestamp'],raw_cache=res.cache_path,request_id=res.request_id) for label,res in got.items() if res is not None},listing_request_id=listing.request_id)
@@ -248,7 +251,7 @@ def grade_preview(records,feed):
         owner_profit=metadata(r)['import'].get('owner_profit','')
         delta=round(float(new['profit'])-float(owner_profit),2) if new.get('profit','')!='' and owner_profit!='' else None
         out.append(dict(row_id=r['row_id'],number=r['row'],official_status=new['status'],stat=new.get('stat',''),profit=new.get('profit',''),owner_result=owner,
-            owner_profit=owner_profit,profit_difference=delta,comparison='agrees' if expected==new['status'] else 'unverified' if new['status']=='pending' else 'DIFFERS',reason=reason))
+            owner_profit=owner_profit,profit_difference=delta,comparison='agrees' if expected==new['status'] else 'unverified' if expected is None or new['status']=='pending' else 'DIFFERS',reason=reason))
     return out
 
 

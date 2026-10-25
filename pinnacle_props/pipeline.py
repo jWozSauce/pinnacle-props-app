@@ -47,7 +47,7 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
     hours=settings.get('scan_window_hours',config.get('scan_window_hours',72))
     if isinstance(hours,bool) or not isinstance(hours,(int,float)) or not 0<hours<float('inf'):
         raise ValueError('scan_window_hours must be a positive finite number')
-    return dict(horizon={'mode':'all_listed' if include_beyond_window else 'rolling','dates':selected_dates,
+    return dict(venue_details_version=1,horizon={'mode':'all_listed' if include_beyond_window else 'rolling','dates':selected_dates,
                          'hours':hours,'include_beyond_window':bool(include_beyond_window)},sport=sport,sport_key=settings['key'],league=settings['label'],
                 reference_book=config['reference_book'],books=selected_books,markets=selected_markets,
                 **({'alternate_version':1} if alternate_pairing_enabled() else {}),
@@ -131,6 +131,9 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     flagged=rules.annotate(flagged,display_rules,settings['sport'])
     if settings.get('advisory_version'):
         flagged=consensus.annotate(flagged,frame,reference=settings['reference_book'],capture_time=capture_time,version=settings['advisory_version'])
+    if settings.get('venue_details_version'):
+        from .venue_details import enrich
+        flagged=enrich(flagged,frame,profile,capture_time)
     raw=frame.copy()
     if settings.get('advisory_version'):raw['kind']=raw.book.map(lambda b:'exchange' if b in consensus.EXCHANGES else 'sportsbook')
     raw['scan_id']=scan_id
@@ -276,6 +279,9 @@ def replay(sport,scan_id=None,*,data_dir=ROOT/'data'):
         flagged=rules.annotate(flagged,manifest['rules'],manifest['settings']['sport'])
     if manifest['settings'].get('advisory_version'):
         flagged=consensus.annotate(flagged,frame,reference=manifest['settings']['reference_book'],capture_time=manifest['capture_time'],version=manifest['settings']['advisory_version'])
+    if manifest['settings'].get('venue_details_version'):
+        from .venue_details import enrich
+        flagged=enrich(flagged,frame,Profile(**manifest['profile']),manifest['capture_time'])
     for suffix,df in [('_flagged.csv',flagged),('_excluded.csv',excluded)]:
         if hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()!=manifest['artifacts'][suffix]['sha256']:
             raise ValueError('Replay differs from the saved '+suffix+' artifact')

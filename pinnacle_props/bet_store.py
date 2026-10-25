@@ -18,9 +18,11 @@ HEADER = 'round logged_at sport game_date start_time event_id away_team home_tea
 BASE_HEADER=HEADER.copy()
 from .consensus import FIELDS, LEGACY_FIELDS
 LEGACY_HEADER=BASE_HEADER+LEGACY_FIELDS
-HEADER=HEADER+FIELDS
+PRE_BLEND_HEADER=HEADER+FIELDS
+from .venue_details import BLEND_FIELDS
+HEADER=PRE_BLEND_HEADER+BLEND_FIELDS
 GRADING = HEADER[21:28]
-FROZEN = HEADER[:21] + ['row_id'] + FIELDS
+FROZEN = HEADER[:21] + ['row_id'] + FIELDS + BLEND_FIELDS
 SHEET_ID = '173vZBHQ31stOXKOuHzjIFH2BtMMWFbLjbzolZlqPNeo'
 
 class StoreUnavailable(ValueError):
@@ -145,14 +147,14 @@ class BetStore:
             values = [active_header]
         header=values[0].copy()
         while header and header[-1]=='':header.pop()
-        if header in (BASE_HEADER,LEGACY_HEADER) and advisory_enabled():
+        if header in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER) and advisory_enabled():
             if any(any(str(c) for c in row[len(header):]) for row in values[1:]):
                 raise StoreUnavailable('Unlabelled extra cells; no migration made')
             # Append header cells only: no existing row or column is rewritten.
             if getattr(ws,'col_count',len(HEADER))<len(HEADER):ws.add_cols(len(HEADER)-ws.col_count)
             ws.update([HEADER[len(header):]], column_name(len(header)+1)+'1:'+column_name(len(HEADER))+'1', value_input_option='RAW')
             values=ws.get_all_values();header=values[0]
-        if header not in (BASE_HEADER,LEGACY_HEADER,HEADER): raise StoreUnavailable('Shared log header mismatch; no rows changed')
+        if header not in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER,HEADER): raise StoreUnavailable('Shared log header mismatch; no rows changed')
         return ws, values
 
     @staticmethod

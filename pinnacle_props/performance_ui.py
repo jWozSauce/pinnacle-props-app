@@ -43,6 +43,9 @@ def render(logged_tab, performance_tab, data_dir, *, store=None, feed=None, clv=
     for kind in ('real','paper'):
         raw[kind]=store.read(kind,raw=True);frames[kind]=canonical(raw[kind],kind)
         if store.warning:warnings.append(store.warning)
+    with logged_tab:
+        from .recommendation_ui import recent_panel
+        recent_panel(frames['paper'],store)
     for tab,key in [(logged_tab,'logged'),(performance_tab,'performance')]:
         with tab:
             selected_raw={kind:filter_rows(f,selections[key]) for kind,f in raw.items()}
@@ -59,6 +62,8 @@ def render(logged_tab, performance_tab, data_dir, *, store=None, feed=None, clv=
         with paper_tab:
             sports=select_sports('paper')
             selected={'paper':filter_rows(frames['paper'],sports)}
+            from .recommendation_ui import forms
+            forms(selected['paper'],store,prefix='paper_recover')
             overall(filter_rows(raw['paper'],sports),selected['paper'],kind='paper',key='paper_tab',clv=clv)
             if not selected['paper'].empty:
                 st.write('By round');st.dataframe(breakdown(selected['paper'],'round'),hide_index=True,width='stretch')

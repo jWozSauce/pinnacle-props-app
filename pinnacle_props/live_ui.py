@@ -62,5 +62,9 @@ def render_live(data_dir,*,store=None,feed=None):
         st.caption('All pending bets plus bets graded in the last 24 hours; times are Eastern.')
         if active:st.caption('Updates every 60 seconds while a tracked game is in progress.')
         if card.empty:st.info(EMPTY)
-        else:table(card,live=True)
+        else:
+            table(card,live=True)
+            if kind=='paper':
+                from .recommendation_ui import forms
+                forms(card,store,prefix='live_recover')
     panel()

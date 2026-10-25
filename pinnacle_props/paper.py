@@ -26,7 +26,14 @@ def frozen(manifest, r, row, *, stake=None, note='', paper=False, display_rules=
                   fair_p=float(r['noVig'+side.title()]),scan_id=manifest['scan_id'],row=int(row),
                   rule_version=rules.version(active),status='pending',note=note)
     from .consensus import FIELDS
-    record.update({k:r.get(k,'') for k in FIELDS})
+    from .venue_details import BLEND_FIELDS
+    record.update({k:r.get(k,'') for k in FIELDS+BLEND_FIELDS})
+    record['source']=json.dumps({'recommendation':dict(capture_time=manifest.get('capture_time'),
+        scan_id=manifest['scan_id'],row=int(row),pin_line=float(r['Target_line']),
+        pin_over_decimal=r.get('pin_over_decimal'),pin_under_decimal=r.get('pin_under_decimal'),
+        fair_p=record['fair_p'],edge=record['edge'],quoted_price=price,rule_version=record['rule_version'],
+        flags={k:r.get(k,'') for k in FIELDS},suggested_stake=float(r['kellyAmount']),
+        venues=json.loads(r.get('venue_quotes','[]')) if isinstance(r.get('venue_quotes','[]'),str) else [])},default=str,sort_keys=True)
     return record
 
 

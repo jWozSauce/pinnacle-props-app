@@ -10,7 +10,8 @@ COLUMNS=['logged_at','scan_id','row','sport','event_id','book','player','market'
          'price_decimal','fair_p','edge','stake_suggested','stake_actual','note','rule_version','scan_rule_version']
 
 from .consensus import FIELDS
-COLUMNS+=FIELDS
+from .venue_details import BLEND_FIELDS
+COLUMNS+=FIELDS+BLEND_FIELDS
 
 def read_bets(data_dir=DATA):
     from .bet_store import enabled, session_store
@@ -41,7 +42,7 @@ def log_bet(scan_id,row,stake=None,note='',*,data_dir=DATA,display_rules=None,al
                 event_id=r.event_id,book=r.book,player=r.player_name,market=r.prop_type,line=r.Target_line,
                 side=side,price_decimal=r['target_'+side+'_decimal'],fair_p=r['noVig'+side.title()],
                 edge=r.edge,stake_suggested=r.kellyAmount,stake_actual=amount,note=note)
-    record.update({k:r.get(k,'') for k in FIELDS})
+    record.update({k:r.get(k,'') for k in FIELDS+BLEND_FIELDS})
     from .bet_store import enabled, BetStore
     if enabled():
         from .paper import frozen, migrate

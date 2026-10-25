@@ -100,7 +100,8 @@ def settle_row(bet, game, players, *, rules=None, now=None, identities=None):
     oldmeta=metadata(bet)
     meta={'provider':game['provider'],'game_id':str(game['id']),'raw_key':game.get('raw_key',''),
           'checked_at':now, 'checked_24h':bool(bet.get('graded_at') and pd.Timestamp(now)-pd.Timestamp(bet['graded_at'])>=pd.Timedelta(hours=24))}
-    if 'import' in oldmeta:meta['import']=oldmeta['import']
+    for preserved in ('import','recommendation'):
+        if preserved in oldmeta:meta[preserved]=oldmeta[preserved]
     stat='' if grade['stat'] is None else float(grade['stat'])
     profit=round(float(grade['profit']),2)
     changed=bet.get('status') in OFFICIAL and (bet['status']!=status or

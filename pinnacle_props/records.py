@@ -67,6 +67,10 @@ def flags(path, manifest):
             raise ValueError('Snapshot rule decisions mismatch')
     frame['rule_version']=manifest.get('rule_version','legacy-unrecorded')
     if 'rule_pass' not in frame:frame['rule_pass']=None
+    if 'venue_quotes' not in frame and manifest.get('profile'):
+        from .venue_details import enrich
+        from .kelly import Profile
+        frame=enrich(frame,artifact(path,manifest,'.parquet'),Profile(**manifest['profile']),manifest['capture_time'])
     return frame
 
 
