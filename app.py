@@ -208,14 +208,20 @@ if preview and preview['settings']==settings:
     if refresh_reasons:st.warning(' '.join(refresh_reasons))
     if st.button('Refresh live prices',type='primary',disabled=bool(refresh_reasons),
                  key='refresh',width='stretch'):
+        from pinnacle_props.refresh_perf import RefreshPerf
+        progress_text=st.empty()
+        phase_text=st.empty()
+        perf=RefreshPerf(data_dir,phase_text.caption)
+        if 'listing_seconds' in preview:perf.phases['listing (estimate)']=preview['listing_seconds']
+        st.session_state['pp_scan_running']=True
+        refresh_status='failed'
         try:
             with st.spinner('Capturing prices and comparing lines…'):
                 # Fetch exactly once for this live run so sheet edits are captured, not silently stale.
-                current_profiles=fetch_profiles()
+                with perf.phase('kelly sheet'):current_profiles=fetch_profiles()
                 if profile_name not in current_profiles:
                     raise ValueError('Selected Kelly profile is no longer available')
                 scan_messages=[]
-                progress_text=st.empty()
                 import threading,logging
                 scan_thread=threading.get_ident()
                 def report_scan(message):
@@ -224,16 +230,23 @@ if preview and preview['settings']==settings:
                         return
                     scan_messages.append(message);progress_text.caption(message)
                 result=run_live(preview,profile=current_profiles[profile_name],profile_name=profile_name,
-                                key=key_for_live(),progress=report_scan,data_dir=data_dir,display_rules=active_rules,paper_track=paper_track)
-                st.session_state.pop('pp_bet_store_'+str(data_dir),None)
+                                key=key_for_live(),progress=report_scan,data_dir=data_dir,display_rules=active_rules,paper_track=paper_track,
+                                store=session_store(data_dir) if settlement_preview else None,perf=perf)
                 if settlement_preview and paper_track:
                     st.session_state['bet_receipt']=scan_messages[-1] if scan_messages else 'Paper tracking finished; check shared logs.'
                 st.session_state.profiles=current_profiles
                 st.session_state['scan_'+sport]=result
                 st.session_state.pop('preview',None)
                 st.session_state['_reset_scan_window']=True
+                refresh_status='complete'
+                st.session_state['refresh_timing']=perf.caption()
                 st.rerun()
         except (APIError,ValueError,KeyError) as e:st.error(str(e))
+        finally:
+            st.session_state['pp_scan_running']=False
+            perf.finish(refresh_status)
+
+if st.session_state.get('refresh_timing'):st.caption(st.session_state['refresh_timing'])
 
 if 'scan_'+sport not in st.session_state:
     try:
@@ -340,11 +353,13 @@ with tab_prices:
                         st.write(row.island_flag)
                         st.caption(f'Pinnacle age at capture: {row.pin_age_min:.1f} min · other books: {row.books_q:g}')
                     age=stale_minutes<row.pin_age_min
-                    st.markdown(f"### {flag.split(' ')[0]+' ' if flag else ''}{row.player_name}")
+                    from pinnacle_props.game_display import player_label,caption as game_caption
+                    st.markdown(f"### {flag.split(' ')[0]+' ' if flag else ''}{player_label(view.loc[row.Index])}")
                     price=row.Target_over if row.side=='over' else row.Target_under
                     st.write(f"{row.side.title()} {row.Target_line:g} · {row.prop_type.removeprefix('player_').replace('_',' ')}")
+                    game_caption(view.loc[row.Index])
                     st.markdown(f"**{book_labels.get(row.book,row.book)} {price:+.0f}** · Edge {100*row.edge:.2f} pp · EV {row.ev_pct:.2f}%")
-                    st.caption(f"{row.game} · {label_time(row.date)} · {row.start_status}")
+                    st.caption(row.start_status)
                     if age:
                         st.caption(f'◷ Older quote · Pinnacle age at capture: {row.pin_age_min:.1f} min')
                     st.caption(f"Suggested stake ${row.kellyAmount:,.2f} · Pinnacle margin {100*row.pin_margin:.2f}%")
@@ -374,6 +389,10 @@ with tab_prices:
             table_rows(view)
             with st.expander('Select bets and full data table'):
                 table=view[(['⚠'] if settlement_preview else [])+table_columns].copy()
+                from pinnacle_props.game_display import game_label,player_label
+                table=table.drop(columns=['bet','game'],errors='ignore')
+                table.insert(0,'bet',[player_label(r)+' · '+r['side']+' '+str(r['Target_line'])+' · '+r['prop_type'] for _,r in view.iterrows()])
+                table.insert(1,'game',[game_label(r) for _,r in view.iterrows()])
                 if settlement_preview:
                     table.index=bd.index_labels(view)
                     table.insert(0,'log',False)
