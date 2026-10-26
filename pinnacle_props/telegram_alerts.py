@@ -142,15 +142,18 @@ def message(manifest,rows,*,now=None):
     when=when.astimezone(ZoneInfo('America/New_York')).strftime('%b %d %H:%M %Z')
     header=f"{manifest['settings']['sport'].upper()} · {when} · {int(manifest['credits_charged'])} credits\n{len(rows)} new rule-passing bets"
     from .recommendations import link
-    columns=['recommendation_url','sport','player','market','line','side','book','price_decimal','edge_points','suggested_stake','start_status']
+    from .game_display import game_label,player_label,book_link
+    columns=['recommendation_url','sport','player','game','book_event_url','market','line','side','book','price_decimal','edge_points','suggested_stake','start_status']
     clean=[];lines=[]
     for row in rows:
         numbers=[float(row[k]) for k in ('line','price_decimal','edge','stake')]
         if not all(math.isfinite(x) for x in numbers) or numbers[1]<=1 or numbers[3]<=0:raise AlertError('bet invalid')
         line,price,edge,stake=numbers
         cleaned={k:_safe_cell(row[k]) for k in ('sport','player','market','side','book')}
+        cleaned['player']=_safe_cell(player_label(row))
+        cleaned.update(game=_safe_cell(game_label(row)),book_event_url=book_link(row) or '')
         cleaned.update(recommendation_url=link(row),line=line,price_decimal=price,edge_points=100*edge,suggested_stake=stake,start_status=label(row.get('start_time'),now=now));clean.append(cleaned)
-        lines.append(f"{cleaned['player']} · {cleaned['market']} · {cleaned['side']} {line:g} | {cleaned['book']} {price:g} | edge {100*edge:.2f} pp | stake ${stake:.2f} | {cleaned['start_status']}\nLog this bet: {cleaned['recommendation_url']}")
+        lines.append(f"{cleaned['player']} · {cleaned['game']} · {cleaned['market']} · {cleaned['side']} {line:g} | {cleaned['book']} {price:g} | edge {100*edge:.2f} pp | stake ${stake:.2f} | {cleaned['start_status']}\nLog this bet: {cleaned['recommendation_url']}")
     text=header+'\n\n'+'\n'.join(lines)
     if len(text.encode('utf-16-le'))//2<=4096:return text,None
     out=io.StringIO();writer=csv.DictWriter(out,fieldnames=columns);writer.writeheader();writer.writerows(clean)

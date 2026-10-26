@@ -28,8 +28,9 @@ def forms(frame,store,*,prefix):
     page=st.selectbox('Recommendation page',range(1,pages+1),key=prefix+'_page') if pages>1 else 1
     for r in chosen.iloc[(page-1)*10:page*10].to_dict('records'):
         ident=prefix+'_'+r['row_id'];flag=r['_flag']
-        title=f"{r['player']} · {r['side']} {r['line']} · {r['market'].removeprefix('player_').replace('_',' ')} · {r['book']}"
-        with st.expander((flag+' · ' if flag else '')+title,expanded=prefix=='linked'):
+        from .game_display import game_label,player_label
+        title=f"{player_label(r)} · {r['side']} {r['line']} · {r['market'].removeprefix('player_').replace('_',' ')} · {r['book']}"
+        with st.expander((flag+' · ' if flag else '')+title+' · '+game_label(r),expanded=prefix=='linked'):
             from .venue_ui import panel
             panel(r,saved=True)
             st.caption(f"{r['away_team']} @ {r['home_team']} · saved {r['logged_at']} · {r['status']}")
@@ -54,6 +55,7 @@ def forms(frame,store,*,prefix):
 
 def recent_panel(frame,store,*,now=None):
     st.subheader('Recent recommendations')
+    if store.warning:st.warning('Log unavailable, retry; recommendations below may be from the last local copy.')
     selected=rec.recent(frame,now=now)
     st.caption('Last 36 hours · newest first · available across devices even after the scan is gone.')
     if selected.empty:st.info('No paper-tracked recommendations in the last 36 hours.')

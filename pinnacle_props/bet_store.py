@@ -57,7 +57,7 @@ def session_store(data_dir=DATA):
     from streamlit.runtime.scriptrunner import get_script_run_ctx
     if get_script_run_ctx(suppress_warning=True) is None:return BetStore(data_dir)
     key='pp_bet_store_'+str(data_dir)
-    if key not in st.session_state:st.session_state[key]=BetStore(data_dir)
+    if key not in st.session_state:st.session_state[key]=BetStore(data_dir, interactive=True)
     return st.session_state[key]
 
 
@@ -69,8 +69,11 @@ def connect():
         info = dict(st.secrets['gcp_service_account'])
         info['private_key'] = info['private_key'].replace('\\n', '\n')
         creds = Credentials.from_service_account_info(info, scopes=['https://www.googleapis.com/auth/spreadsheets'])
-        client = gspread.authorize(creds)
-        client.set_timeout((10, 30))
+        from .bounded_io import sheet_client
+        from google.auth.transport.requests import AuthorizedSession
+        session=AuthorizedSession(creds,max_refresh_attempts=0,refresh_timeout=5)
+        client = gspread.Client(auth=creds,session=session,http_client=sheet_client)
+        client.set_timeout((3, 7))
         return client.open_by_key(st.secrets.get('CONSTANTS_SHEET_ID', SHEET_ID))
     except Exception:
         raise StoreUnavailable('Shared logs unavailable. Check service-account setup and Sheet access; details suppressed.') from None
@@ -116,7 +119,7 @@ def _read(path):
 
 
 class BetStore:
-    def __init__(self, data_dir=DATA, *, spreadsheet=None, connector=connect):
+    def __init__(self, data_dir=DATA, *, spreadsheet=None, connector=connect, interactive=False, clock=time.monotonic):
         self.root = Path(data_dir)
         self.spreadsheet = spreadsheet
         self.connector = connector
@@ -124,13 +127,48 @@ class BetStore:
         self.warning = ''
         self.real_check = None
         self.real_check_at = 0.0
+        self.interactive=interactive;self.clock=clock
+        self.remote_values={};self.remote_at=None;self.remote_ok=False;self.worksheets={}
+
+    def invalidate(self):
+        self.cache.clear();self.remote_at=None;self.real_check=None
+
+    def _batch_read(self, *, fresh=False):
+        if not fresh and self.remote_at is not None and self.clock()-self.remote_at<60:
+            if not self.remote_ok:raise StoreUnavailable('Log unavailable, retry')
+            return
+        self.remote_at=self.clock();self.remote_ok=False;self.cache.clear();self.real_check=None
+        if self.spreadsheet is None:self.spreadsheet=self.connector()
+        if not self.worksheets:
+            self.worksheets={w.title:w for w in self.spreadsheet.worksheets() if w.title in TABS.values()}
+        if any(name not in self.worksheets for name in TABS.values()):
+            raise StoreUnavailable('Shared log tabs unavailable; setup required')
+        result=self.spreadsheet.values_batch_get(["'"+name+"'!A:"+column_name(len(HEADER)) for name in TABS.values()])
+        ranges=result.get('valueRanges',[])
+        if len(ranges)!=2:raise StoreUnavailable('Incomplete log read')
+        self.remote_values={kind:part.get('values',[]) for kind,part in zip(TABS,ranges)}
+        self.remote_ok=True
+
+    def _view_refresh(self):
+        if self.interactive and (self.remote_at is None or self.clock()-self.remote_at>=60):
+            self.cache.clear();self.real_check=None
+
 
     def _path(self, kind, suffix):
         if kind not in TABS: raise ValueError('Only real and paper logs are writable')
         return self.root / 'bets' / f'{kind}_{suffix}.csv'
 
-    def _worksheet(self, kind):
+    def _worksheet(self, kind, *, fresh=False):
         if kind not in TABS: raise ValueError('Forbidden worksheet')
+        if self.interactive:
+            self._batch_read(fresh=fresh)
+            ws=self.worksheets[TABS[kind]]
+            values=self.remote_values[kind]
+            header=values[0] if values else []
+            if header not in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER,HEADER):
+                raise StoreUnavailable('Shared log header mismatch; no rows changed')
+            # UI reads never migrate the schema; accepted current schema is deployed.
+            return ws,[list(row) for row in values]
         if self.spreadsheet is None: self.spreadsheet = self.connector()
         try:
             ws = self.spreadsheet.worksheet(TABS[kind])
@@ -162,6 +200,8 @@ class BetStore:
         return [dict(zip(HEADER, r + [''] * (len(HEADER)-len(r)))) for r in values[1:]]
 
     def read(self, kind, *, reload=False, raw=False):
+        self._view_refresh()
+        if reload and self.interactive:self.invalidate()
         if kind in self.cache and not reload:
             return self.cache[kind].copy() if raw else canonical(self.cache[kind],kind)
         self.warning = ''
@@ -170,7 +210,7 @@ class BetStore:
             records = self._records(values)
             csv_write(self._path(kind, 'mirror'), _frame(records))
         except Exception:
-            self.warning = 'Shared logs unavailable; showing the last local copy and queued rows.'
+            self.warning = 'Log unavailable, retry; showing the last local copy and queued rows.'
             records = _read(self._path(kind, 'mirror'))
         seen = {key(r, kind) for r in records}
         for r in _read(self._path(kind, 'outbox')):
@@ -182,10 +222,11 @@ class BetStore:
     def real_keys(self, *, reload=False):
         """Display-only TTL; never return mirrors as a successful duplicate check."""
         from .bet_duplicates import real_keys
-        if not reload and self.real_check is not None and time.monotonic()-self.real_check_at<120:
+        self._view_refresh()
+        if not reload and self.real_check is not None and time.monotonic()-self.real_check_at<60:
             return self.real_check
         try:
-            _,values=self._worksheet('real')
+            _,values=self._worksheet('real',fresh=reload)
             rows=self._records(values)
             rows.extend(_read(self._path('real','outbox')))
             result=real_keys(_frame(rows))
@@ -203,7 +244,7 @@ class BetStore:
         """
         from .bet_duplicates import select_new
         try:
-            _,values=self._worksheet('real')
+            _,values=self._worksheet('real',fresh=True)
             current=self._records(values)+_read(self._path('real','outbox'))
             selected,skipped=select_new(records,_frame(current),allow_duplicates)
         except Exception:
@@ -232,6 +273,8 @@ class BetStore:
             csv_write(path, _frame(queued))
             try:
                 ws, values = self._worksheet(kind)
+                if self.interactive and values[0]!=HEADER:
+                    raise StoreUnavailable('Log schema requires migration; queued safely')
                 remote = self._records(values)
                 seen = {key(r, kind) for r in remote}
                 row_ids = {r['row_id'] for r in remote}
@@ -243,17 +286,22 @@ class BetStore:
                         'sheetId':ws.id, 'fields':'userEnteredValue',
                         'rows':[{'values':[{'userEnteredValue':{'stringValue':str(r.get(h,''))}}
                                            for h in values[0]]} for r in missing]}}]})
-                    verified = self._records(ws.get_all_values())
+                    # A successful atomic append acknowledges every row. UI uses the
+                    # shared snapshot plus acknowledged rows; uncertain replies stay queued.
+                    verified = remote+missing if self.interactive else self._records(ws.get_all_values())
                     have = {r['row_id'] for r in verified}
                     if any(r['row_id'] not in have for r in missing):
                         raise StoreUnavailable('Append verification failed; queue retained')
                     remote = verified
+                if self.interactive:
+                    self.remote_values[kind]=[values[0]]+[[r.get(h,'') for h in values[0]] for r in remote]
                 csv_write(self._path(kind, 'mirror'), _frame(remote))
                 self.cache.pop(kind, None); self.warning = ''
                 if kind=='real':self.real_check=None
                 return {'written': len(missing), 'queued': 0, 'message': 'Shared log synchronized'}
             except Exception:
                 self.cache.pop(kind, None)
+                if self.interactive:self.remote_ok=False;self.real_check=None
                 self.warning = 'Shared log unavailable or changed; rows queued on this deployment only. Download the log and retry sync before closing; a cloud rebuild can lose this queue.'
                 return {'written': 0, 'queued': len(queued), 'message': self.warning}
 
@@ -265,7 +313,7 @@ class BetStore:
         """
         with record_lock(self.root, 'sheet-'+kind):
             try:
-                ws, values = self._worksheet(kind)
+                ws, values = self._worksheet(kind,fresh=True)
                 remote = self._records(values)
                 updates=[]
                 for old, new in changes:

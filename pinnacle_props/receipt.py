@@ -18,6 +18,8 @@ MARKET_NAMES=dict(MARKETS,**{'three point field goals made':'player_threes','thr
 
 
 def ocr(path):
+    from .settings import ACCOUNTING_CLOUD
+    if ACCOUNTING_CLOUD.get():raise ValueError('Screenshot OCR is available on the Mac; use a text PDF here')
     executable=shutil.which('tesseract')
     if executable:
         result=subprocess.run([executable,str(path),'stdout','--psm','6'],capture_output=True,timeout=45,check=True)
@@ -38,7 +40,9 @@ def extract(body,name):
             if reader.is_encrypted or not 1<=len(reader.pages)<=3:raise ValueError('Use an unencrypted receipt of one to three pages')
             text='\n'.join(page.extract_text() or '' for page in reader.pages)
             # Some books put their name only in a logo. Extract it when possible.
-            if not any(k in text.lower() for k in BOOK_NAMES) or len(text.strip())<30:
+            from .settings import ACCOUNTING_CLOUD
+            if ACCOUNTING_CLOUD.get() and not text.strip():raise ValueError('Image-only PDF: use the Mac for OCR')
+            if not ACCOUNTING_CLOUD.get() and (not any(k in text.lower() for k in BOOK_NAMES) or len(text.strip())<30):
                 if not shutil.which('pdftoppm'):
                     if not text.strip():raise ValueError('PDF image extraction is unavailable')
                 else:

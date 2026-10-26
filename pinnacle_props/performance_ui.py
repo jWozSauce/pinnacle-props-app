@@ -2,7 +2,7 @@
 from pathlib import Path
 import pandas as pd
 import streamlit as st
-from .bet_store import BetStore, canonical, duplicate_audit
+from .bet_store import BetStore, session_store, canonical, duplicate_audit
 from .grade import grade_all, live_table
 from .live_money import breakdown
 from .settlement_sources import FreeFeed
@@ -13,7 +13,7 @@ from .sport_filter import select_sports, filter_rows, show_sport_summary
 def render(logged_tab, performance_tab, data_dir, *, store=None, feed=None, clv=None, paper_tab=None):
     if store is None:
         cache_key='pp_bet_store_'+str(data_dir)
-        if cache_key not in st.session_state:st.session_state[cache_key]=BetStore(data_dir)
+        if cache_key not in st.session_state:st.session_state[cache_key]=BetStore(data_dir,interactive=True)
         store=st.session_state[cache_key]
     feed=feed or FreeFeed(Path(data_dir)/'settlement_cache')
     # Controls are processed before reading either panel, so both refresh together.
@@ -23,7 +23,7 @@ def render(logged_tab, performance_tab, data_dir, *, store=None, feed=None, clv=
         with tab:
             selections[key]=select_sports(key)
             refresh=st.button('Refresh log',key=key+'_refresh_log') or refresh
-    if refresh:store.cache.clear()
+    if refresh:store.invalidate()
     with logged_tab:
         if st.button('Sync queued bets and migrate local log',key='sync_shared'):
             from .paper import migrate

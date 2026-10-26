@@ -47,6 +47,8 @@ def second_line(edge,amount):
 
 
 def panel(row,*,saved=False):
+    from .game_display import caption
+    caption(row)
     if saved:
         provenance=saved_details(row);venues=provenance.get('venues',[])
         player=row['player'];market=row['market'];line=row['line'];side=row['side']
@@ -89,12 +91,16 @@ def table_rows(frame):
     pages=max(1,(len(frame)+19)//20)
     page=st.selectbox('Table page',range(1,pages+1),key='venue_table_page') if pages>1 else 1
     chunks=['<style>.venue-row{border-bottom:1px solid #87929d55;padding:.55rem}.venue-row summary{cursor:pointer}.venue-panel{overflow-x:auto;padding:.6rem}.venue-panel table{border-collapse:collapse;white-space:nowrap}.venue-panel th,.venue-panel td{padding:.3rem .6rem;text-align:right}.venue-panel th:first-child,.venue-panel td:first-child{text-align:left}</style>']
+    from .game_display import game_label,player_label,book_link
     for _,r in frame.iloc[(page-1)*20:page*20].iterrows():
         price=r.get('target_'+r.side+'_decimal');american=f'{decimal_to_american(price):+.0f}' if finite(price) and float(price)>1 else '—'
-        summary=f"{r.player_name} · {r.side} {r.Target_line:g} · {r.prop_type.removeprefix('player_')} · {r.book} {american} · edge {100*r.edge:+.2f} pp · stake ${r.kellyAmount:.2f}"
+        summary=f"{player_label(r)} · {r.side} {r.Target_line:g} · {r.prop_type.removeprefix('player_')} · {r.book} {american} · edge {100*r.edge:+.2f} pp · stake ${r.kellyAmount:.2f}"
         try:venues=json.loads(r.get('venue_quotes','[]'))
         except (ValueError,TypeError):venues=[]
-        chunks.append('<details class="venue-row"><summary>'+escape(summary)+'</summary><div class="venue-panel">')
+        chunks.append('<details class="venue-row"><summary>'+escape(summary)+'<br>'+escape(game_label(r))+'</summary><div class="venue-panel">')
+        chunks.append('<p>'+escape(game_label(r))+'</p>')
+        url=book_link(r)
+        if url:chunks.append('<a target="_blank" rel="noopener noreferrer" href="'+escape(url,quote=True)+'">Open at book</a>')
         chunks.append(f'<p>Pinnacle: edge {100*r.edge:+.2f} pp, stake ${r.kellyAmount:.2f}</p>')
         blend=f"edge {float(r.blend_edge_pp):+.2f} pp, stake ${float(r.blend_stake):.2f}" if finite(r.get('blend_edge_pp')) and finite(r.get('blend_stake')) else 'no exchange quote'
         chunks.append('<p>Blended (Pinnacle + exchanges): '+blend+'</p>')

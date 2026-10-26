@@ -40,8 +40,9 @@ def parse_profiles(text):
 
 def fetch_profiles(url=DEFAULT_URL,session=None,cache_dir=None):
     try:
-        response=(session or requests).get(url,timeout=30)
-    except requests.RequestException:
+        from .bounded_io import PUBLIC_SHEET
+        response=PUBLIC_SHEET.call(lambda:(session or requests).get(url,timeout=(3,7)))
+    except (requests.RequestException,ValueError):
         raise ValueError('Kelly sheet unavailable; no replacement defaults were invented') from None
     if response.status_code!=200:
         raise ValueError(f'Kelly sheet HTTP {response.status_code}')

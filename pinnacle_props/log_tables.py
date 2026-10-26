@@ -15,8 +15,10 @@ def eastern(series):
 
 
 def display(frame,*,live=False):
+    from .game_display import game_label,player_label
     f=frame.copy()
-    f['bet']=f.apply(lambda r:f"{r.player} · {r.market} · {r.side} {r.line}",axis=1) if len(f) else pd.Series(dtype=str)
+    f['bet']=f.apply(lambda r:f"{player_label(r)} · {r.market} · {r.side} {r.line}",axis=1) if len(f) else pd.Series(dtype=str)
+    f['game']=f.apply(game_label,axis=1) if len(f) else pd.Series(dtype=str)
     f['logged at']=eastern(f.logged_at);f['start']=eastern(f.start_time)
     f['matchup']=f.away_team.astype(str)+' @ '+f.home_team.astype(str)
     def american(r):
@@ -29,7 +31,7 @@ def display(frame,*,live=False):
     f['to_win']=(f.stake*(pd.to_numeric(f.price_decimal,errors='coerce')-1)).round(2)
     f['profit']=pd.to_numeric(f.profit,errors='coerce')
     f['import_clv_pp']=[metadata(r).get('import',{}).get('clv_pp') for r in frame.to_dict('records')]
-    fields=(['verdict','bet','detail','score'] if live else ['status','bet','profit'])+['book','logged at','start','matchup','stake','odds','to_win']
+    fields=(['verdict','bet','game','detail','score'] if live else ['status','bet','game','profit'])+['book','logged at','start','matchup','stake','odds','to_win']
     fields += [x for x in RECORDED_FLAGS if x in f]
     if not live:fields+=['edge','fair_p','clv_pp','line_moved','market_pulled','import_clv_pp','note']
     return f[[x for x in fields if x in f]]

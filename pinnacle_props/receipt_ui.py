@@ -13,7 +13,10 @@ import pandas as pd
 def render_receipt(data_dir,store,*,uploaded=None):
     with st.expander('Import a receipt PDF or screenshot'):
         st.caption('One straight player-prop bet, up to 5 MB. Text recognition runs locally. Review every field; unclear values stay editable. No bet is placed by this app.')
-        upload=uploaded if uploaded is not None else st.file_uploader('Receipt',type=['pdf','png','jpg','jpeg','webp'],key='receipt_file')
+        from .settings import ACCOUNTING_CLOUD
+        cloud=ACCOUNTING_CLOUD.get()
+        if cloud:st.caption('Screenshot OCR is available on the Mac; upload a text PDF here.')
+        upload=uploaded if uploaded is not None else st.file_uploader('Receipt',type=['pdf'] if cloud else ['pdf','png','jpg','jpeg','webp'],key='receipt_file')
         if upload is None:return
         body=upload.getvalue();digest=hashlib.sha256(body).hexdigest();key='receipt_'+digest
         try:

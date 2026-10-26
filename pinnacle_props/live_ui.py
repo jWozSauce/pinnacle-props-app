@@ -19,7 +19,7 @@ def cards(store,feed,sports=None):
     now=pd.Timestamp(utcnow());cutoff=now-pd.Timedelta(days=1)
     output={};active=False
     for kind in ('real','paper'):
-        frame=canonical(store.read(kind,reload=True),kind)
+        frame=canonical(store.read(kind),kind)
         if sports is not None:frame=filter_rows(frame,sports)
         graded=pd.to_datetime(frame.graded_at,utc=True,errors='coerce',format='mixed')
         corrected=pd.to_datetime(frame.regraded_at,utc=True,errors='coerce',format='mixed')
@@ -40,12 +40,21 @@ def cards(store,feed,sports=None):
 
 def render_live(data_dir,*,store=None,feed=None):
     store=store if store is not None else session_store(data_dir)
-    feed=feed if feed is not None else FreeFeed(Path(data_dir)/'settlement_cache')
+    feed=feed if feed is not None else FreeFeed(Path(data_dir)/'settlement_cache',budget_seconds=10)
     sports=select_sports('live')
+    if st.session_state.get('pp_scan_running',False):
+        st.info('Live updates paused while the scan runs.');return
     initial,active=cards(store,feed,sports)
     @st.fragment(run_every=60 if active else None)
     def panel():
-        current,current_active=cards(store,feed,sports)
+        if st.session_state.get('pp_scan_running',False):return
+        nonlocal initial
+        if initial is not None:
+            current,current_active=initial,active;initial=None
+        else:
+            # Each fragment run gets a fresh bounded feed; immutable disk caches are shared.
+            current_feed=FreeFeed(Path(data_dir)/'settlement_cache',budget_seconds=10) if isinstance(feed,FreeFeed) else feed
+            current,current_active=cards(store,current_feed,sports)
         if current_active!=active:st.rerun(scope='app')
         st.subheader('Live')
         if store.warning:st.warning(store.warning)

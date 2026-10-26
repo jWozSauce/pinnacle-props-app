@@ -74,6 +74,8 @@ def scan_lock(data_dir):
 
 def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:datetime.now(timezone.utc)):
     """Free preparation for a user-reviewable cost estimate. Contains no credentials."""
+    import time
+    listing_started=time.monotonic()
     c=operational_client(data_dir=data_dir,run_cap=0,session=session,key=key)
     result=c.events(settings['sport_key'])
     if not isinstance(result.payload,list):
@@ -103,7 +105,7 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
         raise APIError('Events endpoint returned duplicate event IDs')
     books=consensus.request_books(settings)
     bound=len(events)*len(settings['markets'])*((len(books)+9)//10)
-    return {'events':events,'bound':bound,'discovered_at':datetime.now(timezone.utc).isoformat(),
+    return {'listing_seconds':time.monotonic()-listing_started,'events':events,'bound':bound,'discovered_at':datetime.now(timezone.utc).isoformat(),
             'window_hours':hours,'window_end':cutoff.isoformat(),'later_events':later,
             'date':day.isoformat(),'event_cache':result.cache_path,'settings':settings}
 
@@ -174,7 +176,12 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     return manifest,flagged,excluded
 
 
-def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,display_rules=None,paper_track=True,concurrency=None):
+from .refresh_perf import logged_refresh
+
+@logged_refresh
+def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=None,session=None,progress=print,project_cap=None,display_rules=None,paper_track=True,concurrency=None,store=None,perf=None):
+    from contextlib import nullcontext
+    timed=perf.phase if perf is not None else lambda name:nullcontext()
     from . import rules
     from .settings import ACCOUNTING_CLOUD
     display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
@@ -215,10 +222,12 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
             for event in preview['events']:
                 try:eligible=eligible or not started(event.get('commence_time'))
                 except ValueError:pass
-            if eligible and preview['bound']:c.preflight()
+            with timed('quota'):
+                if eligible and preview['bound']:c.preflight()
         try:
-            finished,errors=pool.map(preview['events'],fetch,
-                progress=lambda done,total:progress(f'Captured {done} of {total} games'))
+            with timed('prices'):
+                finished,errors=pool.map(preview['events'],fetch,
+                    progress=lambda done,total:progress(f'Captured {done} of {total} games'))
         finally:progress.drain()
         for event,value,error in zip(preview['events'],finished,errors):
             if error is not None:
@@ -233,11 +242,13 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
         run_charge=charged(c)
         now=datetime.now(timezone.utc).isoformat()
         with failure_receipt(c,Path(data_dir)/'incomplete_scans'/(scan_id+'.json'),{'preview':preview,'event_results':statuses}):
-            result = _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],run_charge,display_rules=display_rules,run_accounting=accounting(c))
+            with timed('evaluate'):
+                result = _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],run_charge,display_rules=display_rules,run_accounting=accounting(c))
         from .bet_store import enabled
         if enabled() and paper_track:
             from .paper import track_scan
-            receipt=track_scan(scan_id,data_dir=data_dir,display_rules=display_rules,include_started=settings.get('include_live',False))
+            with timed('sheet'):
+                receipt=track_scan(scan_id,data_dir=data_dir,display_rules=display_rules,include_started=settings.get('include_live',False),store=store)
             if progress: progress(receipt['message'])
         return result
 

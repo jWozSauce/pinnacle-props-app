@@ -42,9 +42,10 @@ def outs(value):
 
 
 class FreeFeed:
-    def __init__(self,root,*,clock=time.time,fetch=None,max_requests=200):
+    def __init__(self,root,*,clock=time.time,fetch=None,max_requests=200,budget_seconds=None):
         self.root=Path(root);self.clock=clock;self.fetch=fetch;self.max_requests=max_requests
         self.calls=0;self.last=0.;self.memo={};self.failed_hosts=set()
+        self.budget_seconds=budget_seconds;self.started=time.monotonic()
 
     def get(self,url,params=None,*,ttl=60,binary=False):
         u=urlsplit(url)
@@ -65,6 +66,8 @@ class FreeFeed:
                 raw=(self.root/(info['sha256']+'.raw')).read_bytes();digest=info['sha256']
                 if hashlib.sha256(raw).hexdigest()!=digest:raise FeedUnavailable('Public cache integrity failed')
             else:
+                if self.budget_seconds is not None and time.monotonic()-self.started>=self.budget_seconds:
+                    raise FeedUnavailable('Live source time budget reached; retry later')
                 if self.calls>=self.max_requests:raise FeedUnavailable('Free-source request bound reached')
                 time.sleep(max(0,.5-(time.monotonic()-self.last)))
                 self.calls+=1
@@ -72,7 +75,11 @@ class FreeFeed:
                     full=url+('?' + urlencode(params) if params else '')
                     request_obj=urllib.request.Request(full,headers={'User-Agent':'Mozilla/5.0 PinnacleProps/1.0'}) if u.hostname=='api-web.nhle.com' else full
                     # urllib's default redirect handler follows GET 307 redirects.
-                    raw=self.fetch(full) if self.fetch else urllib.request.urlopen(request_obj,timeout=30).read()
+                    from .bounded_io import FREE_FEED
+                    def fetch_bytes():
+                        if self.fetch:return self.fetch(full)
+                        with urllib.request.urlopen(request_obj,timeout=5) as response:return response.read()
+                    raw=FREE_FEED.call(fetch_bytes)
                 except Exception:
                     self.last=time.monotonic()
                     self.failed_hosts.add(u.hostname)
