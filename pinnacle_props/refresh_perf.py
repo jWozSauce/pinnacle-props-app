@@ -12,14 +12,15 @@ def resident_mb():
     except Exception:return None
 
 class RefreshPerf:
-    def __init__(self,root,report=None,*,clock=time.monotonic):
+    def __init__(self,root,report=None,*,clock=time.monotonic,kind="refresh"):
+        self.kind=kind
         self.root=Path(root);self.report=report or (lambda text:None);self.clock=clock;self.phases={}
         from .bounded_io import SHEETS
         self.initial_calls=SHEETS.total;self.started=clock()
     def caption(self):return ' · '.join(f'{name} {value:.1f} s' for name,value in self.phases.items())
     @contextmanager
-    def phase(self,name):
-        start=self.clock();self.report((self.caption()+' · ' if self.phases else '')+name+'…')
+    def phase(self,name,*,label=None):
+        start=self.clock();self.report((self.caption()+' · ' if self.phases else '')+(label or name)+'…')
         try:yield
         finally:
             self.phases[name]=self.phases.get(name,0)+self.clock()-start
@@ -29,7 +30,7 @@ class RefreshPerf:
         with SHEETS.lock:
             calls=SHEETS.total-self.initial_calls
             minute_calls=sum(self.clock()-t<60 for t in SHEETS.calls)
-        record=dict(at=datetime.now(timezone.utc).isoformat(),status=status,phases=self.phases,
+        record=dict(kind=self.kind,at=datetime.now(timezone.utc).isoformat(),status=status,phases=self.phases,
             total_seconds=self.clock()-self.started,rss_mb=resident_mb(),
             sheet_calls=calls,sheet_calls_last_minute=minute_calls)
         target=self.root/'perf';target.mkdir(parents=True,exist_ok=True)

@@ -24,11 +24,11 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def options(config,sport,books=None,markets=None,min_edge=None,max_reference_margin=None,include_live=False,dates=None,include_beyond_window=False):
+def options(config,sport,books=None,markets=None,min_edge=None,max_reference_margin=None,include_live=False,dates=None,include_beyond_window=False,catalog=None):
     if sport not in config['sports']:
         raise ValueError('Unknown configured sport')
     settings=config['sports'][sport]
-    allowed_books = (book_catalog.selectable_books(book_catalog.load(), sport, config['books'])
+    allowed_books = (book_catalog.selectable_books(catalog if catalog is not None else book_catalog.load(), sport, config['books'])
                      if book_catalog.enabled() else config['books'])
     defaults = [b for b in config['books'] if b in allowed_books]
     selected_books=list(dict.fromkeys(books if books is not None else defaults))
@@ -53,7 +53,7 @@ def options(config,sport,books=None,markets=None,min_edge=None,max_reference_mar
                 **({'alternate_version':1} if alternate_pairing_enabled() else {}),
                 min_edge=config['min_edge'] if min_edge is None else min_edge,
                 max_reference_margin=max_reference_margin,include_live=include_live,
-                **({'advisory_version':consensus.VERSION,'observation_books':consensus.observation_books()} if consensus.enabled() else {}))
+                **({'advisory_version':consensus.VERSION,'observation_books':consensus.observation_books(catalog)} if consensus.enabled() else {}))
 
 
 @contextmanager
@@ -124,18 +124,24 @@ def _frame(results):
 
 
 def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,results,event_results,
-                   bound,charged,mode='live',display_rules=None,run_accounting=None):
-    frame=_frame(results)
-    flagged,excluded,counts=_evaluate(frame,settings,profile,capture_time)
+                   bound,charged,mode='live',display_rules=None,run_accounting=None,perf=None):
+    from contextlib import nullcontext
+    timed=perf.phase if perf is not None else lambda name,**kwargs:nullcontext()
+    with timed('parse'):frame=_frame(results)
+    contracts=frame[['event_id','player','market','point']].drop_duplicates().shape[0] if not frame.empty else 0
+    with timed('evaluate',label=f'Evaluating {contracts:,} contracts'):
+        flagged,excluded,counts=_evaluate(frame,settings,profile,capture_time)
     from . import rules
     from .settings import ACCOUNTING_CLOUD
     display_rules=rules.validate(display_rules) if display_rules is not None else rules.active(cloud=ACCOUNTING_CLOUD.get())
-    flagged=rules.annotate(flagged,display_rules,settings['sport'])
+    with timed('rules'):flagged=rules.annotate(flagged,display_rules,settings['sport'])
     if settings.get('advisory_version'):
-        flagged=consensus.annotate(flagged,frame,reference=settings['reference_book'],capture_time=capture_time,version=settings['advisory_version'])
+        with timed('consensus flags',label=f'Comparing peers for {len(flagged):,} opportunities'):
+            flagged=consensus.annotate(flagged,frame,reference=settings['reference_book'],capture_time=capture_time,version=settings['advisory_version'])
     if settings.get('venue_details_version'):
         from .venue_details import enrich
-        flagged=enrich(flagged,frame,profile,capture_time)
+        with timed('venue details',label=f'Preparing venue details for {len(flagged):,} opportunities'):
+            flagged=enrich(flagged,frame,profile,capture_time)
     raw=frame.copy()
     if settings.get('advisory_version'):raw['kind']=raw.book.map(lambda b:'exchange' if b in consensus.EXCHANGES else 'sportsbook')
     raw['scan_id']=scan_id
@@ -242,8 +248,7 @@ def run_live(preview,*,data_dir=ROOT/'data',profile=None,profile_name=None,key=N
         run_charge=charged(c)
         now=datetime.now(timezone.utc).isoformat()
         with failure_receipt(c,Path(data_dir)/'incomplete_scans'/(scan_id+'.json'),{'preview':preview,'event_results':statuses}):
-            with timed('evaluate'):
-                result = _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],run_charge,display_rules=display_rules,run_accounting=accounting(c))
+            result = _save_snapshot(Path(data_dir),scan_id,settings,profile,profile_name,now,results,statuses,preview['bound'],run_charge,display_rules=display_rules,run_accounting=accounting(c),perf=perf)
         from .bet_store import enabled
         if enabled() and paper_track:
             from .paper import track_scan
