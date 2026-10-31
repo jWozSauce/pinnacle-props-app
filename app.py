@@ -6,20 +6,32 @@ import json
 
 import pandas as pd
 import streamlit as st
-from pinnacle_props.kelly import american_stake
-from pinnacle_props.kelly_sheet import fetch_profiles, parse_profiles
-from pinnacle_props.odds_api import APIError, resolve_key
-from pinnacle_props.pipeline import discover, options, replay, run_live
-from pinnacle_props.scan import LEGACY_COLUMNS
-from pinnacle_props import rules, game_time
-from pinnacle_props.rule_ui import initialize as initialize_rules, panel as rules_panel
-from pinnacle_props.settings import ROOT, load_config, scan_markets
-from pinnacle_props.deployment import deployment_settings
-from pinnacle_props.access import cloud_access
-from pinnacle_props.bet import log_bet, read_bets
-from pinnacle_props.clv import report as clv_report, logged_view
-
+# The publisher replaces this literal with an immutable exported-runtime digest.
+APP_RELEASE_ID = "d8a5bf11f1a24090a0ad6d5fc43d5f3631c766ea100df146b63bca5ed3d698c4"
 st.set_page_config(page_title='Pinnacle Props',page_icon='◈',layout='wide',initial_sidebar_state='collapsed')
+try:
+    from pinnacle_props.kelly import american_stake
+    from pinnacle_props.kelly_sheet import fetch_profiles, parse_profiles
+    from pinnacle_props.odds_api import APIError, resolve_key
+    from pinnacle_props.pipeline import discover, options, replay, run_live
+    from pinnacle_props.scan import LEGACY_COLUMNS
+    from pinnacle_props import rules, game_time
+    from pinnacle_props.rule_ui import initialize as initialize_rules, panel as rules_panel
+    from pinnacle_props.settings import ROOT, load_config, scan_markets
+    from pinnacle_props.deployment import deployment_settings
+    from pinnacle_props.access import cloud_access
+    from pinnacle_props.bet import log_bet, read_bets
+    from pinnacle_props.clv import report as clv_report, logged_view
+    from pinnacle_props.refresh_perf import RefreshPerf
+    # Validate changed call contracts before the lock screen can be called healthy.
+    from inspect import signature
+    signature(RefreshPerf).bind(None,kind='render')
+    signature(RefreshPerf.phase).bind(None,'phase',label='loading')
+    signature(options).bind(None,None,catalog=None)
+except (ImportError,TypeError):
+    st.info('New version loading, reload in a minute.')
+    st.stop()
+st.markdown(f'<span data-pp-build="{APP_RELEASE_ID}" style="display:none"></span>',unsafe_allow_html=True)
 try:
     deployment=deployment_settings({name:st.secrets.get(name,default) for name,default in [('PP_DEPLOYMENT','local'),('PP_STORE','local')]})
 except (FileNotFoundError,st.errors.StreamlitSecretNotFoundError):
@@ -39,7 +51,6 @@ if 'pp_config' not in st.session_state:st.session_state['pp_config']=load_config
 config=st.session_state['pp_config']
 active_rules=initialize_rules(deployment['cloud'])
 data_dir=ROOT/'data'
-from pinnacle_props.refresh_perf import RefreshPerf
 render_perf=RefreshPerf(data_dir,kind='render')
 from pinnacle_props.bet_store import enabled as settlement_enabled, session_store
 from pinnacle_props import bet_duplicates as bd
