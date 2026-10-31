@@ -73,7 +73,7 @@ def test_app_refresh_through_real_pool_updates_caption(tmp_path,monkeypatch):
     assert any(m.startswith('Account remaining:') for m in seen) and 'Captured 3 of 3 games' in seen
     assert app.session_state['pp_scan_running'] is False
     import json
-    perf=json.loads(next((tmp_path/'data/perf').glob('*.json')).read_text())
-    assert perf['status']=='complete' and {'prices','evaluate','quota','kelly sheet'}<=set(perf['phases'])
+    perf=next(r for p in (tmp_path/'data/perf').glob('*.json') if (r:=json.loads(p.read_text())).get('kind')=='refresh')
+    assert perf['status']=='complete' and {'prices','parse','evaluate','rules','venue details','quota','kelly sheet'}<=set(perf['phases'])
     assert len(transport.paid)==3 and transport.maximum>1
     assert app.session_state['scan_nba'][0]['credits_charged']==3

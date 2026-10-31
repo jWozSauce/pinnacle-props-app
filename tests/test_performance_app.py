@@ -71,8 +71,13 @@ def test_full_app_enabled_uses_new_panels(tmp_path,monkeypatch):
     assert app.checkbox(key='paper_track').value is True
     assert app.button(key='paper_all').label=='Bet ALL 4 qualifying (paper round)'
     assert app.tabs[5].label=='Paper'
+    assert not any(b.label=='Grade pending bets (real + paper)' for b in app.button)
+    assert sum(m.label=='Official P/L' for m in app.metric)==0
+    app.session_state['pp_tab']='Performance';app.run()
+    assert not app.exception
     assert any(b.label=='Grade pending bets (real + paper)' for b in app.button)
-    assert sum(m.label=='Official P/L' for m in app.metric)==1
+    app.session_state['pp_tab']='Live';app.run()
+    assert not app.exception and sum(m.label=='Official P/L' for m in app.metric)==1
     assert app.tabs[1].label=='Live'
 
 
