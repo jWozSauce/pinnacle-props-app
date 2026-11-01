@@ -7,7 +7,7 @@ import json
 import pandas as pd
 import streamlit as st
 # The publisher replaces this literal with an immutable exported-runtime digest.
-APP_RELEASE_ID = "d8a5bf11f1a24090a0ad6d5fc43d5f3631c766ea100df146b63bca5ed3d698c4"
+APP_RELEASE_ID = "aaf22025593c72deb50d34b3c8ded106c459538c158176f2aa18fa5d9fa6ac0d"
 st.set_page_config(page_title='Pinnacle Props',page_icon='◈',layout='wide',initial_sidebar_state='collapsed')
 try:
     from pinnacle_props.kelly import american_stake
@@ -28,6 +28,10 @@ try:
     signature(RefreshPerf).bind(None,kind='render')
     signature(RefreshPerf.phase).bind(None,'phase',label='loading')
     signature(options).bind(None,None,catalog=None)
+    from pinnacle_props import consensus
+    from pinnacle_props.venue_details import enrich
+    signature(enrich).bind(None,None,None,None,version=4)
+    if consensus.VERSION != 4:raise TypeError('Incompatible advisory runtime')
 except (ImportError,TypeError):
     st.info('New version loading, reload in a minute.')
     st.stop()
@@ -307,7 +311,7 @@ if tab_prices.open:
                 try:
                     saved_path=snapshots(data_dir,scan_id=manifest['scan_id'])[0][0]
                     with st.spinner(f'Preparing venue details for {len(flagged):,} saved opportunities…'):
-                        flagged=enrich(flagged,artifact(saved_path,manifest,'.parquet'),Profile(**manifest['profile']),manifest['capture_time'])
+                        flagged=enrich(flagged,artifact(saved_path,manifest,'.parquet'),Profile(**manifest['profile']),manifest['capture_time'],version=manifest['settings'].get('advisory_version') or 3)
                     st.session_state['scan_'+sport]=(manifest,flagged,excluded)
                 except (ValueError,OSError,KeyError,IndexError):pass
             real_keys=None;allow_duplicates=bool(st.session_state.get('allow_real_duplicates',False))
@@ -349,7 +353,8 @@ if tab_prices.open:
             if query and not view.empty:
                 mask=view[['player_name','book','prop_type']].astype(str).agg(' '.join,axis=1).str.contains(query,case=False,regex=False)
                 view=view[mask]
-            advisory_columns=['island_flag','books_q','market_books_q','sharp_books_q'] if manifest.get('settings',{}).get('advisory_version') else []
+            advisory_columns=['island_flag','books_q','market_books_q','sharp_books_q','wide_books_q'] if manifest.get('settings',{}).get('advisory_version') else []
+            advisory_columns=[name for name in advisory_columns if name in view]
             advisory_details=advisory_columns+['cons_edge','market_gap_pp','market_edge_pp','sharp_gap_pp','sharp_edge_pp','advisory_version'] if advisory_columns else []
             table_columns=['start_status']+advisory_details+LEGACY_COLUMNS+['best_book','best_price','pin_margin','pin_age_min','ev_pct','pricing_method']
             with st.expander('Filter individual columns'):

@@ -5,7 +5,7 @@ from streamlit.testing.v1 import AppTest
 from pinnacle_props import refresh_perf,pipeline
 
 
-@pytest.mark.parametrize('failure',['old_constructor','old_phase','missing_import','old_options'])
+@pytest.mark.parametrize('failure',['old_constructor','old_phase','missing_import','old_options','old_enrich','old_advisory'])
 def test_stale_runtime_stops_with_reload_message_before_access_or_data(monkeypatch,failure):
     if failure=='old_constructor':
         class Old:
@@ -14,7 +14,9 @@ def test_stale_runtime_stops_with_reload_message_before_access_or_data(monkeypat
     elif failure=='old_phase':
         monkeypatch.setattr(refresh_perf.RefreshPerf,'phase',lambda self,name:None)
     elif failure=='missing_import':monkeypatch.delattr(refresh_perf,'RefreshPerf')
-    else:monkeypatch.setattr(pipeline,'options',lambda config,sport:None)
+    elif failure=='old_options':monkeypatch.setattr(pipeline,'options',lambda config,sport:None)
+    elif failure=='old_enrich':monkeypatch.setattr('pinnacle_props.venue_details.enrich',lambda f,r,p,c:None)
+    else:monkeypatch.setattr('pinnacle_props.consensus.VERSION',3)
     monkeypatch.setattr('pinnacle_props.settings.load_config',lambda:pytest.fail('Data before compatibility guard'))
     monkeypatch.setattr('requests.sessions.Session.request',lambda *a,**kw:pytest.fail('Network at startup'))
     app=AppTest.from_file(Path('app.py').resolve(),default_timeout=15)
