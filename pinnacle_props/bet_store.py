@@ -16,11 +16,12 @@ from .odds_api import atomic_write
 TABS = {'real': 'PP_Bet_Log', 'paper': 'PP_Paper_Log'}
 HEADER = 'round logged_at sport game_date start_time event_id away_team home_team player market line side book price_decimal odds_american stake edge fair_p scan_id row rule_version status profit stat graded_at regraded_at source note row_id'.split()
 BASE_HEADER=HEADER.copy()
-from .consensus import FIELDS, LEGACY_FIELDS
+from .consensus import FIELDS, LEGACY_FIELDS, V3_FIELDS
 LEGACY_HEADER=BASE_HEADER+LEGACY_FIELDS
-PRE_BLEND_HEADER=HEADER+FIELDS
+PRE_BLEND_HEADER=HEADER+V3_FIELDS
 from .venue_details import BLEND_FIELDS
-HEADER=PRE_BLEND_HEADER+BLEND_FIELDS
+PRE_WIDE_HEADER=PRE_BLEND_HEADER+BLEND_FIELDS
+HEADER=PRE_WIDE_HEADER+['wide_books_q']
 GRADING = HEADER[21:28]
 FROZEN = HEADER[:21] + ['row_id'] + FIELDS + BLEND_FIELDS
 SHEET_ID = '173vZBHQ31stOXKOuHzjIFH2BtMMWFbLjbzolZlqPNeo'
@@ -165,7 +166,7 @@ class BetStore:
             ws=self.worksheets[TABS[kind]]
             values=self.remote_values[kind]
             header=values[0] if values else []
-            if header not in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER,HEADER):
+            if header not in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER,PRE_WIDE_HEADER,HEADER):
                 raise StoreUnavailable('Shared log header mismatch; no rows changed')
             # UI reads never migrate the schema; accepted current schema is deployed.
             return ws,[list(row) for row in values]
@@ -185,14 +186,14 @@ class BetStore:
             values = [active_header]
         header=values[0].copy()
         while header and header[-1]=='':header.pop()
-        if header in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER) and advisory_enabled():
+        if header in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER,PRE_WIDE_HEADER) and advisory_enabled():
             if any(any(str(c) for c in row[len(header):]) for row in values[1:]):
                 raise StoreUnavailable('Unlabelled extra cells; no migration made')
             # Append header cells only: no existing row or column is rewritten.
             if getattr(ws,'col_count',len(HEADER))<len(HEADER):ws.add_cols(len(HEADER)-ws.col_count)
             ws.update([HEADER[len(header):]], column_name(len(header)+1)+'1:'+column_name(len(HEADER))+'1', value_input_option='RAW')
             values=ws.get_all_values();header=values[0]
-        if header not in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER,HEADER): raise StoreUnavailable('Shared log header mismatch; no rows changed')
+        if header not in (BASE_HEADER,LEGACY_HEADER,PRE_BLEND_HEADER,PRE_WIDE_HEADER,HEADER): raise StoreUnavailable('Shared log header mismatch; no rows changed')
         return ws, values
 
     @staticmethod

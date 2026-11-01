@@ -10,6 +10,12 @@ from tests.test_api import Session,Response,payload
 NOW=datetime(2026,10,31,16,tzinfo=timezone.utc) # Spans the Eastern DST fall-back.
 
 
+@pytest.fixture(autouse=True)
+def fixed_request_clock(monkeypatch):
+    # The live send deadline must use the same fixed clock as the preview/UI.
+    monkeypatch.setattr('pinnacle_props.odds_api.utcnow',lambda:NOW.isoformat())
+
+
 def listing():
     return [dict(id=name,commence_time=(NOW+timedelta(hours=hours)).isoformat(),
                  home_team='Home',away_team='Away')

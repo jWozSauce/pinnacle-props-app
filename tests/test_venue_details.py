@@ -57,7 +57,7 @@ def test_schema_header_only_migration_and_frozen_columns(tmp_path):
     row=record(event_id='event-fixture');original=[str(row[k]) for k in PRE_BLEND_HEADER]
     ws.values=[PRE_BLEND_HEADER.copy(),original.copy()]
     store=BetStore(tmp_path,spreadsheet=sheet);frame=store.read('real',reload=True)
-    assert ws.values[0]==HEADER and ws.values[1]==original and ws.writes==['AP1:AQ1']
+    assert ws.values[0]==HEADER and ws.values[1]==original and ws.writes==['AP1:AR1']
     old=frame.iloc[0].to_dict()
     with pytest.raises(ValueError):store.grade('real',[(old,dict(old,blend_stake=500))])
     bad=Spreadsheet();ws=bad.add_worksheet('PP_Bet_Log',5000,len(HEADER));ws.values=[PRE_BLEND_HEADER.copy(),original+['unlabelled']]

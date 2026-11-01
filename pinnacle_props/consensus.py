@@ -7,10 +7,13 @@ import os
 import numpy as np
 import pandas as pd
 
-VERSION=3
+from .quote_quality import is_wide, EXPLANATION
+
+VERSION=4
 EXCHANGES=('novig','prophetx','polymarket','kalshi','polymarket_us')
 LEGACY_FIELDS=['books_q','cons_edge','island_flag','sharp_books_q','sharp_gap_pp','cons_line','pin_age_min']
-FIELDS=LEGACY_FIELDS+['market_gap_pp','market_edge_pp','sharp_edge_pp','market_books_q','advisory_version']
+V3_FIELDS=LEGACY_FIELDS+['market_gap_pp','market_edge_pp','sharp_edge_pp','market_books_q','advisory_version']
+FIELDS=V3_FIELDS+['wide_books_q']
 LEGACY_LEGEND='🏝 ISLAND: one book off market · ⚠️ PINNACLE-OFF: market disagrees with Pinnacle · 📏 LINE?: different consensus line · ⚠️ SHARP-OFF: exchanges disagree. Advisory only; Pinnacle age is shown in minutes.'
 SIGNED_LEGEND='\n\n'.join([
     '🏝 ISLAND: this bet book is off the other sportsbooks at the same line.',
@@ -21,6 +24,11 @@ SIGNED_LEGEND='\n\n'.join([
 ])
 
 LEGEND=SIGNED_LEGEND.replace('this bet book is off the other sportsbooks at the same line.', 'this book clears the rule and at least three other sportsbooks’ fair consensus is with Pinnacle. Never combined with Market against Pinnacle.')
+
+LEGEND += '\n\n' + EXPLANATION
+
+def fields(version):
+    return LEGACY_FIELDS if version==1 else V3_FIELDS if version<4 else FIELDS
 
 def market_labels(gap,count,rule_pass):
     if count<3 or not np.isfinite(gap):return []
@@ -48,7 +56,7 @@ def request_books(settings):
 
 def defaults(frame,version=VERSION):
     out=frame.copy()
-    for key in (LEGACY_FIELDS if version==1 else FIELDS):
+    for key in fields(version):
         if key not in out:out[key]='' if key=='island_flag' else np.nan
     return out
 
@@ -82,7 +90,7 @@ def peer_value(index,key,book):
 def annotate(flagged,raw,*,reference='pinnacle',island_pp=1.,off_pp=3.,capture_time=None,version=VERSION):
     if 'scan_id' in raw and raw.scan_id.nunique(dropna=False)>1:
         raise ValueError('Consensus requires one snapshot')
-    if version not in (1,2,3):raise ValueError('Unsupported advisory version')
+    if version not in (1,2,3,4):raise ValueError('Unsupported advisory version')
     out=defaults(flagged,version)
     if version>=2:out['advisory_version']=version
     if out.empty:return out
@@ -99,6 +107,14 @@ def annotate(flagged,raw,*,reference='pinnacle',island_pp=1.,off_pp=3.,capture_t
     q=q[pd.MultiIndex.from_frame(q[keys]).isin(needed)]
     q['implied']=1/q.price
     votes=q.groupby(keys+['point','side','book'],sort=False).implied.median().reset_index()
+    wide_counts={}
+    if version>=4:
+        pairs=votes.pivot(index=keys+['point','book'],columns='side',values='implied').reindex(columns=['over','under'])
+        wide=pairs[is_wide(100*(pairs.over+pairs.under-1))].reset_index()
+        wide=wide[wide.book.ne(reference)]
+        wide_counts=wide.groupby(keys+['point'],sort=False).size().to_dict()
+        excluded=pd.MultiIndex.from_frame(wide[keys+['point','book']])
+        votes=votes[~pd.MultiIndex.from_frame(votes[keys+['point','book']]).isin(excluded)]
     soft=votes[~votes.book.isin([reference,*EXCHANGES])]
     groups=peer_index(soft,keys+['point','side'],'implied')
     # Each book casts one line vote, regardless of ladder size or repeated outcomes.
@@ -119,10 +135,11 @@ def annotate(flagged,raw,*,reference='pinnacle',island_pp=1.,off_pp=3.,capture_t
             market['fair_over']=market.over-(market.over+market.under-1)/2
             market=market[market.fair_over.gt(0)&market.fair_over.lt(1)].reset_index()
             market_groups=peer_index(market,keys+['point'],'fair_over')
-    values={field:out[field].tolist() for field in (LEGACY_FIELDS if version==1 else FIELDS)}
+    values={field:out[field].tolist() for field in fields(version)}
     for pos,r in enumerate(out.itertuples(index=False)):
         key=(r.sport_key,r.event_id,r.player_name,str(r.prop_type).removesuffix('_alternate'))
         fair=float(getattr(r,'noVig'+r.side.title()));labels=[]
+        if version>=4:values['wide_books_q'][pos]=wide_counts.get((*key,r.Target_line),0)
         n,median=peer_value(groups,(*key,r.Target_line,r.side),r.book)
         edge=100*(fair-median) if n else np.nan
         values['books_q'][pos]=n;values['cons_edge'][pos]=edge

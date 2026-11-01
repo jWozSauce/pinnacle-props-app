@@ -5,13 +5,16 @@ import streamlit as st
 from .venue_details import finite,saved_details
 from .odds import decimal_to_american
 from .consensus import EXCHANGES,direction
+from .quote_quality import quality,EXPLANATION
 
 
 NAMES={'novig':'Novig','prophetx':'ProphetX','polymarket':'Polymarket','kalshi':'Kalshi','polymarket_us':'Polymarket US'}
 
 def verdict(v,book):
-    if not v['same_line']:return 'Different line'
+    v=quality(v)
     if v['venue']=='pinnacle':return 'Reference'
+    if v['wide']:return 'Wide spread (no verdict)'
+    if not v['same_line']:return 'Different line'
     if v['venue']==book:return 'Your bet'
     if not finite(v.get('gap_pp')):return 'No two-sided quote'
     return direction('',float(v['gap_pp'])).strip().capitalize()
@@ -23,6 +26,7 @@ def venue_summary(venues,book):
     for name in EXCHANGES:
         if name=='polymarket_us' and name not in same:continue
         v=same.get(name);label=verdict(v,book).split()[0].lower() if v and finite(v.get('gap_pp')) else 'no quote'
+        if v and quality(v)['wide']:label='wide spread'
         exchange.append(NAMES[name]+' '+label)
     market=[verdict(v,book) for name,v in same.items() if name not in ('pinnacle',book,*EXCHANGES)]
     return 'Exchanges: '+', '.join(exchange)+f" · Market: {market.count('With pinnacle')} with, {market.count('Against pinnacle')} against"
@@ -31,14 +35,20 @@ def venue_summary(venues,book):
 def display_rows(rows,book):
     display=[]
     for v in rows:
+        v=quality(v)
         price=v.get('price');american=f'{decimal_to_american(price):+.0f}' if finite(price) and float(price)>1 else '—'
         display.append({'Venue':v['venue'],'Verdict':verdict(v,book).replace('pinnacle','Pinnacle'),
             'Line':v['line'],'Price (American)':american,
             'Implied probability (%)':100/float(price) if finite(price) and float(price)>1 else None,
-            'Fair probability (%)':100*v['fair_p'] if v.get('fair_p') is not None else None,
-            'Gap from Pinnacle (pp)':v.get('gap_pp'),'Quote age (min)':v.get('age_min'),
+            'Spread (pp)':v['spread_pp'],
+            'Fair probability (%)':'—' if v['wide'] else 100*v['fair_p'] if v.get('fair_p') is not None else None,
+            'Gap from Pinnacle (pp)':'—' if v['wide'] else v.get('gap_pp'),'Quote age (min)':v.get('age_min'),
             'Price (decimal)':price,'Over (decimal)':v.get('over'),'Under (decimal)':v.get('under')})
-    return pd.DataFrame(display)
+    frame=pd.DataFrame(display)
+    for col in ('Fair probability (%)','Gap from Pinnacle (pp)'):
+        if col in frame and frame[col].map(lambda v:isinstance(v,str)).any():
+            frame[col]=frame[col].map(lambda v:v if isinstance(v,str) else '—' if pd.isna(v) else f'{v:.2f}')
+    return frame
 
 
 def second_line(edge,amount):
@@ -62,6 +72,8 @@ def panel(row,*,saved=False):
     if finite(edge) and finite(amount):st.write(f'Pinnacle: edge {100*float(edge):+.2f} pp, stake ${float(amount):,.2f}')
     second_line(row.get('blend_edge_pp'),row.get('blend_stake'))
     st.caption('Blended suggestion uses Pinnacle plus Novig/ProphetX at this exact line. Pinnacle remains primary for recommendations and logging.')
+    st.caption(EXPLANATION)
+    if saved:st.caption(f"Recorded advisory version: {row.get('advisory_version') or 'legacy'} · flags and blend remain as logged. Quote verdicts use the current spread rule.")
     explanations={'ISLAND':'this book clears the rule and at least three other books agree with Pinnacle',
         'LINE?':'other books show a different line; those quotes are separated below',
         'Market with Pinnacle':'other sportsbooks agree with or lean further toward this bet',
@@ -104,7 +116,7 @@ def table_rows(frame):
         chunks.append(f'<p>Pinnacle: edge {100*r.edge:+.2f} pp, stake ${r.kellyAmount:.2f}</p>')
         blend=f"edge {float(r.blend_edge_pp):+.2f} pp, stake ${float(r.blend_stake):.2f}" if finite(r.get('blend_edge_pp')) and finite(r.get('blend_stake')) else 'no exchange quote'
         chunks.append('<p>Blended (Pinnacle + exchanges): '+blend+'</p>')
-        chunks.append('<p>'+escape(venue_summary(venues,r.book))+'</p>')
+        chunks.append('<p>'+escape(venue_summary(venues,r.book))+'</p><p>'+escape(EXPLANATION)+'</p>')
         chunks.append('<p>'+escape(str(r.get('island_flag','')))+'</p><p>With Pinnacle = at least Pinnacle minus 1 pp; against = more than 1 pp lower toward your bet book. LINE? = different thresholds below. ISLAND = this book clears the rule and at least three other books agree with Pinnacle.</p>')
         for same in (True,False):
             selected=[v for v in venues if v['same_line']==same]

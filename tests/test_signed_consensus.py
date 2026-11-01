@@ -24,7 +24,7 @@ def test_signed_fair_probability_uses_bet_side_and_excludes_target(p,side,gap,le
     assert a.market_gap_pp==pytest.approx(gap) and a.sharp_gap_pp==pytest.approx(gap)
     assert a.market_edge_pp==pytest.approx(5+gap) and a.sharp_edge_pp==pytest.approx(5+gap)
     assert 'Market '+lean+' Pinnacle' in a.island_flag and 'Exchanges '+lean+' Pinnacle' in a.island_flag
-    assert a.edge==.05 and a.rule_pass and a.advisory_version==3
+    assert a.edge==.05 and a.rule_pass and a.advisory_version==4
 
 
 @pytest.mark.parametrize('p,flag',[(.48999,True),(.49,False),(.49001,False),(.53,False)])

@@ -4,6 +4,7 @@ import math
 import pandas as pd
 from .consensus import EXCHANGES
 from .devig import wpo
+from .quote_quality import quality
 from .kelly import stake,Profile
 
 BLEND_FIELDS=['blend_edge_pp','blend_stake']
@@ -15,7 +16,7 @@ def finite(value):
     except (TypeError,ValueError):return False
 
 
-def quotes(raw,capture_time):
+def quotes(raw,capture_time,*,version=4):
     """One complete pair per venue/line; prefer main market over alternate copies."""
     groups={}
     if raw.empty:return groups
@@ -41,13 +42,13 @@ def quotes(raw,capture_time):
         if over is not None and under is not None:
             try:fair=float(wpo([over,under])[0])
             except ValueError:pass
-        groups.setdefault((sport,event,player,market),[]).append(dict(venue=book,line=float(line),
-            over=over,under=under,fair_over=fair,age_min=float((captured-stamp).total_seconds()/60)))
+        item=dict(venue=book,line=float(line),over=over,under=under,fair_over=fair,age_min=float((captured-stamp).total_seconds()/60))
+        groups.setdefault((sport,event,player,market),[]).append(quality(item) if version>=4 else item)
     return groups
 
 
-def enrich(flagged,raw,profile,capture_time):
-    out=flagged.copy();groups=quotes(raw,capture_time)
+def enrich(flagged,raw,profile,capture_time,*,version=4):
+    out=flagged.copy();groups=quotes(raw,capture_time,version=version)
     for name in BLEND_FIELDS:out[name]=float('nan')
     out['venue_quotes']='[]'
     quote_cache={}
@@ -62,7 +63,7 @@ def enrich(flagged,raw,profile,capture_time):
                 price=v[r.side]
                 item=dict(v,price=price,fair_p=prob,gap_pp=100*(prob-p) if prob is not None else None,same_line=v['line']==line)
                 rendered.append(item)
-                if v['venue'] in BLEND_VENUES and v['line']==line and prob is not None:exchange.append(prob)
+                if v['venue'] in BLEND_VENUES and v['line']==line and prob is not None and not v.get('wide',False):exchange.append(prob)
             rendered.sort(key=lambda v:(not v['same_line'],0 if v['venue']=='pinnacle' else 1 if v['venue'] in EXCHANGES else 2,EXCHANGES.index(v['venue']) if v['venue'] in EXCHANGES else -(v['price'] or 0),v['venue'],v['line']))
             quote_cache[cache_key]=(json.dumps(rendered,sort_keys=True,allow_nan=False),exchange)
         encoded,exchange=quote_cache[cache_key]

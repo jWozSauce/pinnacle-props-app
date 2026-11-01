@@ -70,7 +70,7 @@ def flags(path, manifest):
     if 'venue_quotes' not in frame and manifest.get('profile'):
         from .venue_details import enrich
         from .kelly import Profile
-        frame=enrich(frame,artifact(path,manifest,'.parquet'),Profile(**manifest['profile']),manifest['capture_time'])
+        frame=enrich(frame,artifact(path,manifest,'.parquet'),Profile(**manifest['profile']),manifest['capture_time'],version=manifest['settings'].get('advisory_version') or 3)
     return frame
 
 

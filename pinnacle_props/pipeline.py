@@ -111,7 +111,7 @@ def discover(settings,*,data_dir=ROOT/'data',session=None,key=None,clock=lambda:
 
 
 def _evaluate(frame,settings,profile,capture_time,exclusion_version=2):
-    if settings.get('advisory_version') not in (None,1,2,3):raise ValueError('Unsupported advisory version')
+    if settings.get('advisory_version') not in (None,1,2,3,4):raise ValueError('Unsupported advisory version')
     return scan(frame,profile,reference_book=settings['reference_book'],min_edge=settings['min_edge'],
                 max_reference_margin=settings['max_reference_margin'],include_live=settings['include_live'],
                 now=capture_time,exclusion_version=exclusion_version,alternate_version=settings.get('alternate_version'),
@@ -141,7 +141,7 @@ def _save_snapshot(data_dir,scan_id,settings,profile,profile_name,capture_time,r
     if settings.get('venue_details_version'):
         from .venue_details import enrich
         with timed('venue details',label=f'Preparing venue details for {len(flagged):,} opportunities'):
-            flagged=enrich(flagged,frame,profile,capture_time)
+            flagged=enrich(flagged,frame,profile,capture_time,version=settings.get('advisory_version') or 3)
     raw=frame.copy()
     if settings.get('advisory_version'):raw['kind']=raw.book.map(lambda b:'exchange' if b in consensus.EXCHANGES else 'sportsbook')
     raw['scan_id']=scan_id
@@ -297,7 +297,7 @@ def replay(sport,scan_id=None,*,data_dir=ROOT/'data'):
         flagged=consensus.annotate(flagged,frame,reference=manifest['settings']['reference_book'],capture_time=manifest['capture_time'],version=manifest['settings']['advisory_version'])
     if manifest['settings'].get('venue_details_version'):
         from .venue_details import enrich
-        flagged=enrich(flagged,frame,Profile(**manifest['profile']),manifest['capture_time'])
+        flagged=enrich(flagged,frame,Profile(**manifest['profile']),manifest['capture_time'],version=manifest['settings'].get('advisory_version') or 3)
     for suffix,df in [('_flagged.csv',flagged),('_excluded.csv',excluded)]:
         if hashlib.sha256(df.to_csv(index=False).encode()).hexdigest()!=manifest['artifacts'][suffix]['sha256']:
             raise ValueError('Replay differs from the saved '+suffix+' artifact')
